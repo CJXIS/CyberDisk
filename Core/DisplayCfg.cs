@@ -23,7 +23,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using Microsoft.Win32;
-
+//nigga
 
 namespace CyberDisk
 {
