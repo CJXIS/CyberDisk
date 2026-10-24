@@ -1,0 +1,459 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Markup;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Shell;
+using System.Windows.Threading;
+using Microsoft.Win32;
+
+namespace CyberDisk
+{
+    static partial class Loc
+    {
+        static void Dict1()
+        {
+            // ── export, disk volumes, restart check ──
+            A("Save as PDF", "حفظ كملف PDF"); A("Save as picture (PNG)", "حفظ كصورة (PNG)"); A("Save as text file", "حفظ كملف نصي"); A("Copy all text", "نسخ كل النص");
+            A("Disk health report", "تقرير صحة القرص"); A("PC hardware report", "تقرير مكونات الجهاز"); A("Base clock", "السرعة الأساسية"); A("PARTITIONS", "الأقسام");
+            A("No drive letter is assigned to this disk. It may hold only hidden partitions or be unformatted.", "لا يوجد حرف قرص لهذا القرص. قد يحتوي على أقسام مخفية فقط أو أنه غير مهيأ.");
+            A("Not ready", "غير جاهز"); A("Local Disk", "قرص محلي"); A("RESTART NOW", "إعادة التشغيل الآن");
+            A("Windows is waiting for a restart to finish installing Windows updates.", "ويندوز ينتظر إعادة التشغيل لإكمال تثبيت تحديثات ويندوز.");
+            A("Windows is waiting for a restart to finish installing a Windows component.", "ويندوز ينتظر إعادة التشغيل لإكمال تثبيت أحد مكونات ويندوز.");
+            A("Windows is waiting for a restart to finish applying the new computer name.", "ويندوز ينتظر إعادة التشغيل لإكمال تطبيق اسم الجهاز الجديد.");
+            A("THE HARDWARE INFORMATION IS STILL LOADING", "معلومات الجهاز ما زالت قيد التحميل"); A("COPIED TO THE CLIPBOARD", "تم النسخ إلى الحافظة"); A("CREATING THE REPORT…", "جارٍ إنشاء التقرير…"); A("REPORT SAVED", "تم حفظ التقرير");
+            // ── apps details, GPU, display ──
+            A("INSTALLED", "تاريخ التثبيت");
+            A("ADVANCED DETAILS", "تفاصيل متقدمة");
+            A("OPEN FOLDER", "فتح المجلد");
+            A("COPY DETAILS", "نسخ التفاصيل");
+            A("LOCATION", "المسار");
+            A("CONTACT THE DEVELOPER", "التواصل مع المطوّر");
+            A("SEND EMAIL", "إرسال بريد");
+            A("COPY ADDRESS", "نسخ العنوان");
+            A("CANCEL", "إلغاء");
+            A("EMAIL ADDRESS COPIED", "تم نسخ عنوان البريد");
+            A("APP DETAILS COPIED", "تم نسخ تفاصيل التطبيق");
+            A("What would you like to do with this address?", "ماذا تريد أن تفعل بهذا العنوان؟");
+            A("THIS APP HAS NO KNOWN INSTALL FOLDER", "لا يوجد مجلد تثبيت معروف لهذا التطبيق");
+            A("Install date source", "مصدر تاريخ التثبيت");
+            A("Installer record", "سجل المثبّت");
+            A("Install folder", "مجلد التثبيت");
+            A("Registry entry", "مدخل السجل");
+            A("Package folder", "مجلد الحزمة");
+            A("Package name", "اسم الحزمة");
+            A("Package family", "عائلة الحزمة");
+            A("Microsoft Store app", "تطبيق من متجر Microsoft");
+            A("Install scope", "نطاق التثبيت");
+            A("Current user only", "المستخدم الحالي فقط");
+            A("All users", "جميع المستخدمين");
+            A("Architecture", "البنية");
+            A("32-bit (x86)", "32 بت (x86)");
+            A("64-bit", "64 بت");
+            A("Installer type", "نوع المثبّت");
+            A("Windows Installer (MSI)", "Windows Installer (MSI)");
+            A("Windows Installer package", "حزمة Windows Installer");
+            A("Setup program (EXE)", "برنامج إعداد (EXE)");
+            A("Product code / key", "رمز المنتج / المفتاح");
+            A("Install source", "مصدر التثبيت");
+            A("Size (registry)", "الحجم (السجل)");
+            A("Modify / repair", "التعديل / الإصلاح");
+            A("Language", "اللغة");
+            A("Uninstall command", "أمر الإزالة");
+            A("Silent uninstall", "إزالة صامتة");
+            A("Modify command", "أمر التعديل");
+            A("Display icon", "أيقونة العرض");
+            A("Help link", "رابط المساعدة");
+            A("Website", "الموقع");
+            A("Update info", "معلومات التحديث");
+            A("Support phone", "هاتف الدعم");
+            A("Contact", "جهة الاتصال");
+            A("Comments", "ملاحظات");
+            A("Registry last changed", "آخر تغيير في السجل");
+            A("Registry key", "مفتاح السجل");
+            A("Folder size (measured)", "حجم المجلد (مقاس)");
+            A("Running now", "قيد التشغيل الآن");
+            A("Not running", "غير قيد التشغيل");
+            A("calculating…", "جارٍ الحساب…");
+            A("checking…", "جارٍ الفحص…");
+            A("Max clock (boost)", "أقصى سرعة (Boost)");
+            A("Manufacturer", "الشركة المصنّعة");
+            A("GPU chip", "شريحة GPU");
+            A("Max GPU clock", "أقصى سرعة للـ GPU");
+            A("Max memory clock", "أقصى سرعة للذاكرة");
+            A("Power limit", "حد الطاقة");
+            A("PCI Express", "PCI Express");
+            A("Driver provider", "مزوّد التعريف");
+            A("Video BIOS", "BIOS كرت الشاشة");
+            A("VBIOS version", "إصدار VBIOS");
+            A("Temperature now", "الحرارة الآن");
+            A("GPU clock now", "سرعة GPU الآن");
+            A("Adapter string", "وصف المحوّل");
+            A("Vendor / device ID", "معرّف الشركة / الجهاز");
+            A("Refresh rate", "معدل التحديث");
+            A("Color depth", "عمق الألوان");
+            A("HDR", "HDR");
+            A("Connection", "نوع الاتصال");
+            A("Screen size", "حجم الشاشة");
+            A("Generic monitor", "شاشة عامة");
+            // ── navigation & titles ──
+            A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
+            A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");
+            A("Disk intelligence  ·  App control  ·  Deep cleanup", "ذكاء الأقراص  ·  إدارة التطبيقات  ·  تنظيف عميق");
+            A("By Ahmad Qashqesh", "بواسطة Ahmad Qashqesh");
+            A("click anywhere or press any key to enter", "انقر في أي مكان أو اضغط أي مفتاح للدخول");
+            A("APP CONTROL", "إدارة التطبيقات"); A("Installed apps, games and Store apps  ·  select one to inspect or remove it", "التطبيقات والألعاب وتطبيقات المتجر المثبّتة  ·  اختر واحدًا لفحصه أو إزالته");
+            A("CLEANUP LAB", "مختبر التنظيف"); A("System junk, Windows Disk Cleanup, browsers and app caches  ·  analyze first, then clean", "ملفات النظام غير الضرورية وتنظيف القرص والمتصفحات وذاكرات التطبيقات المؤقتة  ·  حلّل أولًا ثم نظّف");
+            A("HEALTH CHECK", "فحص الصحة"); A("A quick scan for disk, file system, driver, service and security problems", "فحص سريع لمشاكل القرص ونظام الملفات وبرامج التشغيل والخدمات والأمان");
+            A("HEALTH SCORE", "درجة الصحة"); A("Press RUN CHECK to scan this PC", "اضغط بدء الفحص لفحص هذا الجهاز");
+            A("MEMORY", "الذاكرة"); A("CPU", "المعالج"); A("Free memory, tame heavy processes and trim startup apps  ·  live CPU and RAM", "حرّر الذاكرة وتحكّم بالعمليات الثقيلة وقلّل تطبيقات بدء التشغيل  ·  المعالج والذاكرة مباشرة");
+            A("BOOST asks Windows to release idle memory held by background programs. It is safe and nothing is closed.", "يطلب التسريع من ويندوز تحرير الذاكرة الخاملة التي تحتفظ بها البرامج في الخلفية. العملية آمنة ولا يتم إغلاق أي شيء.");
+            A("Ready to boost", "جاهز للتسريع");
+            // ── buttons (symbol prefixes are handled automatically) ──
+            A("REFRESH", "تحديث"); A("RESCAN", "إعادة الفحص"); A("ANALYZE", "تحليل"); A("EXPLORER", "المستكشف"); A("STOP SCAN", "إيقاف الفحص"); A("UP", "للأعلى");
+            A("PASTE", "لصق"); A("UNINSTALL", "إلغاء التثبيت"); A("BOOST NOW", "سرّع الآن"); A("CUT", "قص"); A("SELECT SAFE", "تحديد الآمن"); A("NONE", "لا شيء");
+            A("DELETE", "حذف"); A("RUN CHECK", "بدء الفحص"); A("CLEAN UP", "تنظيف"); A("ALL", "الكل"); A("RESET LAYOUT", "إعادة ضبط التخطيط"); A("COPY", "نسخ"); A("FOLDER", "مجلد");
+            A("CANCEL", "إلغاء"); A("OK", "حسنًا"); A("DETAILS", "التفاصيل"); A("END TASK", "إنهاء المهمة"); A("TRIM", "تقليص"); A("LOWER PRIORITY", "خفض الأولوية");
+            A("SAFE", "آمن"); A("SIGN-OUT", "تسجيل خروج"); A("ADVANCED", "متقدم"); A("GAMES", "الألعاب"); A("STORE", "المتجر"); A("APP", "تطبيق"); A("GAME", "لعبة"); A("BROWSERS", "المتصفحات");
+            A("JUNK & SYSTEM", "الملفات غير الضرورية والنظام");
+            A("Open", "فتح"); A("Copy", "نسخ"); A("Cut", "قص"); A("Close", "إغلاق"); A("New folder", "مجلد جديد"); A("Paste here", "لصق هنا"); A("Delete...", "حذف..."); A("Delete permanently (fast)", "حذف نهائي (سريع)");
+            A("Show in Windows Explorer", "إظهار في مستكشف ويندوز");
+            // ── tooltips ──
+            A("Full screen (F11)", "ملء الشاشة (F11)"); A("Exit full screen (F11 / Esc)", "الخروج من ملء الشاشة (F11 / Esc)"); A("Minimize", "تصغير"); A("Maximize / restore", "تكبير / استعادة");
+            A("Zoom in (Ctrl + wheel / Ctrl +)", "تكبير (Ctrl + العجلة / Ctrl +)"); A("Zoom out (Ctrl + wheel / Ctrl -)", "تصغير (Ctrl + العجلة / Ctrl -)");
+            A("Reset zoom, menu order, drive order and pane sizes", "إعادة ضبط التكبير وترتيب القوائم وترتيب الأقراص وأحجام اللوحات");
+            A("Copy selected (Ctrl+C)", "نسخ المحدد (Ctrl+C)"); A("Cut selected (Ctrl+X)", "قص المحدد (Ctrl+X)"); A("Paste here (Ctrl+V)", "لصق هنا (Ctrl+V)");
+            A("Delete selected (Del)  ·  Shift+Del = permanent", "حذف المحدد (Del)  ·  Shift+Del = حذف نهائي"); A("Create a new folder here", "إنشاء مجلد جديد هنا");
+            A("Clear the selection - untick everything", "مسح التحديد - إلغاء تحديد كل شيء"); A("Select only the safe items of this group", "تحديد العناصر الآمنة فقط في هذه المجموعة"); A("Untick this whole group", "إلغاء تحديد هذه المجموعة بالكامل");
+            A("Tick everything, including advanced items - review before cleaning", "تحديد كل شيء بما في ذلك العناصر المتقدمة - راجع قبل التنظيف");
+            A("Tick only the items marked SAFE and untick the rest (recommended)", "تحديد العناصر المعلّمة آمن فقط وإلغاء تحديد الباقي (موصى به)");
+            A("Include this browser in the cleanup", "تضمين هذا المتصفح في التنظيف"); A("Search by name or publisher", "ابحث بالاسم أو الناشر");
+            A("Make the selected process yield CPU to other programs", "اجعل العملية المحددة تترك المعالج للبرامج الأخرى"); A("Release idle memory of the selected process", "تحرير الذاكرة الخاملة للعملية المحددة");
+            A("Also remove leftovers (files, registry, startup entries, crash dumps) - you review the list first", "إزالة المخلفات أيضًا (الملفات والسجل وعناصر بدء التشغيل وملفات التعطل) - ستراجع القائمة أولًا");
+            A("Tick the browsers you want to clean, then fine-tune exactly which data to remove. Passwords, bookmarks, extensions and settings are never touched. Drag a card to reorder.", "حدّد المتصفحات التي تريد تنظيفها ثم اضبط البيانات المراد حذفها بدقة. لا يتم المساس بكلمات المرور والإشارات المرجعية والإضافات والإعدادات. اسحب البطاقة لإعادة الترتيب.");
+            A("Untick an app so it no longer starts with Windows. You can turn it back on any time - takes effect at the next restart.", "ألغِ تحديد تطبيق كي لا يبدأ مع ويندوز. يمكنك إعادة تفعيله في أي وقت - يسري التغيير عند إعادة التشغيل التالية.");
+            // ── columns and panels ──
+            A("NAME", "الاسم"); A("SIZE", "الحجم"); A("SHARE", "النسبة"); A("TYPE", "النوع"); A("PUBLISHER", "الناشر"); A("PROCESS", "العملية"); A("USED", "مستخدم"); A("VERSION", "الإصدار");
+            A("FILES", "الملفات"); A("FOLDERS", "المجلدات"); A("MODIFIED", "تاريخ التعديل"); A("RUNNING PROCESSES", "العمليات الجارية"); A("STARTUP APPS", "تطبيقات بدء التشغيل");
+            A("RECLAIMABLE SPACE", "المساحة القابلة للاسترداد"); A("INSIDE THE CACHE · top websites by size", "داخل الذاكرة المؤقتة · أكبر المواقع حجمًا");
+            A("Select a folder or file\nto preview what's inside", "اختر مجلدًا أو ملفًا\nلمعاينة محتواه"); A("Select an app to see details", "اختر تطبيقًا لعرض التفاصيل");
+            A("Press ANALYZE to look for junk files", "اضغط تحليل للبحث عن الملفات غير الضرورية"); A("INSIDE ▸ largest items", "بالداخل ▸ أكبر العناصر");
+            A("Unknown publisher", "ناشر غير معروف"); A("Local Disk", "قرص محلي"); A("FIXED", "ثابت"); A("REMOVABLE", "قابل للإزالة"); A("Folder", "مجلد"); A("File", "ملف"); A("Registry", "السجل"); A("Startup", "بدء التشغيل");
+            A("READY", "جاهز"); A("LAYOUT RESET", "تمت إعادة ضبط التخطيط");
+            A("DOCUMENTS", "المستندات"); A("IMAGES", "الصور"); A("VIDEO", "الفيديو"); A("AUDIO", "الصوت"); A("ARCHIVES", "الأرشيفات"); A("CODE", "الأكواد"); A("SYSTEM / EXEC", "النظام / تنفيذي"); A("OTHER", "أخرى");
+            // ── drives / scanning ──
+            A("⚡ CLICK TO SCAN", "⚡ انقر للفحص"); A("OPEN ▶  click to browse", "افتح ◀  انقر للتصفح"); A("SCANNING…", "جارٍ الفحص…"); A("SCAN ERROR", "خطأ في الفحص"); A("SCAN STOPPED", "تم إيقاف الفحص");
+            P("{n0} FREE", "{0} متاح"); P("SCANNING  {n0} files · {n1}", "جارٍ الفحص  الملفات: {0} · {1}"); P("SCANNING {0} · parallel enumeration active", "جارٍ فحص {0} · التعداد المتوازي نشط");
+            P("{n0} files", "الملفات: {0}"); P("{n0} file", "الملفات: {0}"); P("{n0} folders", "المجلدات: {0}"); P("{n0} files here", "الملفات هنا: {0}"); P("{n0} total", "الإجمالي: {0}"); P("{n0} folders inside", "المجلدات بالداخل: {0}");
+            A("loading files…", "جارٍ تحميل الملفات…"); P("… {n0} more small files", "… {0} ملفات صغيرة أخرى"); P("HEAVIEST ▸ {0}", "الأثقل ▸ {0}"); P("{n0} ITEMS", "العناصر: {0}");
+            // ── uninstall ──
+            A("SELECT AN APP", "اختر تطبيقًا"); A("Pick an app or game from the list first.", "اختر تطبيقًا أو لعبة من القائمة أولًا.");
+            A("CANNOT UNINSTALL", "لا يمكن إلغاء التثبيت"); A("Windows has no uninstaller registered for this item.", "لا يوجد برنامج إلغاء تثبيت مسجّل في ويندوز لهذا العنصر.");
+            P("Uninstall  {0}  ?", "إلغاء تثبيت  {0}  ؟");
+            A("Afterwards you will get a list of leftover files, registry entries, startup items and crash dumps to review - nothing extra is deleted without your approval.", "بعد ذلك ستحصل على قائمة بالملفات وعناصر السجل وعناصر بدء التشغيل وملفات التعطل المتبقية لمراجعتها - لن يُحذف أي شيء إضافي دون موافقتك.");
+            A("CONFIRM UNINSTALL", "تأكيد إلغاء التثبيت"); P("UNINSTALLING {0}…  (the app stays usable meanwhile)", "جارٍ إلغاء تثبيت {0}…  (يبقى التطبيق صالحًا للاستخدام في هذه الأثناء)");
+            A("UNINSTALL ERROR", "خطأ في إلغاء التثبيت"); P("UNINSTALL FAILED · {0}", "فشل إلغاء التثبيت · {0}"); P("UNINSTALL NOT COMPLETED · {0} IS STILL INSTALLED", "لم يكتمل إلغاء التثبيت · {0} ما زال مثبّتًا");
+            A("UNINSTALL FINISHED · refreshing the list…", "اكتمل إلغاء التثبيت · جارٍ تحديث القائمة…"); A("UNINSTALLED · leftover review could not be shown", "تم إلغاء التثبيت · تعذّر عرض مراجعة المخلفات");
+            A("SOMETHING WENT WRONG", "حدث خطأ ما"); A("SCANNING FOR LEFTOVERS…", "جارٍ البحث عن المخلفات…"); P("NO LEFTOVERS · {0} is completely gone", "لا مخلفات · تمت إزالة {0} بالكامل");
+            P("{n0} selected  ·  {n1}", "المحدد: {0}  ·  {1}"); P("{0}  ·  {1} leftover item(s) - untick anything you want to keep", "{0}  ·  المخلفات: {1} - ألغِ تحديد ما تريد الاحتفاظ به");
+            A("Scanning…", "جارٍ الفحص…"); A("Deleting…", "جارٍ الحذف…"); A("LEFTOVERS REMOVED", "تمت إزالة المخلفات"); P("{n0} item(s)", "العناصر: {0}"); P("{n0} freed", "تم تحرير {0}"); P("{n0} could not be removed", "تعذّرت إزالة {0}");
+            // ── processes / boost ──
+            A("SELECT A PROCESS", "اختر عملية"); A("Pick a process from the list first.", "اختر عملية من القائمة أولًا."); P("TRIMMED {0}", "تم تقليص {0}"); P("COULD NOT TRIM {0} (ACCESS DENIED)", "تعذّر تقليص {0} (تم رفض الوصول)");
+            P("{0} NOW RUNS AT LOWER PRIORITY", "{0} يعمل الآن بأولوية أقل"); A("COULD NOT CHANGE PRIORITY", "تعذّر تغيير الأولوية"); A("WINDOWS NEEDS THIS", "ويندوز يحتاج هذا");
+            P("{0} is a core Windows process (or this app). Ending it could crash the PC or log you off, so it is protected.", "{0} عملية أساسية في ويندوز (أو هذا التطبيق). إنهاؤها قد يُعطّل الجهاز أو يسجّل خروجك، لذلك هي محمية.");
+            P("End  {0}  (PID {1})?", "إنهاء  {0}  (PID {1})؟"); A("Unsaved work in that program will be lost.", "سيُفقد أي عمل غير محفوظ في ذلك البرنامج."); P("ENDED {0}", "تم إنهاء {0}"); A("COULD NOT END THE TASK", "تعذّر إنهاء المهمة");
+            A("Boosting…", "جارٍ التسريع…"); A("Releasing idle memory held by background programs…", "جارٍ تحرير الذاكرة الخاملة التي تحتفظ بها برامج الخلفية…"); A("Already optimized", "محسّن بالفعل");
+            P("Trimmed {n0} processes", "تم تقليص {0} عملية"); P("{0} of {1} is now available. Windows refills memory as programs need it, so run BOOST whenever the PC feels slow.", "{0} من {1} متاح الآن. يعيد ويندوز ملء الذاكرة حسب حاجة البرامج، لذا شغّل التسريع كلما شعرت ببطء الجهاز.");
+            A("BOOST COMPLETE", "اكتمل التسريع"); P("{n0} FREED", "تم تحرير {0}"); A("MEMORY ALREADY OPTIMIZED", "الذاكرة محسّنة بالفعل");
+            P("{n0} of {n1} enabled", "{0} من {1} مفعّلة"); P("{n0} of {n1} in use", "{0} من {1} قيد الاستخدام"); P("{n0} logical processors", "المعالجات المنطقية: {0}"); A("Boost complete", "اكتمل التسريع");
+            P("Freed about {n0} of memory.", "تم تحرير حوالي {0} من الذاكرة."); A("Memory was already optimized.", "كانت الذاكرة محسّنة بالفعل.");
+            A("memory compression", "ضغط الذاكرة"); A("Registry (user)", "السجل (المستخدم)"); A("Registry (all users)", "السجل (كل المستخدمين)"); A("Registry (all users, 32-bit)", "السجل (كل المستخدمين، 32 بت)"); A("Startup folder (user)", "مجلد بدء التشغيل (المستخدم)"); A("Startup folder (all users)", "مجلد بدء التشغيل (كل المستخدمين)");
+            // ── welcome ──
+            A("Initializing sentinel core…", "جارٍ تهيئة النواة الحارسة…"); A("Mapping your drives…", "جارٍ رسم خريطة أقراصك…"); A("Calibrating the cleanup engine…", "جارٍ معايرة محرك التنظيف…"); A("Loading browser intelligence…", "جارٍ تحميل ذكاء المتصفحات…"); A("Ready ✦", "جاهز ✦");
+            // ── tray ──
+            A("Open CyberDisk", "فتح CyberDisk"); A("⚡  Boost memory now", "⚡  تسريع الذاكرة الآن"); A("✦  Cleanup", "✦  التنظيف"); A("✚  Health check", "✚  فحص الصحة"); A("⚠  App errors", "⚠  أخطاء التطبيقات"); A("⚙  Settings", "⚙  الإعدادات");
+            A("Close button hides to the tray", "زر الإغلاق يخفي التطبيق في الشريط"); A("Exit", "خروج"); A("CyberDisk is still running", "CyberDisk ما زال يعمل"); A("Double-click the tray icon to open it again.", "انقر نقرًا مزدوجًا على أيقونة الشريط لفتحه مجددًا.");
+
+        }
+        static void Dict2()
+        {
+            // ── cleanup lab: groups, items, descriptions ──
+            A("QUICK CLEAN", "تنظيف سريع"); A("SYSTEM FILES", "ملفات النظام"); A("APP CACHES", "ذاكرات التطبيقات المؤقتة"); A("PRIVACY TRACES", "آثار الخصوصية"); A("WINDOWS DISK CLEANUP", "تنظيف قرص ويندوز");
+            A("not analyzed yet", "لم يتم التحليل بعد");
+            A("User temporary files", "الملفات المؤقتة للمستخدم"); A("Leftovers from apps and installers in your Temp folder", "مخلفات التطبيقات وبرامج التثبيت في مجلد Temp");
+            A("Windows temporary files", "ملفات ويندوز المؤقتة"); A("System-wide temp folder used by Windows and installers", "مجلد مؤقت على مستوى النظام يستخدمه ويندوز وبرامج التثبيت");
+            A("Recycle Bin", "سلة المحذوفات"); A("Deleted files still waiting on every drive", "ملفات محذوفة ما زالت تنتظر على كل قرص");
+            A("Thumbnail & icon cache", "ذاكرة الصور المصغّرة والأيقونات"); A("Explorer preview cache, rebuilt automatically", "ذاكرة معاينة المستكشف، تُعاد بناؤها تلقائيًا");
+            A("GPU shader caches", "ذاكرات تظليل بطاقة الرسوميات"); A("DirectX, NVIDIA and AMD shader caches (games rebuild them)", "ذاكرات التظليل لـ DirectX وNVIDIA وAMD (تعيد الألعاب بناءها)");
+            A("Windows Update downloads", "تنزيلات تحديث ويندوز"); A("Already-installed update packages", "حزم التحديث المثبّتة بالفعل");
+            A("Delivery Optimization cache", "ذاكرة تحسين التسليم"); A("Peer-to-peer update cache kept by Windows", "ذاكرة تحديثات الند للند التي يحتفظ بها ويندوز");
+            A("Crash dumps & error reports", "ملفات التعطل وتقارير الأخطاء"); A("Memory dumps (incl. MEMORY.DMP) and Windows Error Reporting leftovers", "ملفات تفريغ الذاكرة (بما فيها MEMORY.DMP) ومخلفات تقارير أخطاء ويندوز");
+            A("Windows & setup logs", "سجلات ويندوز والتثبيت"); A("CBS, DISM and Panther setup logs", "سجلات CBS وDISM وPanther");
+            A("Defender scan history", "سجل فحوصات Defender"); A("Old Microsoft Defender scan history files", "ملفات سجل فحوصات Microsoft Defender القديمة");
+            A("Prefetch files", "ملفات Prefetch"); A("Launch-speed hints; Windows rebuilds them but first launches are slower", "تلميحات لتسريع التشغيل؛ يعيد ويندوز بناءها لكن أول تشغيل يكون أبطأ");
+            A("Component store cleanup (DISM)", "تنظيف مخزن المكونات (DISM)"); A("Removes superseded Windows update files from WinSxS - takes a few minutes", "يزيل ملفات تحديث ويندوز القديمة من WinSxS - يستغرق بضع دقائق");
+            A("Discord cache", "ذاكرة Discord المؤقتة"); A("Chat media and GPU cache", "وسائط الدردشة وذاكرة بطاقة الرسوميات");
+            A("Spotify cache", "ذاكرة Spotify المؤقتة"); A("Offline song cache and temporary data", "ذاكرة الأغاني دون اتصال والبيانات المؤقتة");
+            A("VS Code cache", "ذاكرة VS Code المؤقتة"); A("Cached data, GPU cache and logs", "البيانات المخزنة وذاكرة بطاقة الرسوميات والسجلات");
+            A("Steam web cache", "ذاكرة Steam للويب"); A("Steam client browser cache", "ذاكرة متصفح عميل Steam");
+            A("Teams & Slack cache", "ذاكرة Teams وSlack"); A("Chat app caches", "ذاكرات تطبيقات الدردشة");
+            A("Recent files & jump lists", "الملفات الأخيرة وقوائم الانتقال"); A("Recently opened documents shown in Explorer and the taskbar", "المستندات المفتوحة مؤخرًا الظاهرة في المستكشف وشريط المهام");
+            A("DNS resolver cache", "ذاكرة محلّل DNS"); A("Flushes the DNS cache (ipconfig /flushdns)", "يمسح ذاكرة DNS (ipconfig /flushdns)");
+            A("Thumbnail Cache", "ذاكرة الصور المصغّرة"); A("Temporary Files", "الملفات المؤقتة"); A("Delivery Optimization Files", "ملفات تحسين التسليم"); A("Windows Error Reporting Files", "ملفات تقارير أخطاء ويندوز");
+            A("System error memory dump files", "ملفات تفريغ ذاكرة أخطاء النظام"); A("System error minidump files", "ملفات التفريغ المصغّر لأخطاء النظام"); A("D3D Shader Cache", "ذاكرة تظليل D3D");
+            A("Active Setup Temp Folders", "مجلدات الإعداد النشط المؤقتة"); A("Content Indexer Cleaner", "منظّف مفهرس المحتوى"); A("Diagnostic Data Viewer database files", "ملفات قاعدة بيانات عارض بيانات التشخيص");
+            A("Downloaded Program Files", "ملفات البرامج التي تم تنزيلها"); A("Internet Cache Files", "ملفات ذاكرة الإنترنت المؤقتة"); A("Offline Pages Files", "ملفات الصفحات دون اتصال"); A("Old ChkDsk Files", "ملفات ChkDsk القديمة");
+            A("RetailDemo Offline Content", "محتوى العرض التجريبي دون اتصال"); A("Service Pack Cleanup", "تنظيف حزم الخدمة"); A("Setup Log Files", "ملفات سجل التثبيت"); A("Temporary Setup Files", "ملفات التثبيت المؤقتة"); A("Update Cleanup", "تنظيف التحديثات");
+            A("Upgrade Discarded Files", "ملفات الترقية المهملة"); A("Windows Defender", "Windows Defender"); A("Windows Upgrade Log Files", "ملفات سجل ترقية ويندوز"); A("Previous Installations", "التثبيتات السابقة");
+            A("Windows ESD installation files", "ملفات تثبيت Windows ESD"); A("Language Pack", "حزم اللغة"); A("Device Driver Packages", "حزم برامج تشغيل الأجهزة"); A("User file versions", "إصدارات ملفات المستخدم"); A("Cleaned by Windows Disk Cleanup", "يتم تنظيفه بواسطة تنظيف قرص ويندوز");
+            A("Web cache", "ذاكرة الويب المؤقتة"); A("Saved copies of pages, images and scripts so sites load faster. Rebuilds itself.", "نسخ محفوظة من الصفحات والصور والنصوص البرمجية لتحميل المواقع أسرع. تعيد بناء نفسها.");
+            A("Keep you signed in. Deleting them signs you out of every website.", "تُبقيك مسجّلًا الدخول. حذفها يسجّل خروجك من كل المواقع."); A("Cookies", "ملفات تعريف الارتباط");
+            A("Browsing history", "سجل التصفح"); A("Visited pages, favicons, top sites and address-bar suggestions.", "الصفحات التي زرتها والأيقونات والمواقع الأكثر زيارة واقتراحات شريط العنوان.");
+            A("Site data", "بيانات المواقع"); A("Local storage, IndexedDB and offline data kept by websites (can sign you out of some sites).", "التخزين المحلي وIndexedDB والبيانات دون اتصال التي تحتفظ بها المواقع (قد تسجّل خروجك من بعض المواقع).");
+            A("Autofill & forms", "الملء التلقائي والنماذج"); A("Saved addresses, cards and search engines (passwords are NOT included).", "العناوين والبطاقات ومحركات البحث المحفوظة (كلمات المرور غير مشمولة).");
+            A("Open tabs & sessions", "التبويبات والجلسات المفتوحة"); A("The tabs that reopen when you restart the browser.", "التبويبات التي تُعاد فتحها عند إعادة تشغيل المتصفح."); A("The tabs that reopen when you restart Firefox.", "التبويبات التي تُعاد فتحها عند إعادة تشغيل Firefox.");
+            A("Crash reports & metrics", "تقارير الأعطال والمقاييس"); A("Diagnostic data collected by the browser.", "بيانات التشخيص التي يجمعها المتصفح."); A("Form history", "سجل النماذج"); A("Text you typed into website forms and the search bar.", "النصوص التي كتبتها في نماذج المواقع وشريط البحث.");
+            A("Saved copies of pages and images. Rebuilds itself.", "نسخ محفوظة من الصفحات والصور. تعيد بناء نفسها."); A("Gecko engine", "محرك Gecko"); A("Chromium engine", "محرك Chromium"); A("● running - close it for best results", "● قيد التشغيل - أغلقه للحصول على أفضل نتيجة");
+            P("{n0} profile", "الملفات الشخصية: {0}"); P("{n0} profiles", "الملفات الشخصية: {0}");
+            // ── cleanup lab: actions and status ──
+            A("Hunting for junk…", "جارٍ البحث عن الملفات غير الضرورية…"); A("scanning…", "جارٍ الفحص…"); A("size computed by Windows", "الحجم يحسبه ويندوز"); A("runs when you clean", "يعمل عند التنظيف"); A("nothing to clean", "لا شيء للتنظيف");
+            P("Found {n0} of junk", "تم العثور على {0} من الملفات غير الضرورية"); A("pick what to clean", "اختر ما تريد تنظيفه"); A("Your system is already sparkling clean ✦", "نظامك نظيف تمامًا ✦");
+            A("NOTHING TO CLEAN", "لا شيء للتنظيف"); A("Nothing is selected. Tick at least one item first.", "لم يتم تحديد شيء. حدّد عنصرًا واحدًا على الأقل أولًا."); A("Run ANALYZE first so the app knows what to clean.", "شغّل التحليل أولًا ليعرف التطبيق ما يجب تنظيفه.");
+            P("Permanently delete the selected items (about {0} measured)?", "حذف العناصر المحددة نهائيًا (حوالي {0} تم قياسها)؟");
+            A("• The Recycle Bin will be emptied permanently.", "• سيتم إفراغ سلة المحذوفات نهائيًا."); A("• Browser cookies / history / site data will be erased (you may be signed out of websites).", "• سيتم مسح ملفات تعريف الارتباط وسجل المتصفح وبيانات المواقع (قد يتم تسجيل خروجك من المواقع).");
+            A("• Windows Disk Cleanup (cleanmgr) will run for the selected system items - this can take a few minutes.", "• سيعمل تنظيف قرص ويندوز (cleanmgr) للعناصر المحددة - قد يستغرق بضع دقائق.");
+            A("CONFIRM CLEANUP", "تأكيد التنظيف"); A("BROWSER OPEN", "المتصفح مفتوح");
+            P("{0} is still running.", "{0} ما زال يعمل."); P("{0} are still running.", "{0} ما زالت تعمل.");
+            A("Close it now so every file can be cleaned, or clean anyway (files in use are skipped).", "أغلقه الآن ليتم تنظيف كل الملفات، أو نظّف على أي حال (يتم تخطي الملفات قيد الاستخدام).");
+            A("CLOSE & CLEAN", "إغلاق وتنظيف"); A("CLEAN ANYWAY", "نظّف على أي حال");
+            A("Munching junk…", "جارٍ التهام الملفات غير الضرورية…"); A("CLEANING…", "جارٍ التنظيف…"); A("cleaning…", "جارٍ التنظيف…"); P("✓ cleaned {n0}", "✓ تم تنظيف {0}"); A("rest in use", "الباقي قيد الاستخدام"); A("in use", "قيد الاستخدام"); A("skipped", "تم التخطي");
+            A("running…", "قيد التنفيذ…"); A("✓ done", "✓ تم"); A("Windows is cleaning…", "ويندوز يقوم بالتنظيف…"); A("Windows Disk Cleanup is working…", "تنظيف قرص ويندوز قيد العمل…"); A("✓ cleaned by Windows", "✓ تم التنظيف بواسطة ويندوز");
+            P("All done! {n0} reclaimed ✦", "تم كل شيء! تم استرداد {0} ✦"); A("Done. Nothing measurable was freed (files in use or already clean).", "تم. لم يتم تحرير شيء قابل للقياس (الملفات قيد الاستخدام أو نظيفة بالفعل)."); A("CLEANUP COMPLETE", "اكتمل التنظيف");
+            A("Windows is still measuring…", "ويندوز ما زال يقيس…"); A("SAFE ITEMS SELECTED", "تم تحديد العناصر الآمنة"); A("SELECTION CLEARED", "تم مسح التحديد"); A("EVERYTHING SELECTED", "تم تحديد كل شيء");
+            P("{n0} OF {n1} SELECTED", "المحدد: {0} من {1}"); P("{n0} SELECTED", "المحدد: {0}"); P("SAFE ITEMS SELECTED IN {0}", "تم تحديد العناصر الآمنة في {0}"); P("CLEARED {0}", "تم مسح تحديد {0}");
+            // ── folder browser: file operations ──
+            A("NOTHING SELECTED", "لم يتم تحديد شيء"); A("Select one or more files or folders first (Ctrl or Shift + click selects several).", "حدّد ملفًا أو مجلدًا أو أكثر أولًا (Ctrl أو Shift + نقر لتحديد عدة عناصر).");
+            A("Select one or more files or folders first.", "حدّد ملفًا أو مجلدًا أو أكثر أولًا."); A("CANNOT MOVE THIS", "لا يمكن نقل هذا"); P("{0} is {1}.", "{0} هو {1}.");
+            A("a drive root", "جذر قرص"); A("a protected system folder", "مجلد نظام محمي"); A("part of Windows", "جزء من ويندوز"); A("a protected system item", "عنصر نظام محمي"); A("an invalid path", "مسار غير صالح");
+            P("CUT {n0} ITEM(S) · open any folder and press PASTE", "تم قص {0} عنصر · افتح أي مجلد واضغط لصق"); P("COPIED {n0} ITEM(S) · open any folder and press PASTE", "تم نسخ {0} عنصر · افتح أي مجلد واضغط لصق");
+            A("NOTHING TO PASTE", "لا شيء للصق"); A("Copy or cut some files first, then paste them into a folder.", "انسخ أو اقصّ بعض الملفات أولًا ثم الصقها في مجلد."); A("CANNOT PASTE HERE", "لا يمكن اللصق هنا");
+            A("A folder cannot be copied into itself:", "لا يمكن نسخ مجلد إلى داخل نفسه:"); A("THOSE ITEMS ARE ALREADY IN THIS FOLDER", "هذه العناصر موجودة بالفعل في هذا المجلد"); A("ITEMS ALREADY EXIST", "العناصر موجودة بالفعل");
+            P("{n0} item(s) with the same name already exist in this folder:", "يوجد في هذا المجلد {0} عنصر بنفس الاسم:"); A("KEEP BOTH", "الاحتفاظ بالاثنين"); A("REPLACE", "استبدال");
+            P("Moving {n0} item(s)", "جارٍ نقل {0} عنصر"); P("Copying {n0} item(s)", "جارٍ نسخ {0} عنصر"); A("PROTECTED", "محمي"); P("{0} is {1} and cannot be deleted here.", "{0} هو {1} ولا يمكن حذفه هنا.");
+            P("{n0} items", "{0} عناصر"); A("DELETE PERMANENTLY", "حذف نهائي"); P("Permanently delete {0}?", "حذف {0} نهائيًا؟"); A("This skips the Recycle Bin and cannot be undone.", "يتجاوز هذا سلة المحذوفات ولا يمكن التراجع عنه.");
+            P("Delete {0}?", "حذف {0}؟"); A("Recycle Bin keeps a copy you can restore. Permanent delete is much faster and cannot be undone.", "تحتفظ سلة المحذوفات بنسخة يمكنك استعادتها. الحذف النهائي أسرع بكثير ولا يمكن التراجع عنه."); A("RECYCLE BIN", "سلة المحذوفات");
+            P("Deleting {0}", "جارٍ حذف {0}"); A("MOVING TO THE RECYCLE BIN…", "جارٍ النقل إلى سلة المحذوفات…"); A("NOT FULLY DELETED", "لم يتم الحذف بالكامل"); A("Windows could not move everything to the Recycle Bin (items may be in use).", "تعذّر على ويندوز نقل كل شيء إلى سلة المحذوفات (قد تكون العناصر قيد الاستخدام).");
+            A("COULD NOT CREATE THE FOLDER", "تعذّر إنشاء المجلد"); P("CREATED {0}", "تم إنشاء {0}"); A("Preparing…", "جارٍ التحضير…"); A("Cancelling…", "جارٍ الإلغاء…"); A("Cancelled", "تم الإلغاء"); A("Finished with problems", "انتهى مع وجود مشاكل"); A("Done ✓", "تم ✓");
+            P("Done  ·  {0} item(s)  ·  {1} in {2} s", "تم  ·  العناصر: {0}  ·  {1} خلال {2} ث"); P("Cancelled  ·  {0} item(s)  ·  {1} in {2} s", "تم الإلغاء  ·  العناصر: {0}  ·  {1} خلال {2} ث");
+            P("{n0} s left", "المتبقي {0} ث"); P("{n0} min left", "المتبقي {0} د"); P("{n0} of {n1} items", "{0} من {1} عنصر");
+            A("SOME ITEMS FAILED", "فشلت بعض العناصر"); P("{n0} item(s) could not be processed:", "تعذّرت معالجة {0} عنصر:");
+            A("• …", "• …"); A("Select an item first.", "حدّد عنصرًا أولًا.");
+
+        }
+        static void Dict3()
+        {
+            // ── health check: progress, findings ──
+            A("Starting the check…", "جارٍ بدء الفحص…"); A("CHECK FAILED", "فشل الفحص"); A("Checking disks…", "جارٍ فحص الأقراص…"); A("Checking file systems…", "جارٍ فحص أنظمة الملفات…"); A("Checking free space…", "جارٍ فحص المساحة الحرة…");
+            A("Reading recent system errors…", "جارٍ قراءة أخطاء النظام الأخيرة…"); A("Checking pending restarts…", "جارٍ فحص إعادة التشغيل المعلّقة…"); A("Checking core services…", "جارٍ فحص الخدمات الأساسية…");
+            A("Checking Windows security…", "جارٍ فحص أمان ويندوز…"); A("Checking performance…", "جارٍ فحص الأداء…");
+            A("No problems found ✦", "لم يتم العثور على مشاكل ✦"); P("{n0} problem(s), {n1} warning(s) found", "المشاكل: {0} · التحذيرات: {1}"); A("HEALTH CHECK COMPLETE", "اكتمل فحص الصحة"); P("SCORE {n0}", "الدرجة {0}");
+            A("A drive predicts it will fail (SMART)", "قرص يتوقع أنه سيفشل (SMART)"); A("Back up your data now and replace the drive soon.", "انسخ بياناتك احتياطيًا الآن واستبدل القرص قريبًا.");
+            A("No automatic fix: a failing drive is a hardware problem. Copy your important files to another drive today.", "لا يوجد إصلاح تلقائي: القرص المتعطل مشكلة في العتاد. انسخ ملفاتك المهمة إلى قرص آخر اليوم.");
+            A("Disk reports a problem", "القرص يبلّغ عن مشكلة"); A("No automatic fix: this is reported by the drive itself. Back up your data and have the drive checked.", "لا يوجد إصلاح تلقائي: هذا الإبلاغ صادر عن القرص نفسه. انسخ بياناتك احتياطيًا واطلب فحص القرص.");
+            A("Drives report healthy", "الأقراص تبلّغ عن سلامتها"); P("{n0} physical drive(s) checked, no SMART failure predicted.", "تم فحص الأقراص الفعلية: {0} - لا يوجد فشل متوقع حسب SMART.");
+            A("Disk health unavailable", "حالة القرص غير متاحة"); A("Windows did not return drive status information.", "لم يُرجع ويندوز معلومات حالة القرص.");
+            A("File system needs a check", "نظام الملفات يحتاج إلى فحص"); P("Volume {0} is marked dirty. Windows will offer a disk check on restart.", "القرص {0} معلّم كغير سليم. سيعرض ويندوز فحص القرص عند إعادة التشغيل.");
+            A("File systems are consistent", "أنظمة الملفات سليمة"); A("No volume is marked dirty.", "لا يوجد قرص معلّم كغير سليم.");
+            P("{0} is almost full", "{0} ممتلئ تقريبًا"); P("{n0} free ({n1}%). Windows slows down badly below 10%.", "المتاح {0} ({1}%). يصبح ويندوز بطيئًا جدًا عند أقل من 10%.");
+            P("{0} is running low on space", "المساحة في {0} تنفد"); P("{n0} free ({n1}%). Use the Cleanup tab.", "المتاح {0} ({1}%). استخدم تبويب التنظيف.");
+            A("No critical errors in the last 24 hours", "لا أخطاء حرجة في آخر 24 ساعة"); A("The System and Application logs are clean.", "سجلات النظام والتطبيقات نظيفة.");
+            P("{0}  (event {n1})  ×{n2}", "{0}  (الحدث {1})  ×{2}"); A("Reported as an error in the last 24 hours.", "تم الإبلاغ عنه كخطأ في آخر 24 ساعة."); A("Event log not readable", "سجل الأحداث غير قابل للقراءة"); A("Could not read the Windows event logs.", "تعذّرت قراءة سجلات أحداث ويندوز.");
+            A("The PC restarted without a clean shutdown (crash, power loss or forced reset).", "أُعيد تشغيل الجهاز دون إيقاف تشغيل سليم (عطل أو انقطاع الطاقة أو إعادة ضبط قسرية).");
+            A("Windows hit a bad block on a disk.", "واجه ويندوز كتلة تالفة على قرص."); A("A disk controller reported an error.", "أبلغ متحكم القرص عن خطأ."); A("A disk reported an error during a paging operation.", "أبلغ قرص عن خطأ أثناء عملية تبديل الصفحات.");
+            A("A disk I/O operation had to be retried.", "كان لا بد من إعادة محاولة عملية إدخال/إخراج على القرص."); A("The file system structure on a drive is corrupt - run a disk check.", "بنية نظام الملفات على قرص تالفة - شغّل فحص القرص.");
+            A("NTFS found a problem on a volume.", "اكتشف NTFS مشكلة في قرص."); A("NTFS could not write to a volume's log.", "تعذّر على NTFS الكتابة في سجل قرص."); A("A hardware error was reported by the CPU or memory (WHEA).", "تم الإبلاغ عن خطأ عتاد من المعالج أو الذاكرة (WHEA).");
+            A("A hardware error was reported (WHEA).", "تم الإبلاغ عن خطأ في العتاد (WHEA)."); A("Windows could not create a memory dump file.", "تعذّر على ويندوز إنشاء ملف تفريغ الذاكرة."); A("A service failed to start.", "فشلت خدمة في البدء.");
+            A("A service failed because of a dependency.", "فشلت خدمة بسبب اعتمادية."); A("A service terminated with an error.", "انتهت خدمة بخطأ."); A("A service stopped unexpectedly.", "توقفت خدمة بشكل غير متوقع."); A("A service crashed unexpectedly.", "تعطلت خدمة بشكل غير متوقع.");
+            A("An application crashed.", "تعطل تطبيق."); A("An application stopped responding.", "توقف تطبيق عن الاستجابة.");
+            A("A restart is pending", "إعادة التشغيل معلّقة"); A("Windows is waiting for a restart to finish installing updates or changes.", "ينتظر ويندوز إعادة التشغيل لإكمال تثبيت التحديثات أو التغييرات."); A("No restart pending", "لا توجد إعادة تشغيل معلّقة"); A("Nothing is waiting for a reboot.", "لا شيء ينتظر إعادة التشغيل.");
+            A("Some core services are not running", "بعض الخدمات الأساسية لا تعمل"); P("{0}. Normal if another security product replaced Defender or the firewall.", "{0}. هذا طبيعي إذا حل منتج أمان آخر محل Defender أو جدار الحماية.");
+            A("No automatic fix: Microsoft Defender is switched off by another security product, which is normal.", "لا يوجد إصلاح تلقائي: تم إيقاف Microsoft Defender بواسطة منتج أمان آخر، وهذا طبيعي.");
+            A("Core services are running", "الخدمات الأساسية تعمل"); A("Event Log, Firewall, DNS, DHCP and RPC are all up.", "سجل الأحداث وجدار الحماية وDNS وDHCP وRPC تعمل جميعها.");
+            A("Real-time protection is off", "الحماية الفورية متوقفة"); A("Microsoft Defender is not protecting this PC right now.", "Microsoft Defender لا يحمي هذا الجهاز حاليًا.");
+            P("Virus definitions are {n0} days old", "تعريفات الفيروسات عمرها {0} يومًا"); A("Update Microsoft Defender from Windows Security.", "حدّث Microsoft Defender من أمان ويندوز."); A("Microsoft Defender is active", "Microsoft Defender يعمل");
+            A("Real-time protection is on, definitions are current.", "الحماية الفورية تعمل والتعريفات محدّثة."); A("Memory is almost full", "الذاكرة ممتلئة تقريبًا"); P("{n0}% of RAM is in use. Try BOOST or close heavy apps.", "{0}% من الذاكرة قيد الاستخدام. جرّب التسريع أو أغلق التطبيقات الثقيلة.");
+            A("Memory usage is fine", "استخدام الذاكرة جيد"); P("{n0}% of {n1} in use.", "{0}% من {1} قيد الاستخدام."); P("The PC has not restarted for {n0} days", "لم يُعاد تشغيل الجهاز منذ {0} يومًا");
+            A("A restart clears memory leaks and applies pending updates.", "إعادة التشغيل تمسح تسرّبات الذاكرة وتطبّق التحديثات المعلّقة."); P("{n0} apps start with Windows", "{0} تطبيقًا يبدأ مع ويندوز"); A("Disable some in the BOOST tab for a faster startup.", "عطّل بعضها من تبويب التسريع لبدء تشغيل أسرع.");
+            A("System file integrity not scanned", "سلامة ملفات النظام لم تُفحص"); A("A full check (sfc /scannow) takes a long time, so it is not part of this quick check.", "الفحص الكامل (sfc /scannow) يستغرق وقتًا طويلًا، لذا ليس جزءًا من هذا الفحص السريع.");
+            A("Hardware errors can be caused by failing memory or an overheating CPU.", "قد تنتج أخطاء العتاد عن ذاكرة متعطلة أو معالج شديد الحرارة.");
+            A("If this keeps happening, check the power supply, cables and temperatures, or test the memory.", "إذا تكرر هذا، افحص مصدر الطاقة والكابلات ودرجات الحرارة، أو اختبر الذاكرة.");
+            // ── health fixes: buttons and what each one does ──
+            A("WHAT THE FIX DOES", "ماذا يفعل الإصلاح"); A("FIXING…", "جارٍ الإصلاح…"); A("Fixing… this can take a moment.", "جارٍ الإصلاح… قد يستغرق هذا لحظات."); P("Fixed: {0}", "تم الإصلاح: {0}"); A("Restart Windows to finish the repair.", "أعد تشغيل ويندوز لإكمال الإصلاح.");
+            P("⚙  FIX ALL ({n0})", "⚙  إصلاح الكل ({0})"); A("REPAIR DRIVES", "إصلاح الأقراص"); A("OPEN CLEANUP", "فتح التنظيف"); A("START SERVICES", "تشغيل الخدمات"); A("TURN ON PROTECTION", "تشغيل الحماية"); A("UPDATE DEFINITIONS", "تحديث التعريفات");
+            A("FREE MEMORY", "تحرير الذاكرة"); A("RESTART NOW", "إعادة التشغيل الآن"); A("OPEN BOOST", "فتح التسريع"); A("RUN SCAN", "بدء الفحص"); A("MARK AS REVIEWED", "تعليم كمُراجع"); A("TEST MEMORY", "اختبار الذاكرة"); A("OPEN APP ERRORS", "فتح أخطاء التطبيقات"); A("REPAIR SETTINGS", "إصلاح الإعدادات");
+            A("• Starts every stopped core service listed above.", "• يشغّل كل خدمة أساسية متوقفة مذكورة أعلاه."); A("• A service that was disabled is set back to Automatic start first.", "• الخدمة المعطّلة تُعاد أولًا إلى التشغيل التلقائي."); A("• Waits up to 20 seconds for each service and checks that it is really running.", "• ينتظر حتى 20 ثانية لكل خدمة ويتحقق من أنها تعمل فعلًا.");
+            A("• Starts the failed service(s) again.", "• يعيد تشغيل الخدمات التي فشلت."); A("• Services you disabled on purpose are left untouched.", "• الخدمات التي عطّلتها عمدًا تُترك كما هي."); A("• Checks afterwards that each service is really running.", "• يتحقق بعد ذلك من أن كل خدمة تعمل فعلًا.");
+            A("• Runs Windows chkdsk /f on each volume marked dirty to repair file system errors.", "• يشغّل chkdsk /f في ويندوز على كل قرص معلّم كغير سليم لإصلاح أخطاء نظام الملفات."); A("• The system drive cannot be checked while Windows runs, so its check is scheduled for the next restart.", "• لا يمكن فحص قرص النظام أثناء عمل ويندوز، لذا يُجدول فحصه عند إعادة التشغيل التالية.");
+            A("• Other drives are repaired now when no program uses them, otherwise they are scheduled for the next restart.", "• الأقراص الأخرى تُصلح الآن إذا لم يستخدمها أي برنامج، وإلا فتُجدول لإعادة التشغيل التالية.");
+            A("• Runs a read-only online scan (chkdsk /scan) on every fixed NTFS drive.", "• يجري فحصًا مباشرًا للقراءة فقط (chkdsk /scan) على كل قرص NTFS ثابت."); A("• If a drive has errors, a repair is queued and finishes during the next restart.", "• إذا كان في القرص أخطاء، يُجدول إصلاح ينتهي أثناء إعادة التشغيل التالية.");
+            A("• Nothing is deleted - chkdsk only repairs file system structures.", "• لا يُحذف شيء - chkdsk يصلح بنى نظام الملفات فقط.");
+            A("• Turns Microsoft Defender real-time protection back on.", "• يعيد تشغيل الحماية الفورية في Microsoft Defender."); A("• Then checks that Windows really reports the protection as active.", "• ثم يتحقق من أن ويندوز يبلّغ فعلًا أن الحماية نشطة.");
+            A("• If Tamper Protection or another security product blocks it, you are told how to switch it on by hand.", "• إذا منعته حماية العبث أو منتج أمان آخر، ستعرف كيف تشغّلها يدويًا.");
+            A("• Downloads the latest virus definitions for Microsoft Defender.", "• ينزّل أحدث تعريفات الفيروسات لـ Microsoft Defender."); A("• Needs an internet connection and can take a minute or two.", "• يحتاج إلى اتصال بالإنترنت وقد يستغرق دقيقة أو دقيقتين.");
+            A("• Asks Windows to move idle memory pages of background programs out of RAM.", "• يطلب من ويندوز نقل صفحات الذاكرة الخاملة لبرامج الخلفية خارج الذاكرة."); A("• No program is closed - pages are loaded back automatically when needed.", "• لا يُغلق أي برنامج - تُعاد الصفحات تلقائيًا عند الحاجة.");
+            A("• Turns on automatic pagefile management so Windows can write crash dumps.", "• يشغّل الإدارة التلقائية لملف الترحيل ليتمكن ويندوز من كتابة ملفات التعطل."); A("• Sets the crash dump type to Automatic memory dump.", "• يضبط نوع ملف التعطل على تفريغ الذاكرة التلقائي."); A("• Takes effect after the next restart.", "• يسري بعد إعادة التشغيل التالية.");
+            A("• Runs System File Checker (sfc /scannow) to verify every protected Windows file.", "• يشغّل مدقق ملفات النظام (sfc /scannow) للتحقق من كل ملف محمي في ويندوز."); A("• Damaged files are replaced from the Windows component store automatically.", "• تُستبدل الملفات التالفة تلقائيًا من مخزن مكونات ويندوز.");
+            A("• If some files cannot be repaired, DISM /RestoreHealth runs and the check is repeated.", "• إذا تعذّر إصلاح بعض الملفات، يعمل DISM /RestoreHealth ويُعاد الفحص."); A("• Takes 10-30 minutes - you can keep using the PC.", "• يستغرق 10-30 دقيقة - يمكنك متابعة استخدام الجهاز.");
+            A("• Opens Windows Memory Diagnostic and lets you restart now or later to test your RAM.", "• يفتح أداة تشخيص ذاكرة ويندوز ويتيح لك إعادة التشغيل الآن أو لاحقًا لاختبار الذاكرة."); A("• The test runs before Windows starts and the result appears after you sign in.", "• يعمل الاختبار قبل بدء ويندوز وتظهر النتيجة بعد تسجيل الدخول.");
+            A("• Restarts Windows after a 30-second warning so pending updates and changes can finish.", "• يعيد تشغيل ويندوز بعد تحذير مدته 30 ثانية لتكتمل التحديثات والتغييرات المعلّقة."); A("• Save your work first. You can cancel the restart from the message that appears.", "• احفظ عملك أولًا. يمكنك إلغاء إعادة التشغيل من الرسالة التي تظهر.");
+            A("• Opens Cleanup Lab and runs ANALYZE for you.", "• يفتح مختبر التنظيف ويشغّل التحليل نيابةً عنك."); A("• Items marked SAFE are ticked, so one click frees the space.", "• العناصر المعلّمة آمن محددة، فنقرة واحدة تحرّر المساحة.");
+            A("• Opens the BOOST tab where you can untick apps that start with Windows.", "• يفتح تبويب التسريع حيث يمكنك إلغاء تحديد التطبيقات التي تبدأ مع ويندوز."); A("• Nothing is disabled automatically - you choose which apps to keep.", "• لا يُعطَّل شيء تلقائيًا - أنت تختار التطبيقات التي تبقيها.");
+            A("• Opens App Errors, which lists the crashing programs with the cause and a recommended action.", "• يفتح أخطاء التطبيقات التي تعرض البرامج المتعطلة مع السبب والإجراء الموصى به.");
+            A("• Marks this event as reviewed so future checks hide it.", "• يعلّم هذا الحدث كمُراجَع فتخفيه الفحوصات القادمة."); A("• It comes back only if the same error happens again.", "• يعود فقط إذا تكرر الخطأ نفسه."); A("• The Windows event log itself is not changed.", "• لا يتغير سجل أحداث ويندوز نفسه.");
+            // ── fix results ──
+            P("Running again: {0}.", "تعمل من جديد: {0}."); P("Could not start: {0}.", "تعذّر التشغيل: {0}."); P("Left disabled (your choice): {0}.", "تُركت معطّلة (باختيارك): {0}."); A("Nothing needed to be started.", "لا شيء يحتاج إلى التشغيل.");
+            P("Repaired: {0}.", "تم الإصلاح: {0}."); P("Repair scheduled for the next restart: {0}.", "الإصلاح مجدول لإعادة التشغيل التالية: {0}."); P("Could not repair: {0}.", "تعذّر الإصلاح: {0}.");
+            P("No errors found on: {0}.", "لم يتم العثور على أخطاء في: {0}."); P("Repair queued for the next restart: {0}.", "الإصلاح في قائمة الانتظار لإعادة التشغيل التالية: {0}."); P("Could not check: {0}.", "تعذّر الفحص: {0}."); A("No NTFS drive needed a check.", "لا يحتاج أي قرص NTFS إلى فحص.");
+            A("Real-time protection is on.", "الحماية الفورية تعمل."); A("Windows blocked the change (Tamper Protection or another security product). Open Windows Security > Virus & threat protection > Manage settings and switch it on.", "منع ويندوز التغيير (حماية العبث أو منتج أمان آخر). افتح أمان ويندوز > الحماية من الفيروسات والمخاطر > إدارة الإعدادات وشغّلها.");
+            A("Virus definitions are up to date.", "تعريفات الفيروسات محدّثة."); A("The update did not finish. Check your internet connection and try again.", "لم يكتمل التحديث. تحقق من اتصالك بالإنترنت وحاول مجددًا."); A("Could not update the definitions. Check your internet connection and try again.", "تعذّر تحديث التعريفات. تحقق من اتصالك بالإنترنت وحاول مجددًا.");
+            P("Released {0} of memory from {1} processes.", "تم تحرير {0} من الذاكرة من {1} عملية."); A("Memory is already optimized.", "الذاكرة محسّنة بالفعل."); P("Released {0}, but memory is still high. Close heavy apps in the BOOST tab.", "تم تحرير {0} لكن الذاكرة ما زالت مرتفعة. أغلق التطبيقات الثقيلة من تبويب التسريع.");
+            A("Crash dumps are enabled. Restart Windows to apply the change.", "تم تفعيل ملفات التعطل. أعد تشغيل ويندوز لتطبيق التغيير."); A("Part of the settings were changed. Restart Windows to apply them.", "تم تغيير جزء من الإعدادات. أعد تشغيل ويندوز لتطبيقها."); A("Could not change the crash dump settings.", "تعذّر تغيير إعدادات ملفات التعطل.");
+            P("Windows reports: {0}", "يبلّغ ويندوز: {0}"); A("The scan finished.", "انتهى الفحص."); A("The scan could not run.", "تعذّر تشغيل الفحص."); A("Some files could not be repaired. See C:\\Windows\\Logs\\CBS\\CBS.log.", "تعذّر إصلاح بعض الملفات. راجع C:\\Windows\\Logs\\CBS\\CBS.log.");
+            A("Windows Memory Diagnostic is open - choose when to restart.", "أداة تشخيص ذاكرة ويندوز مفتوحة - اختر وقت إعادة التشغيل."); P("Could not open Windows Memory Diagnostic: {0}", "تعذّر فتح أداة تشخيص الذاكرة: {0}"); A("Marked as reviewed.", "تم التعليم كمُراجَع.");
+            P("Windows refused to restart: {0}", "رفض ويندوز إعادة التشغيل: {0}"); P("The fix failed: {0}", "فشل الإصلاح: {0}"); A("This fix is not available.", "هذا الإصلاح غير متاح.");
+            A("FIX COMPLETE", "اكتمل الإصلاح"); A("FIX NEEDS ATTENTION", "الإصلاح يحتاج إلى انتباه"); A("FIX ALL FINISHED", "اكتمل إصلاح الكل"); P("{n0} FIXED", "تم إصلاح {0}"); P("{n0} NEED ATTENTION", "{0} تحتاج إلى انتباه");
+            A("CONFIRM FIX", "تأكيد الإصلاح"); A("FIX NOW", "أصلح الآن"); A("What this fix will do:", "ما سيفعله هذا الإصلاح:"); A("FIX ALL ISSUES", "إصلاح كل المشاكل"); A("FIX ALL", "إصلاح الكل"); A("These fixes will run one after another:", "ستعمل هذه الإصلاحات واحدًا تلو الآخر:");
+            A("Each fix is described on its card. No file is deleted.", "كل إصلاح موصوف على بطاقته. لا يُحذف أي ملف."); A("RESTART NEEDED", "إعادة التشغيل مطلوبة"); A("Windows must restart to finish the repair. Save your work first.", "يجب أن يعيد ويندوز التشغيل لإكمال الإصلاح. احفظ عملك أولًا."); A("LATER", "لاحقًا");
+            A("RESTART WINDOWS", "إعادة تشغيل ويندوز"); A("Restart the PC now?", "إعادة تشغيل الجهاز الآن؟"); A("Windows shows a 30-second warning first. Save your work.", "يعرض ويندوز تحذيرًا لمدة 30 ثانية أولًا. احفظ عملك."); A("RESTART", "إعادة التشغيل");
+            A("RESTARTING IN 30 SECONDS", "إعادة التشغيل خلال 30 ثانية"); A("Windows will restart in 30 seconds. Save your work now.", "سيعيد ويندوز التشغيل خلال 30 ثانية. احفظ عملك الآن."); A("CANCEL RESTART", "إلغاء إعادة التشغيل"); A("RESTART CANCELLED", "تم إلغاء إعادة التشغيل"); A("COULD NOT RESTART", "تعذّرت إعادة التشغيل");
+            // ── app errors ──
+            A("APP ERRORS", "أخطاء التطبيقات"); A("Programs that crashed or froze, why it happened and what to do about it", "البرامج التي تعطلت أو تجمّدت، ولماذا حدث ذلك، وماذا تفعل حياله"); A("EXPORT REPORT", "تصدير التقرير"); A("SCAN NOW", "افحص الآن");
+            A("24 HOURS", "24 ساعة"); A("7 DAYS", "7 أيام"); A("30 DAYS", "30 يومًا"); A("NOT RESPONDING RIGHT NOW", "لا تستجيب الآن"); A("No app crashes or hangs were found - everything runs smoothly ✦", "لم يتم العثور على أعطال أو تجمّد في التطبيقات - كل شيء يعمل بسلاسة ✦");
+            A("WHAT TO DO", "ماذا تفعل"); A("FIND IN APPS", "بحث في التطبيقات"); A("OPEN FOLDER", "فتح المجلد"); A("SHOW DETAILS", "عرض التفاصيل"); A("HIDE DETAILS", "إخفاء التفاصيل"); A("Crash", "عطل"); A("Hang", "تجمّد");
+            A("GET VC++ RUNTIME", "تنزيل مكتبة VC++"); A("SCAN SYSTEM FILES", "فحص ملفات النظام"); A("GET .NET", "تنزيل .NET"); A("DRIVER UPDATES", "تحديثات برامج التشغيل"); A("CHECK DISK", "فحص القرص");
+            A("Scanning the Windows event log…", "جارٍ فحص سجل أحداث ويندوز…"); P("{n0} event(s) from {n1} app(s)", "الأحداث: {0} · التطبيقات: {1}"); A("NO APP ERRORS FOUND", "لم يتم العثور على أخطاء في التطبيقات"); P("APP ERRORS · {n0} APP(S) AFFECTED", "أخطاء التطبيقات · التطبيقات المتأثرة: {0}");
+            A("NOTHING TO EXPORT", "لا شيء للتصدير"); A("Run SCAN NOW first.", "شغّل افحص الآن أولًا."); A("REPORT SAVED", "تم حفظ التقرير"); A("The report was saved to your desktop:", "تم حفظ التقرير على سطح المكتب:"); A("SHOW FILE", "إظهار الملف"); A("CLOSE", "إغلاق");
+            A("COULD NOT SAVE THE REPORT", "تعذّر حفظ التقرير"); A("COULD NOT OPEN IT", "تعذّر فتحه"); A("An app crashed", "تعطل تطبيق"); A("An app stopped responding", "توقف تطبيق عن الاستجابة"); P("{0} - open CyberDisk > App Errors for the cause and a fix.", "{0} - افتح CyberDisk > أخطاء التطبيقات لمعرفة السبب والحل.");
+            P("{n0} crash(es)", "الأعطال: {0}"); P("{n0} hang(s)", "حالات التجمّد: {0}"); P("last seen {0}", "آخر ظهور {0}"); A("just now", "الآن"); P("{n0} min ago", "قبل {0} دقيقة"); P("{n0} h ago", "قبل {0} ساعة"); P("{n0} d ago", "قبل {0} يوم");
+            A("Access violation: the program touched memory it was not allowed to use. Usual causes are a bug in the program, a faulty add-on or driver, or damaged files.", "انتهاك وصول: لمس البرنامج ذاكرة غير مسموح له باستخدامها. الأسباب المعتادة خلل في البرنامج أو إضافة أو برنامج تشغيل معيب أو ملفات تالفة.");
+            A("Stack buffer overrun: the program detected corrupted memory and stopped itself on purpose.", "تجاوز مخزن المكدس: اكتشف البرنامج ذاكرة تالفة فأوقف نفسه عمدًا.");
+            A("Unhandled .NET exception: the program hit an error in its managed code that it did not handle.", "استثناء .NET غير معالَج: واجه البرنامج خطأ في شيفرته المُدارة ولم يعالجه.");
+            A("Heap corruption: the program's memory structures were damaged, often by a faulty add-on, driver or bad RAM.", "تلف الكومة: تضررت بنى ذاكرة البرنامج، غالبًا بسبب إضافة أو برنامج تشغيل معيب أو ذاكرة سيئة.");
+            A("Stack overflow: the program called itself endlessly until it ran out of stack space.", "فيض المكدس: استدعى البرنامج نفسه بلا نهاية حتى نفدت مساحة المكدس.");
+            A("A required DLL was not found: the program or a runtime it needs is missing or damaged.", "لم يتم العثور على ملف DLL مطلوب: البرنامج أو مكتبة تشغيل يحتاجها مفقودة أو تالفة.");
+            A("A DLL failed to start: usually a missing or mismatched runtime.", "فشل تشغيل ملف DLL: غالبًا مكتبة تشغيل مفقودة أو غير متوافقة."); A("Bad image format: a 32-bit / 64-bit mismatch or a damaged DLL.", "تنسيق صورة سيئ: عدم توافق بين 32 و64 بت أو ملف DLL تالف.");
+            A("Illegal instruction: the program uses a CPU feature this PC lacks, or its code is damaged.", "تعليمة غير مشروعة: يستخدم البرنامج ميزة معالج غير متوفرة في هذا الجهاز أو أن شيفرته تالفة.");
+            A("In-page error: Windows could not read data the program needed - a failing disk, an unreliable network drive or a damaged file.", "خطأ في الصفحة: تعذّر على ويندوز قراءة بيانات يحتاجها البرنامج - قرص متعطل أو قرص شبكة غير موثوق أو ملف تالف.");
+            A("Arithmetic error inside the program (division by zero) - a bug in the program.", "خطأ حسابي داخل البرنامج (قسمة على صفر) - خلل في البرنامج."); A("Arithmetic error inside the program (overflow) - a bug in the program.", "خطأ حسابي داخل البرنامج (تجاوز) - خلل في البرنامج.");
+            A("A breakpoint was hit: a debugging leftover or a deliberate stop inside the program.", "تم الوصول إلى نقطة توقف: بقايا تصحيح أو توقف متعمد داخل البرنامج."); A("The program's runtime requested a fatal exit.", "طلبت مكتبة تشغيل البرنامج إنهاءً حرجًا.");
+            P("Windows reported error code 0x{0}.", "أبلغ ويندوز عن رمز الخطأ 0x{0}."); A("The program closed unexpectedly.", "أُغلق البرنامج بشكل غير متوقع.");
+            A("The faulting module is unknown, which often means memory was corrupted.", "الوحدة المسببة للعطل غير معروفة، وهذا يعني غالبًا أن الذاكرة تلفت.");
+            P("The crash happened inside the Microsoft Visual C++ runtime ({0}).", "حدث العطل داخل مكتبة تشغيل Microsoft Visual C++ ({0})."); P("The crash was reported by a core Windows library ({0}) on behalf of the program, so the real cause is usually in the program or in damaged system files.", "أبلغت مكتبة أساسية في ويندوز ({0}) عن العطل نيابةً عن البرنامج، لذا يكون السبب الحقيقي غالبًا في البرنامج أو في ملفات نظام تالفة.");
+            P("The crash happened inside the .NET runtime ({0}).", "حدث العطل داخل مكتبة تشغيل .NET ({0})."); P("The crash happened inside a graphics component ({0}).", "حدث العطل داخل مكوّن رسوميات ({0})."); P("An overlay or hook module ({0}) was loaded into the program when it crashed.", "كانت وحدة تراكب أو اعتراض ({0}) محمّلة داخل البرنامج عند تعطله.");
+            P("A security product's module ({0}) was inside the program when it crashed.", "كانت وحدة تابعة لمنتج أمان ({0}) داخل البرنامج عند تعطله."); P("The fault is inside the program's own code ({0}).", "الخلل في شيفرة البرنامج نفسه ({0})."); P("A third-party module ({0}) caused the crash.", "تسببت وحدة من جهة خارجية ({0}) في العطل."); P("The crash happened inside {0}.", "حدث العطل داخل {0}.");
+            A("The program stopped responding: it was busy for too long or waited for something that never came (disk, network or another program).", "توقف البرنامج عن الاستجابة: انشغل لوقت طويل أو انتظر شيئًا لم يأتِ (قرص أو شبكة أو برنامج آخر).");
+            A("• Repair or reinstall the Microsoft Visual C++ Redistributable (2015-2022), both x64 and x86.", "• أصلح أو أعد تثبيت Microsoft Visual C++ Redistributable (2015-2022) بنسختي x64 وx86."); A("• Run the System File Checker from the Health tab.", "• شغّل مدقق ملفات النظام من تبويب الصحة.");
+            A("• Install the latest .NET update, or repair the .NET runtime the program uses.", "• ثبّت أحدث تحديث لـ .NET أو أصلح مكتبة .NET التي يستخدمها البرنامج."); A("• Update or cleanly reinstall your graphics driver.", "• حدّث برنامج تشغيل الرسوميات أو أعد تثبيته تثبيتًا نظيفًا.");
+            A("• Turn off game or screen overlays (Discord, Steam, GeForce, MSI Afterburner).", "• أوقف تراكبات الألعاب والشاشة (Discord وSteam وGeForce وMSI Afterburner)."); A("• Lower the graphics settings inside the program.", "• اخفض إعدادات الرسوميات داخل البرنامج.");
+            A("• Turn that overlay off, or update it.", "• أوقف ذلك التراكب أو حدّثه."); A("• Update your security software, or add this program to its exclusions.", "• حدّث برنامج الأمان لديك أو أضف هذا البرنامج إلى استثناءاته.");
+            A("• Update the program to its newest version, or reinstall it.", "• حدّث البرنامج إلى أحدث إصدار أو أعد تثبيته."); A("• Update or uninstall the software that installed this module.", "• حدّث البرنامج الذي ثبّت هذه الوحدة أو ألغِ تثبيته."); A("• Run a disk check from the Health tab.", "• شغّل فحص القرص من تبويب الصحة.");
+            A("• Reinstall the program so its runtime files are restored.", "• أعد تثبيت البرنامج لاستعادة ملفات التشغيل الخاصة به."); A("• Update the program to its newest version.", "• حدّث البرنامج إلى أحدث إصدار."); A("• Close other heavy programs to free memory and CPU.", "• أغلق البرامج الثقيلة الأخرى لتحرير الذاكرة والمعالج.");
+            A("• Keep the program's data off a slow or disconnected network drive.", "• أبقِ بيانات البرنامج بعيدًا عن قرص شبكة بطيء أو مفصول."); A("• Repeated failures: if updating does not help, uninstall and reinstall the program from the APPS tab.", "• أعطال متكررة: إذا لم يفد التحديث، ألغِ تثبيت البرنامج وأعد تثبيته من تبويب التطبيقات.");
+            A("• Update the program, and reinstall it from the APPS tab if it keeps failing.", "• حدّث البرنامج، وأعد تثبيته من تبويب التطبيقات إذا استمر في الفشل.");
+            // ── settings ──
+            A("Language, startup, notifications and appearance", "اللغة وبدء التشغيل والإشعارات والمظهر"); A("LANGUAGE", "اللغة"); A("Choose the language of the whole app. Arabic also switches the layout to right-to-left.", "اختر لغة التطبيق بالكامل. تغيّر العربية اتجاه التخطيط أيضًا من اليمين إلى اليسار.");
+            A("APPEARANCE", "المظهر"); A("Interface size", "حجم الواجهة"); A("Makes the whole window larger or smaller (also Ctrl + mouse wheel).", "يكبّر النافذة كلها أو يصغّرها (أو Ctrl + عجلة الفأرة)."); A("Smooth page animations", "حركات انتقال سلسة بين الصفحات");
+            A("Show the welcome screen when CyberDisk opens", "عرض شاشة الترحيب عند فتح CyberDisk"); A("STARTUP", "بدء التشغيل"); A("Start CyberDisk with Windows", "تشغيل CyberDisk مع ويندوز"); A("Runs at sign-in with administrator rights and no prompt (uses a scheduled task).", "يعمل عند تسجيل الدخول بصلاحيات المسؤول ودون مطالبة (يستخدم مهمة مجدولة).");
+            A("Start hidden in the tray", "البدء مخفيًا في شريط النظام"); A("When it starts with Windows, only the tray icon appears.", "عند البدء مع ويندوز تظهر أيقونة الشريط فقط."); A("Open this page first", "افتح هذه الصفحة أولًا");
+            A("BEHAVIOR & ALERTS", "السلوك والتنبيهات"); A("Close button hides CyberDisk to the tray", "زر الإغلاق يخفي CyberDisk في شريط النظام"); A("Keeps CyberDisk running so it can warn you about crashes. Use Exit in the tray menu to quit.", "يُبقي CyberDisk يعمل ليحذّرك من الأعطال. استخدم خروج من قائمة الشريط للإغلاق.");
+            A("Alert me when an app crashes or freezes", "نبّهني عند تعطل تطبيق أو تجمّده"); A("Shows a tray notification that opens App Errors when you click it.", "يعرض إشعارًا في الشريط يفتح أخطاء التطبيقات عند النقر عليه."); A("DATA & RESET", "البيانات وإعادة الضبط");
+            A("The fix log records every repair CyberDisk made to your system.", "يسجّل سجل الإصلاحات كل إصلاح أجراه CyberDisk على نظامك."); A("OPEN SETTINGS FOLDER", "فتح مجلد الإعدادات"); A("OPEN FIX LOG", "فتح سجل الإصلاحات"); A("RESET ALL SETTINGS", "إعادة ضبط كل الإعدادات"); A("ABOUT", "حول");
+            P("Settings folder: {0}", "مجلد الإعدادات: {0}"); A("NO LOG YET", "لا يوجد سجل بعد"); A("The fix log is created the first time a health fix runs.", "يُنشأ سجل الإصلاحات عند تشغيل أول إصلاح صحي.");
+            A("CYBERDISK WILL START WITH WINDOWS", "سيبدأ CyberDisk مع ويندوز"); A("CYBERDISK NO LONGER STARTS WITH WINDOWS", "لم يعد CyberDisk يبدأ مع ويندوز"); A("COULD NOT CHANGE STARTUP", "تعذّر تغيير بدء التشغيل");
+            A("Language, startup options and notifications go back to their defaults, and the 'reviewed' health events are forgotten.\n\nThe start-with-Windows task is removed.", "تعود اللغة وخيارات بدء التشغيل والإشعارات إلى الإعدادات الافتراضية، وتُنسى أحداث الصحة المعلّمة كمُراجَعة.\n\nتتم إزالة مهمة البدء مع ويندوز.");
+            A("RESET", "إعادة الضبط"); A("SETTINGS RESET", "تمت إعادة ضبط الإعدادات");
+            A("DELETE SELECTED", "حذف المحدد"); A("LEFTOVERS FOUND", "تم العثور على مخلفات"); A("SKIP", "تخطي"); A("PID", "المعرّف PID");
+            A("everything else", "كل ما عداه");
+
+        }
+        static void Dict4()
+        {
+            // ── navigation, About, contact ──
+            A("MY PC", "جهازي"); A("DEVELOPER", "المطوّر"); A("Questions, ideas and bug reports are always welcome.", "الأسئلة والأفكار وتقارير الأخطاء مرحّب بها دائمًا."); A("COPY EMAIL", "نسخ البريد"); A("EMAIL COPIED", "تم نسخ البريد الإلكتروني");
+            A("COULD NOT OPEN THE LINK", "تعذّر فتح الرابط"); A("Copy it and open it in your browser:", "انسخه وافتحه في المتصفح:"); P("Version {0}", "الإصدار {0}"); A("Disk analyzer, cleaner, app uninstaller and PC booster", "محلل الأقراص ومنظّف ومزيل تطبيقات ومسرّع للجهاز");
+            // ── score rings, grades, categories ──
+            A("EXCELLENT", "ممتاز"); A("GOOD", "جيد"); A("FAIR", "مقبول"); A("POOR", "ضعيف"); A("CRITICAL", "حرج"); A("HIGH", "مرتفع"); A("MEDIUM", "متوسط"); A("LOW", "منخفض");
+            A("STORAGE", "التخزين"); A("RELIABILITY", "الموثوقية"); A("SECURITY", "الأمان"); A("SYSTEM", "النظام"); A("PERFORMANCE", "الأداء");
+            P("LAST CHECK {0}", "آخر فحص {0}"); P("{n0} problems", "المشاكل: {0}"); P("{n0} warnings", "التحذيرات: {0}"); P("{n0} passed", "الناجحة: {0}");
+            A("Reading drive health…", "جارٍ قراءة صحة الأقراص…"); A("OPEN DISK HEALTH", "فتح صحة القرص"); A("All drives look healthy", "كل الأقراص تبدو سليمة");
+            P("{0} - drive health {n1}/100", "{0} - صحة القرص {1}/100"); P("{n0} drive(s) checked - temperature, wear and error counters are normal.", "تم فحص الأقراص: {0} - الحرارة والتآكل وعدادات الأخطاء طبيعية.");
+            A("• Opens Disk Health & Info with the full report for this drive.", "• يفتح صحة القرص ومعلوماته مع التقرير الكامل لهذا القرص."); A("• Shows temperature, wear, SMART data and exactly what lowers the score.", "• يعرض الحرارة والتآكل وبيانات SMART وما الذي يخفض الدرجة بالضبط.");
+            // ── disk health page ──
+            A("DISK HEALTH & INFO", "صحة القرص ومعلوماته"); A("DISK HEALTH", "صحة القرص"); A("Health score, temperature, wear and SMART data for every physical drive", "درجة الصحة والحرارة والتآكل وبيانات SMART لكل قرص فعلي"); A("Reading your drives…", "جارٍ قراءة أقراصك…");
+            A("READING DRIVE HEALTH…", "جارٍ قراءة صحة الأقراص…"); A("No drive information could be read on this PC.", "تعذّرت قراءة معلومات الأقراص على هذا الجهاز."); A("WHAT AFFECTS THE SCORE", "ما الذي يؤثر على الدرجة"); A("VOLUMES ON THIS DISK", "الأقراص المنطقية على هذا القرص");
+            A("IDENTITY & TECHNICAL DETAILS", "الهوية والتفاصيل التقنية"); A("SMART ATTRIBUTES", "خصائص SMART"); A("ID", "المعرّف"); A("ATTRIBUTE", "الخاصية"); A("VALUE", "القيمة"); A("WORST", "الأسوأ"); A("RAW", "الخام");
+            A("This drive does not expose a SMART table (typical for NVMe and USB drives).", "هذا القرص لا يوفّر جدول SMART (وهذا معتاد في أقراص NVMe وUSB)."); A("ADVANCED", "متقدم"); A("BASIC", "أساسي");
+            P("DISK {n0}", "القرص {0}"); A("NVMe SSD", "NVMe SSD"); A("USB drive", "قرص USB"); A("Disk", "قرص");
+            A("Healthy", "سليم"); A("Warning", "تحذير"); A("Unhealthy", "غير سليم"); A("FAILING", "على وشك الفشل"); A("PASSED", "ناجح");
+            A("WINDOWS STATUS", "حالة ويندوز"); A("TEMPERATURE", "الحرارة"); A("LIFE LEFT", "العمر المتبقي"); A("POWER-ON TIME", "مدة التشغيل"); A("READ / WRITE ERRORS", "أخطاء القراءة / الكتابة"); A("SMART PREDICTION", "توقع SMART");
+            A("not reported", "غير مُبلَّغ عنه"); P("max {n0} °C", "الأقصى {0} °C"); P("wear {n0}%", "التآكل {0}%"); A("not applicable (HDD)", "غير منطبق (HDD)"); P("{n0} read  ·  {n1} write", "{0} قراءة  ·  {1} كتابة"); P("{n0} attributes", "{0} خاصية"); A("no SMART table", "لا يوجد جدول SMART");
+            P("{n0} years", "{0} سنة"); P("{n0} days", "{0} يومًا"); P("{n0} h", "{0} ساعة"); A("No problems found - all health indicators are normal.", "لم يتم العثور على مشاكل - كل مؤشرات الصحة طبيعية."); P("{n0} free of {n1}", "المتاح {0} من {1}");
+            A("Windows reports this drive as unhealthy.", "يبلّغ ويندوز أن هذا القرص غير سليم."); A("Windows reports a warning for this drive.", "يبلّغ ويندوز عن تحذير بخصوص هذا القرص."); A("SMART predicts that this drive will fail soon.", "يتوقع SMART أن يفشل هذا القرص قريبًا.");
+            P("Temperature is {n0}°C - too hot, check airflow and dust.", "درجة الحرارة {0}°C - مرتفعة جدًا، افحص التهوية والغبار."); P("Temperature is {n0}°C - running warm.", "درجة الحرارة {0}°C - دافئ.");
+            P("{n0}% of the SSD's life is used - replace it soon.", "تم استهلاك {0}% من عمر SSD - استبدله قريبًا."); P("{n0}% of the SSD's life is used - plan a replacement.", "تم استهلاك {0}% من عمر SSD - خطّط للاستبدال."); P("{n0}% of the SSD's life is used.", "تم استهلاك {0}% من عمر SSD.");
+            P("{n0} reallocated sector(s) - the surface is starting to fail.", "{0} قطاع معاد تخصيصه - بدأ سطح القرص بالتلف."); P("{n0} sector(s) are waiting to be reallocated.", "{0} قطاع بانتظار إعادة التخصيص."); P("{n0} sector(s) could not be read (offline uncorrectable).", "تعذّرت قراءة {0} قطاع (غير قابل للتصحيح).");
+            P("{n0} interface CRC error(s) - check the data cable.", "{0} خطأ CRC في الواجهة - افحص كابل البيانات."); P("Windows logged {n0} read and {n1} write error(s).", "سجّل ويندوز {0} خطأ قراءة و{1} خطأ كتابة."); P("The drive has run for {n0} hours (about {n1} years).", "عمل القرص {0} ساعة (حوالي {1} سنة).");
+            A("Excellent - no sign of wear or errors.", "ممتاز - لا علامات على التآكل أو الأخطاء."); A("Good - a few points are worth watching.", "جيد - هناك نقاط تستحق المراقبة."); A("Fair - keep an eye on this drive and back up regularly.", "مقبول - راقب هذا القرص وانسخ بياناتك احتياطيًا بانتظام.");
+            A("Poor - back up your data now.", "ضعيف - انسخ بياناتك احتياطيًا الآن."); A("Critical - back up immediately and replace this drive.", "حرج - انسخ بياناتك احتياطيًا فورًا واستبدل هذا القرص.");
+            A("Model", "الطراز"); A("Serial number", "الرقم التسلسلي"); A("Firmware", "البرنامج الثابت"); A("Disk number", "رقم القرص"); A("Capacity", "السعة"); A("Bus / interface", "الناقل / الواجهة"); A("Media type", "نوع الوسيط"); A("Partition style", "نمط التقسيم"); A("Partitions", "الأقسام");
+            A("Sector size (logical / physical)", "حجم القطاع (منطقي / فعلي)"); A("Spindle speed", "سرعة الدوران"); A("Solid state (no moving parts)", "حالة صلبة (بلا أجزاء متحركة)"); A("Windows health status", "حالة الصحة في ويندوز"); A("Start / stop cycles", "دورات البدء / الإيقاف"); A("Load / unload cycles", "دورات التحميل / التفريغ");
+            A("Read error rate", "معدل أخطاء القراءة"); A("Spin-up time", "زمن بدء الدوران"); A("Start / stop count", "عدد البدء / الإيقاف"); A("Reallocated sectors", "القطاعات المعاد تخصيصها"); A("Seek error rate", "معدل أخطاء البحث"); A("Power-on hours", "ساعات التشغيل");
+            A("Spin retry count", "عدد محاولات الدوران"); A("Power cycle count", "عدد دورات الطاقة"); A("Wear leveling count", "عدد موازنة التآكل"); A("Used reserved blocks", "الكتل الاحتياطية المستخدمة"); A("Program fail count", "عدد أخطاء البرمجة"); A("Erase fail count", "عدد أخطاء المسح");
+            A("Reported uncorrectable errors", "الأخطاء غير القابلة للتصحيح المُبلَّغ عنها"); A("Command timeout", "انتهاء مهلة الأوامر"); A("Airflow temperature", "حرارة تدفق الهواء"); A("Unsafe shutdown count", "عدد حالات الإيقاف غير الآمن"); A("Load cycle count", "عدد دورات التحميل");
+            A("Hardware ECC recovered", "أخطاء ECC المصحّحة"); A("Reallocation events", "أحداث إعادة التخصيص"); A("Current pending sectors", "القطاعات المعلّقة حاليًا"); A("Offline uncorrectable sectors", "القطاعات غير القابلة للتصحيح"); A("Interface CRC errors", "أخطاء CRC في الواجهة");
+            A("SSD life left", "العمر المتبقي لـ SSD"); A("Media wearout indicator", "مؤشر تآكل الوسيط"); A("Total host writes", "إجمالي الكتابة"); A("Total host reads", "إجمالي القراءة"); P("Vendor attribute {n0}", "خاصية الشركة المصنّعة {0}"); A("Temperature", "الحرارة");
+            // ── My PC page ──
+            A("Your processor, memory, graphics, storage and more  ·  press ADVANCED for deeper details", "المعالج والذاكرة والرسوميات والتخزين وغيرها  ·  اضغط متقدم لمزيد من التفاصيل"); A("EXPORT", "تصدير"); A("Reading your hardware…", "جارٍ قراءة العتاد…");
+            A("READING HARDWARE…", "جارٍ قراءة العتاد…"); A("HARDWARE INFORMATION READY", "معلومات العتاد جاهزة"); A("The hardware information is still loading.", "معلومات العتاد ما زالت قيد التحميل."); P("Could not read the hardware information: {0}", "تعذّرت قراءة معلومات العتاد: {0}"); A("Custom-built PC", "جهاز مُجمَّع حسب الطلب");
+            P("up {n0} d {n1} h {n2} min", "يعمل منذ {0} يوم {1} ساعة {2} دقيقة"); P("up {n0} h {n1} min", "يعمل منذ {0} ساعة {1} دقيقة"); P("{n0} d {n1} h {n2} min", "{0} يوم {1} ساعة {2} دقيقة"); P("{n0} h {n1} min", "{0} ساعة {1} دقيقة");
+            A("PROCESSOR", "المعالج"); A("GRAPHICS", "الرسوميات"); A("MOTHERBOARD & BIOS", "اللوحة الأم وBIOS"); A("DISPLAY", "الشاشة"); A("NETWORK", "الشبكة"); A("OPERATING SYSTEM", "نظام التشغيل"); A("BATTERY", "البطارية");
+            P("{n0} cores  ·  {n1} threads  ·  {2}", "{0} نواة  ·  {1} خيط  ·  {2}"); A("CPU LOAD", "حمل المعالج"); A("IN USE", "قيد الاستخدام"); A("CHARGE", "الشحن"); A("Manufacturer", "الشركة المصنّعة"); A("Architecture", "المعمارية"); A("Cores / threads", "الأنوية / الخيوط");
+            A("Max clock", "أقصى سرعة"); A("Current clock", "السرعة الحالية"); A("Sockets", "المقابس"); A("Socket", "المقبس"); A("L2 cache", "ذاكرة L2"); A("L3 cache", "ذاكرة L3"); A("Virtualization", "المحاكاة الافتراضية"); A("Enabled in firmware", "مفعّلة في البرنامج الثابت");
+            A("Disabled or not supported", "معطّلة أو غير مدعومة"); A("Family / revision", "العائلة / المراجعة"); A("Processor ID", "معرّف المعالج"); A("Description", "الوصف"); A("Thermal zone", "المنطقة الحرارية"); A("Not exposed by this PC", "غير متاح في هذا الجهاز");
+            A("Installed", "المثبّت"); A("Available", "المتاح"); A("Type", "النوع"); A("Speed", "السرعة"); A("Modules", "الوحدات"); A("Max supported", "الحد الأقصى المدعوم"); A("Voltage", "الجهد"); P("{n0} module(s) of {n1} slots", "الوحدات: {0} من {1} فتحات"); P("{n0} module(s)", "الوحدات: {0}"); P("{n0} of {n1} slots", "{0} من {1} فتحات"); P("Slot {n0}", "الفتحة {0}");
+            A("Video memory", "ذاكرة الفيديو"); A("Driver version", "إصدار برنامج التشغيل"); A("Driver date", "تاريخ برنامج التشغيل"); A("Resolution", "الدقة"); A("Status", "الحالة"); A("Shared with system memory", "مشتركة مع ذاكرة النظام"); A("Not active", "غير نشط"); A("Video processor", "معالج الفيديو"); A("DAC type", "نوع DAC");
+            A("Color depth", "عمق الألوان"); A("Driver file", "ملف برنامج التشغيل"); A("Hardware ID", "معرّف العتاد"); P("{n0} video memory", "ذاكرة الفيديو {0}"); P("driver {0}", "برنامج التشغيل {0}");
+            A("System", "النظام"); A("Board", "اللوحة"); A("Board vendor", "مصنّع اللوحة"); A("BIOS vendor", "مصنّع BIOS"); A("BIOS version", "إصدار BIOS"); A("BIOS date", "تاريخ BIOS"); A("Firmware mode", "وضع البرنامج الثابت"); A("Legacy BIOS", "BIOS تقليدي"); A("SMBIOS version", "إصدار SMBIOS"); A("Board version", "إصدار اللوحة"); A("Board serial", "الرقم التسلسلي للوحة"); A("System UUID", "معرّف النظام UUID"); P("BIOS {0}", "BIOS {0}");
+            P("{n0} drive(s)", "الأقراص: {0}"); P("Disk {n0}", "القرص {0}"); P("health {n0}/100", "الصحة {0}/100"); P("Disk {n0} volumes", "أقراص القرص {0} المنطقية"); P("Disk {n0} interface", "واجهة القرص {0}"); P("Disk {n0} firmware", "البرنامج الثابت للقرص {0}");
+            P("{n0} display(s) connected", "الشاشات المتصلة: {0}"); P("Display {n0}", "الشاشة {0}"); P("Display {n0} (primary)", "الشاشة {0} (الرئيسية)"); P("Display {n0} position", "موضع الشاشة {0}"); P("Display {n0} work area", "منطقة عمل الشاشة {0}"); P("{n0} bit", "{0} بت");
+            A("Not connected", "غير متصل"); A("No active network adapter", "لا يوجد محوّل شبكة نشط"); A("connected", "متصل"); A("IPv4 address", "عنوان IPv4"); A("Gateway", "البوابة"); A("DNS", "DNS"); A("MAC address", "عنوان MAC"); A("Link speed", "سرعة الاتصال"); A("IPv6 address", "عنوان IPv6"); A("DNS suffix", "لاحقة DNS"); A("Host name", "اسم المضيف");
+            P("build {0}", "الإنشاء {0}"); A("Computer name", "اسم الحاسوب"); A("User", "المستخدم"); A("Last boot", "آخر إقلاع"); A("Uptime", "مدة التشغيل المتواصل"); A("Edition", "الإصدار"); A("Windows folder", "مجلد ويندوز"); A("Registered owner", "المالك المسجّل"); A("Time zone", "المنطقة الزمنية"); A("System language", "لغة النظام"); A("Domain / workgroup", "النطاق / مجموعة العمل");
+            A("Plugged in", "موصول بالكهرباء"); A("On battery", "على البطارية"); A("Power source", "مصدر الطاقة"); A("AC power", "التيار الكهربائي"); A("Battery", "البطارية"); A("Time remaining", "الوقت المتبقي"); A("Battery health", "صحة البطارية"); P("{n0}% of original capacity", "{0}% من السعة الأصلية"); A("Design capacity", "السعة التصميمية"); A("Full charge capacity", "سعة الشحن الكامل");
+            A("Secure Boot", "الإقلاع الآمن"); A("TPM", "TPM"); A("Antivirus", "مكافح الفيروسات"); A("CPU virtualization", "محاكاة المعالج الافتراضية"); A("Running as administrator", "يعمل بصلاحيات المسؤول"); A("Enabled", "مفعّل"); A("Yes", "نعم"); A("No", "لا"); A("On", "يعمل"); A("Off", "متوقف"); A("Not available", "غير متاح"); A("Not found", "غير موجود");
+            A("Present and enabled", "موجود ومفعّل"); A("Present but disabled", "موجود لكن معطّل"); A("Real-time protection on", "الحماية الفورية تعمل"); A("Real-time protection off", "الحماية الفورية متوقفة"); A("Unknown", "غير معروف"); P("Secure Boot {0}", "الإقلاع الآمن {0}"); P("TPM {0}", "TPM {0}");
+            // ── App errors summary ──
+            A("STABILITY", "الاستقرار"); A("ACTIVITY", "النشاط"); A("CRASHES", "الأعطال"); A("HANGS", "حالات التجمّد"); A("APPS AFFECTED", "التطبيقات المتأثرة"); A("MOST UNSTABLE", "الأقل استقرارًا"); A("LAST EVENT", "آخر حدث"); A("programs", "برامج");
+            A("last 24 hours", "آخر 24 ساعة"); P("last {n0} days", "آخر {0} يومًا"); P("{n0} event(s)", "الأحداث: {0}");
+            A("Your apps are running smoothly - no significant crashes.", "تطبيقاتك تعمل بسلاسة - لا أعطال تُذكر."); A("Mostly stable - a few programs failed now and then.", "مستقر في الغالب - فشلت بعض البرامج بين الحين والآخر.");
+            A("Unstable - several programs keep failing. Follow the advice below.", "غير مستقر - عدة برامج تفشل باستمرار. اتبع النصائح أدناه."); A("Very unstable - repeated crashes. Start with the red items below.", "غير مستقر جدًا - أعطال متكررة. ابدأ بالعناصر الحمراء أدناه.");
+
+        }
+    }
+}

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- .NET Framework 4.8 ships with Windows 10 (1903+) and Windows 11 -> result is ONE small exe, nothing else needed -->
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AssemblyName>CyberDisk</AssemblyName>
+    <RootNamespace>CyberDisk</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>CyberDisk.ico</ApplicationIcon>
+    <Company>Ahmad Qashqesh</Company>
+    <Product>CyberDisk</Product>
+    <AssemblyTitle>CyberDisk</AssemblyTitle>
+    <Description>Disk analyzer, cleaner, app uninstaller and PC booster</Description>
+    <Copyright>Copyright (c) 2026 Ahmad Qashqesh</Copyright>
+    <Version>1.2.0</Version>
+    <FileVersion>1.2.0.0</FileVersion>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.ServiceProcess" />
+  </ItemGroup>
+</Project>

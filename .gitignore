@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+*.suo
+*.log
+
+# Packages and publish output
+publish/
+*.nupkg
+*.zip
+*.exe
+
+# Local settings written by the app
+settings.ini
+layout.ini
