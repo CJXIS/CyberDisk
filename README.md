@@ -24,7 +24,7 @@ By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · 
 Requirements: Windows 10/11 and the .NET SDK (any version that can target .NET Framework 4.8).
 
 ```powershell
-git clone https://github.com/<your-name>/CyberDisk.git
+git clone https://github.com/CJXIS/CyberDisk.git
 cd CyberDisk
 dotnet build -c Release
 ```
