@@ -1,0 +1,36 @@
+﻿name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        run: dotnet build CyberDisk.csproj -c Release
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $name = "CyberDisk-${{ github.ref_name }}"
+          New-Item -ItemType Directory -Force -Path "dist/$name" | Out-Null
+          Copy-Item "bin/Release/net48/*" "dist/$name" -Recurse -Exclude *.pdb
+          Compress-Archive -Path "dist/$name/*" -DestinationPath "$name.zip"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CyberDisk ${{ github.ref_name }}
+          files: CyberDisk-${{ github.ref_name }}.zip
+          generate_release_notes: true
