@@ -34,6 +34,21 @@ namespace CyberDisk
         public string Category = "System";      // Storage, Reliability, Security, System or Performance (drives the score breakdown)
         public string FixId, FixData;           // what the fix is and its argument
         public bool AutoSafe;                   // part of FIX ALL
+        public string IgnoreKey = "";           // stable id used to remember "ignored" across checks
+        bool ignored, queued;
+        public bool Ignored { get { return ignored; } set { ignored = value; Refresh(); } }
+        public bool Queued { get { return queued; } set { queued = value; Refresh(); } }
+        public string IgnoreCaption { get { return ignored ? "RESTORE" : "IGNORE"; } }
+        public Visibility IgnoreVis { get { return (Level > 0 && !fixed_ && !busy) || ignored ? Visibility.Visible : Visibility.Collapsed; } }
+        public double CardOpacity { get { return ignored ? 0.55 : 1.0; } }
+
+        /// <summary>Builds the id that stays the same between checks (numbers in the title are ignored, so "12 days" and "13 days" match).</summary>
+        public void MakeIgnoreKey()
+        {
+            if (!string.IsNullOrEmpty(Key)) { IgnoreKey = "ev|" + Key; return; }
+            string t = System.Text.RegularExpressions.Regex.Replace(Title ?? "", @"[\d.,]+", "#");
+            IgnoreKey = Category + "|" + (FixId != null && FixId != "ack" && !FixId.StartsWith("go:") ? FixId + "|" : "") + t;
+        }
         string caption, title, detail, glyph, info, advice, result;
         Brush tone, resBrush; bool busy, fixed_;
         public string Title { get => title; set => Set(ref title, value); }
@@ -47,12 +62,12 @@ namespace CyberDisk
         public string FixCaption { get => busy ? "FIXING…" : caption; }
         public bool Busy { get => busy; set { busy = value; Refresh(); } }
         public bool IsFixed { get => fixed_; set { fixed_ = value; Refresh(); } }
-        public bool CanRun { get { return FixId != null && !busy && !fixed_; } }
+        public bool CanRun { get { return FixId != null && !busy && !fixed_ && !ignored; } }
         public Visibility FixVis { get { return FixId != null && !fixed_ ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility InfoVis { get { return FixId != null && !fixed_ && !string.IsNullOrEmpty(info) ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility AdviceVis { get { return FixId == null && !string.IsNullOrEmpty(advice) ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility ResultVis { get { return string.IsNullOrEmpty(result) ? Visibility.Collapsed : Visibility.Visible; } }
-        public void Refresh() { foreach (var n in new[] { "FixCaption", "CanRun", "FixVis", "InfoVis", "AdviceVis", "ResultVis" }) Raise(n); }
+        public void Refresh() { foreach (var n in new[] { "FixCaption", "CanRun", "FixVis", "InfoVis", "AdviceVis", "ResultVis", "IgnoreCaption", "IgnoreVis", "CardOpacity" }) Raise(n); }
 
         public Finding WithFix(string id, string cap, string infoText, string data = null, bool auto = false)
         { FixId = id; caption = cap; info = infoText; FixData = data; AutoSafe = auto; return this; }
@@ -66,6 +81,7 @@ namespace CyberDisk
             string c = level == 0 ? "#3DDC97" : level == 1 ? "#FFB84D" : level == 2 ? "#FF6B8A" : "#5B9BFF";
             var b = new SolidColorBrush(Ui.Col(c)); b.Freeze();
             Tone = b; Glyph = level == 0 ? "✓" : level == 1 ? "!" : level == 2 ? "✖" : "i";
+            Refresh();
         }
     }
 }

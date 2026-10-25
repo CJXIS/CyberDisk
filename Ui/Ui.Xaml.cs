@@ -230,7 +230,24 @@ namespace CyberDisk
     <DataTrigger Binding="{Binding Badge}" Value=""><Setter TargetName="pill" Property="Visibility" Value="Collapsed"/></DataTrigger>
    </DataTemplate.Triggers>
   </DataTemplate>
-   <Style x:Key="Sel" TargetType="TextBox">
+   <Style x:Key="Switch" TargetType="CheckBox">
+   <Setter Property="Cursor" Value="Hand"/><Setter Property="VerticalAlignment" Value="Center"/>
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
+    <Grid Width="44" Height="24" Background="Transparent" SnapsToDevicePixels="True">
+     <Border x:Name="track" CornerRadius="12" Background="#1A2740" BorderBrush="#2A3B5C" BorderThickness="1"/>
+     <Ellipse x:Name="thumb" Width="16" Height="16" Fill="#8195B0" HorizontalAlignment="Left" Margin="4,0,0,0"/>
+    </Grid>
+    <ControlTemplate.Triggers>
+     <Trigger Property="IsChecked" Value="True">
+      <Setter TargetName="track" Property="Background" Value="#1C7A57"/><Setter TargetName="track" Property="BorderBrush" Value="#3DDC97"/>
+      <Setter TargetName="thumb" Property="Fill" Value="White"/>
+      <Setter TargetName="thumb" Property="HorizontalAlignment" Value="Right"/><Setter TargetName="thumb" Property="Margin" Value="0,0,4,0"/>
+     </Trigger>
+     <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="track" Property="Opacity" Value="0.85"/></Trigger>
+     <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
+    </ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+  </Style>
+  <Style x:Key="Sel" TargetType="TextBox">
    <Setter Property="IsReadOnly" Value="True"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Background" Value="Transparent"/>
    <Setter Property="Padding" Value="0"/><Setter Property="Foreground" Value="#E6EEFA"/><Setter Property="TextWrapping" Value="Wrap"/>
    <Setter Property="SelectionBrush" Value="#3DD6F5"/><Setter Property="SelectionOpacity" Value="0.4"/><Setter Property="Cursor" Value="IBeam"/>
@@ -306,7 +323,7 @@ namespace CyberDisk
     <Grid x:Name="vDrives" Margin="28,22,12,0">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel Margin="0,0,16,18">
-      <Button x:Name="bRefDrives" DockPanel.Dock="Right" Content="⟳ REFRESH" Style="{StaticResource Neon}" VerticalAlignment="Center" Margin="0"/>
+      <Button x:Name="bRefDrives" DockPanel.Dock="Right"  Style="{StaticResource Neon}" VerticalAlignment="Center" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="REFRESH"/></StackPanel></Button>
       <StackPanel>
        <TextBlock Text="DRIVE MATRIX" FontFamily="Segoe UI" FontSize="24" FontWeight="Bold" Foreground="#3DD6F5"/>
        <TextBlock Text="Live capacity telemetry  ·  click a drive to deep-scan it" Foreground="#8195B0" Margin="0,2,0,0"/>
@@ -370,27 +387,27 @@ namespace CyberDisk
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-       <Button x:Name="bUp" Content="▲ UP" Style="{StaticResource Neon}"/>
-       <Button x:Name="bRescan" Content="⟳ RESCAN" Style="{StaticResource Neon}"/>
-       <Button x:Name="bOpen" Content="⌕ EXPLORER" Style="{StaticResource Neon}" Margin="0"/>
+       <Button x:Name="bUp"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M18 15l-6-6-6 6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="UP"/></StackPanel></Button>
+       <Button x:Name="bRescan"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESCAN"/></StackPanel></Button>
+       <Button x:Name="bOpen"  Style="{StaticResource Neon}" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="EXPLORER"/></StackPanel></Button>
       </StackPanel>
-      <Button x:Name="bBack" Content="◀ DRIVES" Style="{StaticResource Neon}"/>
+      <Button x:Name="bBack"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M15 18l-6-6 6-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="DRIVES"/></StackPanel></Button>
       <TextBlock x:Name="txtCrumb" FontFamily="Segoe UI" FontSize="15" Foreground="#3DD6F5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="6,0,12,0"/>
      </DockPanel>
      <DockPanel Grid.Row="1" Margin="2,10,0,10">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-       <Button x:Name="bCopy" Content="⧉ COPY" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Copy selected (Ctrl+C)"/>
-       <Button x:Name="bCut" Content="✂ CUT" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Cut selected (Ctrl+X)"/>
-       <Button x:Name="bPaste" Content="▾ PASTE" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#3DDC97" BorderBrush="#3DDC97" ToolTip="Paste here (Ctrl+V)"/>
-       <Button x:Name="bNewFolder" Content="＋ FOLDER" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Create a new folder here"/>
-       <Button x:Name="bDelete" Content="✖ DELETE" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Margin="0" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Delete selected (Del)  ·  Shift+Del = permanent"/>
+       <Button x:Name="bCopy"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Copy selected (Ctrl+C)"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M9 9h11a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z M5 15H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="COPY"/></StackPanel></Button>
+       <Button x:Name="bCut"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Cut selected (Ctrl+X)"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M20 4L8.12 15.88 M14.47 14.48L20 20 M8.12 8.12L12 12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="CUT"/></StackPanel></Button>
+       <Button x:Name="bPaste"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#3DDC97" BorderBrush="#3DDC97" ToolTip="Paste here (Ctrl+V)"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="PASTE"/></StackPanel></Button>
+       <Button x:Name="bNewFolder"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Create a new folder here"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 11v6 M9 14h6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="FOLDER"/></StackPanel></Button>
+       <Button x:Name="bDelete"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Margin="0" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Delete selected (Del)  ·  Shift+Del = permanent"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="DELETE"/></StackPanel></Button>
       </StackPanel>
       <TextBlock x:Name="txtInfo" Foreground="#8195B0" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
      </DockPanel>
      <Grid Grid.Row="2" Margin="0,0,0,12">
       <Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="320"/><ColumnDefinition Width="10"/><ColumnDefinition x:Name="colBrowsePane" Width="350" MinWidth="260" MaxWidth="700"/></Grid.ColumnDefinitions>
       <Border Style="{StaticResource Panel}">
-       <DataGrid x:Name="gs" SelectionMode="Extended">
+       <DataGrid x:Name="gs" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended">
        <DataGrid.ContextMenu><ContextMenu>
         <MenuItem x:Name="miOpen" Header="Open" Tag="open"/>
         <MenuItem x:Name="miExplorer" Header="Show in Windows Explorer" Tag="explorer"/>
@@ -408,12 +425,12 @@ namespace CyberDisk
           <DockPanel><Image Source="{Binding Icon}" Width="18" Height="18" Margin="0,0,10,0" DockPanel.Dock="Left" RenderOptions.BitmapScalingMode="HighQuality"/>
            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/></DockPanel>
          </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
-         <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="130"/>
+         <DataGridTextColumn Header="TYPE" Binding="{Binding Kind}" Width="120"/>
          <DataGridTextColumn Header="DETAILS" Binding="{Binding Meta}" Width="130"/>
-         <DataGridTextColumn Header="SIZE" Binding="{Binding SizeText}" SortMemberPath="SizeBytes" Width="90"/>
-         <DataGridTemplateColumn Header="SHARE" Width="140" SortMemberPath="Percent"><DataGridTemplateColumn.CellTemplate><DataTemplate>
-          <Grid><ProgressBar Value="{Binding Percent}" Maximum="100" Height="14"/>
-           <TextBlock Text="{Binding PctText}" HorizontalAlignment="Center" FontSize="10" FontFamily="Segoe UI" Foreground="White"/></Grid>
+         <DataGridTextColumn Header="SIZE" Binding="{Binding SizeText}" SortMemberPath="SizeBytes" Width="86"/>
+         <DataGridTemplateColumn Header="SHARE" Width="150" SortMemberPath="Percent"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+          <Grid Margin="0,0,6,0"><ProgressBar Value="{Binding Percent}" Maximum="100" Height="12" Foreground="{Binding PctBrush}" Background="#14213A" BorderThickness="0"/>
+           <TextBlock Text="{Binding PctText}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="9.5" FontFamily="Segoe UI" FontWeight="SemiBold" Foreground="White"/></Grid>
          </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
         </DataGrid.Columns>
        </DataGrid>
@@ -423,27 +440,61 @@ namespace CyberDisk
        <Grid>
         <TextBlock x:Name="pvEmpty" Text="Select a folder or file&#x0a;to preview what's inside" TextAlignment="Center" Foreground="#8195B0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <DockPanel x:Name="pvBody" Visibility="Collapsed">
-         <StackPanel DockPanel.Dock="Top">
-          <DockPanel>
-           <Image x:Name="pvIcon" Width="40" Height="40" DockPanel.Dock="Left" Margin="0,0,12,0" RenderOptions.BitmapScalingMode="HighQuality"/>
-           <StackPanel VerticalAlignment="Center">
-            <TextBlock x:Name="pvName" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-            <TextBlock x:Name="pvKind" Foreground="#8195B0" FontSize="11" TextTrimming="CharacterEllipsis"/>
-           </StackPanel>
-          </DockPanel>
-          <Grid Margin="0,14,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="86"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-           <TextBlock x:Name="pvInfoL" FontSize="11" Foreground="#8195B0" LineHeight="20" LineStackingStrategy="BlockLineHeight"/>
-           <TextBlock x:Name="pvInfo" Grid.Column="1" FontSize="12.5" Foreground="#C7D6EE" LineHeight="20" LineStackingStrategy="BlockLineHeight"/></Grid>
-          <TextBlock x:Name="pvPath" Foreground="#8195B0" FontSize="11" TextWrapping="Wrap" Margin="0,8,0,0"/>
-          <Image x:Name="pvImg" MaxHeight="220" Stretch="Uniform" Margin="0,12,0,0" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality"/>
-          <TextBlock x:Name="pvListHdr" Foreground="#3DDC97" FontFamily="Segoe UI" FontSize="11" Margin="0,16,0,6"/>
+         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
+          <Button x:Name="bPvOpen" Style="{StaticResource Neon}" Padding="12,5" FontSize="10.5" Margin="0,0,8,0"><TextBlock Text="OPEN"/></Button>
+          <Button x:Name="bPvExplorer" Style="{StaticResource Neon}" Padding="12,5" FontSize="10.5" Margin="0,0,8,0"><TextBlock Text="SHOW IN EXPLORER"/></Button>
+          <Button x:Name="bPvCopy" Style="{StaticResource Neon}" Padding="12,5" FontSize="10.5" Margin="0"><TextBlock Text="COPY PATH"/></Button>
          </StackPanel>
-         <ListBox x:Name="pvList"><ListBox.ItemTemplate><DataTemplate>
-          <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-           <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,8,0"/>
-           <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontSize="12"/>
-           <TextBlock Grid.Column="2" Text="{Binding SizeText}" Foreground="#3DD6F5" FontFamily="Segoe UI" FontSize="11" Margin="8,0,0,0"/></Grid>
-         </DataTemplate></ListBox.ItemTemplate></ListBox>
+         <ScrollViewer x:Name="svPv" VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="0,0,8,0">
+           <Border CornerRadius="14" Padding="14,12" BorderBrush="#21304A" BorderThickness="1">
+            <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#13213B" Offset="0"/><GradientStop Color="#0D182B" Offset="1"/></LinearGradientBrush></Border.Background>
+            <DockPanel>
+             <Image x:Name="pvIcon" Width="44" Height="44" DockPanel.Dock="Left" Margin="0,0,14,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+             <StackPanel VerticalAlignment="Center">
+              <TextBlock x:Name="pvName" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxHeight="42"/>
+              <TextBlock x:Name="pvKind" Foreground="#8195B0" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>
+              <TextBlock x:Name="pvBig" FontSize="20" FontWeight="Bold" Foreground="#3DD6F5" Margin="0,6,0,0"/>
+             </StackPanel>
+            </DockPanel>
+           </Border>
+           <ItemsControl x:Name="pvRows" Margin="0,12,0,0"><ItemsControl.ItemTemplate><DataTemplate>
+            <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="86"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+             <TextBlock Text="{Binding K}" Foreground="#8195B0" FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Top" Margin="0,1,0,0"/>
+             <TextBox Grid.Column="1" Style="{StaticResource Sel}" Text="{Binding V, Mode=OneWay}" Foreground="#E6EEFA" FontSize="12" VerticalAlignment="Top"/>
+            </Grid>
+           </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+           <TextBox x:Name="pvPath" Style="{StaticResource Sel}" Foreground="#6B7E99" FontSize="10.5" Margin="0,8,0,0"/>
+           <Image x:Name="pvImg" MaxHeight="220" Stretch="Uniform" Margin="0,12,0,0" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality"/>
+           <Border x:Name="pvTextBox" Visibility="Collapsed" CornerRadius="10" Background="#08101D" BorderBrush="#1C2B44" BorderThickness="1" Padding="10,8" Margin="0,12,0,0">
+            <StackPanel>
+             <TextBlock Text="PREVIEW" FontSize="10" FontWeight="Bold" Foreground="#8B7CFF" Margin="0,0,0,6"/>
+             <TextBox x:Name="pvText" Style="{StaticResource Sel}" FontFamily="Consolas" FontSize="11" Foreground="#C7D6EE" TextWrapping="NoWrap" MaxHeight="230"/>
+            </StackPanel>
+           </Border>
+           <TextBlock x:Name="pvTypesHdr" Text="WHAT TAKES THE SPACE" FontSize="10" FontWeight="Bold" Foreground="#FFB84D" Margin="0,16,0,6" Visibility="Collapsed"/>
+           <ItemsControl x:Name="pvTypes" Visibility="Collapsed"><ItemsControl.ItemTemplate><DataTemplate>
+            <Grid Margin="0,3">
+             <Grid.ColumnDefinitions><ColumnDefinition Width="92"/><ColumnDefinition Width="*"/><ColumnDefinition Width="64"/></Grid.ColumnDefinitions>
+             <TextBlock Text="{Binding Name}" FontSize="11.5" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+             <ProgressBar Grid.Column="1" Value="{Binding Percent}" Maximum="100" Height="6" Foreground="{Binding PctBrush}" Background="#14213A" BorderThickness="0" Margin="6,0"/>
+             <TextBlock Grid.Column="2" Text="{Binding SizeText}" FontSize="11" Foreground="#3DD6F5" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </Grid>
+           </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+           <TextBlock x:Name="pvListHdr" Foreground="#3DDC97" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
+           <ItemsControl x:Name="pvList"><ItemsControl.ItemTemplate><DataTemplate>
+            <Grid Margin="0,3">
+             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+             <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+             <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontSize="12"/>
+              <ProgressBar Value="{Binding Percent}" Maximum="100" Height="3" Foreground="{Binding PctBrush}" Background="#14213A" BorderThickness="0" Margin="0,3,0,0"/>
+             </StackPanel>
+             <TextBlock Grid.Column="2" Text="{Binding SizeText}" Foreground="#3DD6F5" FontFamily="Segoe UI" FontSize="11" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            </Grid>
+           </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+          </StackPanel>
+         </ScrollViewer>
         </DockPanel>
        </Grid>
       </Border>
@@ -465,9 +516,9 @@ namespace CyberDisk
         <DockPanel Margin="0,0,8,10">
          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
           <TextBlock x:Name="txtSelCount" Foreground="#8195B0" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-          <Button x:Name="bSelSafe" Content="✓ SELECT SAFE" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#3DDC97" BorderBrush="#3DDC97" ToolTip="Tick only the items marked SAFE and untick the rest (recommended)"/>
-          <Button x:Name="bSelNone" Content="✕ NONE" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Clear the selection - untick everything"/>
-          <Button x:Name="bSelAll" Content="✱ ALL" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Margin="0" Foreground="#FFB84D" BorderBrush="#FFB84D" ToolTip="Tick everything, including advanced items - review before cleaning"/>
+          <Button x:Name="bSelSafe"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#3DDC97" BorderBrush="#3DDC97" ToolTip="Tick only the items marked SAFE and untick the rest (recommended)"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M20 6L9 17l-5-5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="SELECT SAFE"/></StackPanel></Button>
+          <Button x:Name="bSelNone"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Clear the selection - untick everything"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M18 6L6 18 M6 6l12 12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="NONE"/></StackPanel></Button>
+          <Button x:Name="bSelAll"  Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Margin="0" Foreground="#FFB84D" BorderBrush="#FFB84D" ToolTip="Tick everything, including advanced items - review before cleaning"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M4 4h6.5v6.5H4z M13.5 4H20v6.5h-6.5z M4 13.5h6.5V20H4z M13.5 13.5H20V20h-6.5z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ALL"/></StackPanel></Button>
          </StackPanel>
          <StackPanel Orientation="Horizontal">
           <Button x:Name="bTabJunk" Content="JUNK &amp; SYSTEM" Style="{StaticResource Neon}" Padding="14,6"/>
@@ -569,8 +620,8 @@ namespace CyberDisk
          <TextBlock x:Name="txtCleanPct" Grid.Column="1" Text="0%" FontSize="12" FontWeight="SemiBold" Foreground="#C7D6EE" Margin="10,0,0,0" VerticalAlignment="Center" MinWidth="34" TextAlignment="Right"/>
         </Grid>
         <TextBlock x:Name="txtFreed" Text=" " FontSize="12" Foreground="#3DDC97" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-        <Button x:Name="bClean" Style="{StaticResource Primary}" Content="✦  CLEAN UP" Margin="0,16,0,0" IsEnabled="False"/>
-        <Button x:Name="bAnalyze" Style="{StaticResource Neon}" Content="⌕  ANALYZE" Margin="0,10,0,0" Padding="14,10"/>
+        <Button x:Name="bClean" Style="{StaticResource Primary}"  Margin="0,16,0,0" IsEnabled="False"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z M5 3l.5 1.3L6.8 4.8 5.5 5.3 5 6.6 4.5 5.3 3.2 4.8l1.3-.5z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="CLEAN UP"/></StackPanel></Button>
+        <Button x:Name="bAnalyze" Style="{StaticResource Neon}"  Margin="0,10,0,0" Padding="14,10"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.35-4.35" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ANALYZE"/></StackPanel></Button>
        </StackPanel>
        </ScrollViewer>
       </Border>
@@ -607,7 +658,7 @@ namespace CyberDisk
        <StackPanel Grid.Column="2" VerticalAlignment="Center">
         <TextBlock x:Name="boostBig" Text="Ready to boost" FontSize="26" FontWeight="Bold" Foreground="#E6EEFA"/>
         <TextBlock x:Name="boostMsg" Text="BOOST asks Windows to release idle memory held by background programs. It is safe and nothing is closed." FontSize="12.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,4,0,14" MaxWidth="460" HorizontalAlignment="Left"/>
-        <Button x:Name="bBoost" Style="{StaticResource Primary}" Content="⚡  BOOST NOW" HorizontalAlignment="Left" Width="220"/>
+        <Button x:Name="bBoost" Style="{StaticResource Primary}"  HorizontalAlignment="Left" Width="220"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M13 2L4 14h7l-1 8 9-12h-7l1-8z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="BOOST NOW"/></StackPanel></Button>
        </StackPanel>
       </Grid>
      </Border>
@@ -636,23 +687,43 @@ namespace CyberDisk
       </Border>
       <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="14,12,8,8">
        <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <StackPanel Margin="2,0,8,10">
-         <TextBlock x:Name="txtStartupHead" Text="STARTUP APPS" FontSize="12" FontWeight="Bold" Foreground="#8195B0"/>
-         <TextBlock Text="Untick an app so it no longer starts with Windows. You can turn it back on any time - takes effect at the next restart." FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,4,0,0"/>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <StackPanel Margin="2,0,8,8">
+         <DockPanel>
+          <Border DockPanel.Dock="Right" CornerRadius="9" Background="#12382B" Padding="10,3" VerticalAlignment="Center"><TextBlock x:Name="txtStartupCount" FontSize="11" FontWeight="Bold" Foreground="#3DDC97"/></Border>
+          <TextBlock x:Name="txtStartupHead" Text="STARTUP APPS" FontSize="12" FontWeight="Bold" Foreground="#C7D6EE" VerticalAlignment="Center"/>
+         </DockPanel>
+         <TextBlock Text="Turn off what you do not need so Windows starts faster. You can turn any app back on at any time - changes apply at the next restart." FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,5,0,0"/>
         </StackPanel>
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-         <ItemsControl x:Name="itemsStartup"><ItemsControl.ItemTemplate><DataTemplate>
-          <Border CornerRadius="10" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,9" Margin="0,0,8,8" ToolTip="{Binding Command}">
+        <StackPanel Grid.Row="1" Margin="2,0,8,10">
+         <TextBox x:Name="txtStartupSearch" ToolTip="Search startup apps"/>
+         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+          <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
+          <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
+          <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
+          <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5" Margin="8,0,0,0" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><TextBlock Text="TURN ALL OFF"/></Button>
+         </StackPanel>
+        </StackPanel>
+        <ScrollViewer x:Name="svStartup" Grid.Row="2" VerticalScrollBarVisibility="Auto">
+         <StackPanel>
+         <ItemsControl x:Name="itemsStartup" VirtualizingPanel.IsVirtualizing="True"><ItemsControl.ItemTemplate><DataTemplate>
+          <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" ToolTip="{Binding Command}" Opacity="{Binding Dim}">
            <DockPanel>
-            <CheckBox DockPanel.Dock="Left" IsChecked="{Binding Enabled, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,12,0"/>
-            <StackPanel>
-             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-             <TextBlock Text="{Binding Source}" FontSize="11" Foreground="#8195B0"/>
+            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="12,0,0,0"/>
+            <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+            <StackPanel VerticalAlignment="Center">
+             <DockPanel>
+              <Border DockPanel.Dock="Right" CornerRadius="5" Background="#1A2740" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding Badge}" FontSize="8.5" FontWeight="Bold" Foreground="#A9BAD3"/></Border>
+              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+             </DockPanel>
+             <TextBlock Text="{Binding Publisher}" FontSize="11" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
+             <TextBlock Text="{Binding StateText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StateBrush}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
            </DockPanel>
           </Border>
          </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+         <TextBlock x:Name="txtStartupEmpty" Visibility="Collapsed" Text="No startup app matches your search." Foreground="#8195B0" FontSize="12" Margin="4,10,0,0"/>
+         </StackPanel>
         </ScrollViewer>
        </Grid>
       </Border>
@@ -695,14 +766,24 @@ namespace CyberDisk
           </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
           <TextBlock x:Name="txtHealthMeta" FontSize="10.5" Foreground="#6B7E99" TextAlignment="Center" Margin="0,10,0,0"/>
           <Button x:Name="bHealth" Style="{StaticResource Primary}" Content="✚  RUN CHECK" Margin="0,14,0,0"/>
-          <Button x:Name="bFixAll" Style="{StaticResource Neon}" Content="⚙  FIX ALL" Margin="0,10,0,0" Padding="14,9" Visibility="Collapsed" Foreground="#3DDC97" BorderBrush="#3DDC97"/>
+          <Button x:Name="bFixAll" Style="{StaticResource Neon}" Content="FIX ALL" Margin="0,10,0,0" Padding="14,9" Visibility="Collapsed" Foreground="#3DDC97" BorderBrush="#3DDC97"/>
+          <Border x:Name="panelFix" Visibility="Collapsed" CornerRadius="12" Background="#0F1B2E" BorderBrush="#2B6B52" BorderThickness="1" Padding="14,12" Margin="0,12,0,0">
+           <StackPanel>
+            <TextBlock x:Name="txtFixTitle" Text="FIXING" FontSize="10" FontWeight="Bold" Foreground="#3DDC97"/>
+            <TextBlock x:Name="txtFixStep" FontSize="12" Foreground="#E6EEFA" TextWrapping="Wrap" Margin="0,5,0,0"/>
+            <ProgressBar x:Name="barFix" Height="6" Maximum="100" Foreground="#3DDC97" Background="#18263B" BorderThickness="0" Margin="0,10,0,0"/>
+            <Button x:Name="bFixStop" Style="{StaticResource Neon}" Content="STOP" Padding="12,5" FontSize="10.5" Margin="0,12,0,0" Foreground="#FF6B8A" BorderBrush="#FF6B8A"/>
+           </StackPanel>
+          </Border>
+          <TextBlock x:Name="txtIgnored" Visibility="Collapsed" FontSize="11" Foreground="#6B7E99" TextAlignment="Center" TextWrapping="Wrap" Margin="0,14,0,0"/>
+          <Button x:Name="bShowIgnored" Visibility="Collapsed" Style="{StaticResource Neon}" Content="SHOW IGNORED" Padding="12,5" FontSize="10.5" Margin="0,6,0,0"/>
          </StackPanel>
         </ScrollViewer>
        </Border>
       <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="14,14,8,6">
        <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl x:Name="itemsHealth"><ItemsControl.ItemTemplate><DataTemplate>
-         <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="14,12" Margin="0,0,8,10">
+         <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="14,12" Margin="0,0,8,10" Opacity="{Binding CardOpacity}">
           <DockPanel>
            <Grid DockPanel.Dock="Left" Width="34" Height="34" Margin="0,0,14,0" VerticalAlignment="Top">
             <Border CornerRadius="17" Background="{Binding Tone}" Opacity="0.2"/>
@@ -718,8 +799,9 @@ namespace CyberDisk
              </StackPanel>
             </Border>
             <TextBlock Text="{Binding Advice}" Visibility="{Binding AdviceVis}" FontSize="11.5" Foreground="#FFB84D" TextWrapping="Wrap" Margin="0,8,0,0"/>
-            <StackPanel Visibility="{Binding FixVis}" Orientation="Horizontal" Margin="0,10,0,0">
-             <Button Tag="fix" Content="{Binding FixCaption}" IsEnabled="{Binding CanRun}" Style="{StaticResource Neon}" Padding="16,6" Margin="0"/>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+             <Button Tag="fix" Visibility="{Binding FixVis}" Content="{Binding FixCaption}" IsEnabled="{Binding CanRun}" Style="{StaticResource Neon}" Padding="16,6" Margin="0,0,8,0"/>
+             <Button Tag="ignore" Visibility="{Binding IgnoreVis}" Content="{Binding IgnoreCaption}" Style="{StaticResource Neon}" Padding="14,6" Margin="0" Foreground="#8195B0" BorderBrush="#2A3B5C" ToolTip="Hide this finding and leave it out of the score. You can restore it later."/>
             </StackPanel>
             <TextBlock Text="{Binding Result}" Visibility="{Binding ResultVis}" Foreground="{Binding ResultBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"/>
            </StackPanel>
@@ -736,8 +818,10 @@ namespace CyberDisk
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-       <Button x:Name="bErrExport" Content="⇩ EXPORT REPORT" Style="{StaticResource Neon}"/>
-       <Button x:Name="bErrScan" Content="⟳ SCAN NOW" Style="{StaticResource Neon}" Margin="0"/>
+       <Button x:Name="bErrRestore" Content="RESTORE REMOVED" Style="{StaticResource Neon}" Visibility="Collapsed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
+       <Button x:Name="bErrClear" Content="CLEAR LIST" Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Remove every app from this list. They come back only if they crash again."/>
+       <Button x:Name="bErrExport"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M12 3v12 M7 10l5 5 5-5 M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="EXPORT REPORT"/></StackPanel></Button>
+       <Button x:Name="bErrScan"  Style="{StaticResource Neon}" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="SCAN NOW"/></StackPanel></Button>
       </StackPanel>
       <StackPanel>
        <TextBlock Text="APP ERRORS" FontSize="24" FontWeight="Bold" Foreground="#FFB84D"/>
@@ -836,6 +920,7 @@ namespace CyberDisk
             <Button Tag="app" Content="FIND IN APPS" Style="{StaticResource Neon}" Padding="14,6"/>
             <Button Tag="folder" Visibility="{Binding FolderVis}" Content="OPEN FOLDER" Style="{StaticResource Neon}" Padding="14,6"/>
             <Button Tag="toggle" Content="{Binding OpenCaption}" Style="{StaticResource Neon}" Padding="14,6"/>
+            <Button Tag="dismiss" Content="REMOVE FROM LIST" Style="{StaticResource Neon}" Padding="14,6" Foreground="#FF6B8A" BorderBrush="#FF6B8A" ToolTip="Remove this app's errors from the list. They come back only if it crashes again."/>
            </WrapPanel>
            <TextBlock Text="{Binding Details}" Visibility="{Binding DetailsVis}" FontFamily="Consolas" FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,6,0,0"/>
           </StackPanel>
@@ -912,10 +997,10 @@ namespace CyberDisk
         <TextBlock Text="DATA &amp; RESET" FontSize="11" FontWeight="Bold" Foreground="#3DD6F5"/>
         <TextBlock Text="The fix log records every repair CyberDisk made to your system." Foreground="#8195B0" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,12"/>
         <WrapPanel>
-         <Button x:Name="bOpenData" Content="▣ OPEN SETTINGS FOLDER" Style="{StaticResource Neon}"/>
-         <Button x:Name="bOpenLog" Content="☰ OPEN FIX LOG" Style="{StaticResource Neon}"/>
-         <Button x:Name="bSetResetLayout" Content="⟲ RESET LAYOUT" Style="{StaticResource Neon}"/>
-         <Button x:Name="bResetSettings" Content="✖ RESET ALL SETTINGS" Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A"/>
+         <Button x:Name="bOpenData"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN SETTINGS FOLDER"/></StackPanel></Button>
+         <Button x:Name="bOpenLog"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN FIX LOG"/></StackPanel></Button>
+         <Button x:Name="bSetResetLayout"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET LAYOUT"/></StackPanel></Button>
+         <Button x:Name="bResetSettings"  Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M18 6L6 18 M6 6l12 12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET ALL SETTINGS"/></StackPanel></Button>
         </WrapPanel>
        </StackPanel></Border>
 
@@ -928,7 +1013,7 @@ namespace CyberDisk
         <TextBlock Text="Ahmad Qashqesh" FontSize="17" FontWeight="SemiBold" Foreground="#F2F7FF" Margin="0,3,0,0"/>
         <TextBlock Text="Questions, ideas and bug reports are always welcome." Foreground="#8195B0" FontSize="12" Margin="0,2,0,10"/>
         <WrapPanel>
-         <Button x:Name="bMail" Content="✉  ahmadrqash@gmail.com" Style="{StaticResource Neon}" Padding="16,8"/>
+         <Button x:Name="bMail"  Style="{StaticResource Neon}" Padding="16,8"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M22 6l-10 7L2 6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ahmadrqash@gmail.com"/></StackPanel></Button>
          <Button x:Name="bLinkedIn" Content="in  linkedin.com/in/ahmadrq" Style="{StaticResource Neon}" Padding="16,8"/>
         </WrapPanel>
        </StackPanel></Border>
@@ -1183,7 +1268,7 @@ namespace CyberDisk
      <DockPanel>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
        <TextBlock x:Name="txtCount" Foreground="#8195B0" FontFamily="Segoe UI" VerticalAlignment="Center" Margin="0,0,14,0"/>
-       <Button x:Name="bRef" Content="⟳ REFRESH" Style="{StaticResource Neon}" Margin="0"/>
+       <Button x:Name="bRef"  Style="{StaticResource Neon}" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="REFRESH"/></StackPanel></Button>
       </StackPanel>
       <StackPanel>
        <TextBlock Text="APP CONTROL" FontFamily="Segoe UI" FontSize="24" FontWeight="Bold" Foreground="#8B7CFF"/>
@@ -1202,7 +1287,7 @@ namespace CyberDisk
      <Grid Grid.Row="2" Margin="0,0,0,12">
       <Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="320"/><ColumnDefinition Width="10"/><ColumnDefinition x:Name="colAppsPane" Width="320" MinWidth="260" MaxWidth="600"/></Grid.ColumnDefinitions>
       <Border Style="{StaticResource Panel}">
-       <DataGrid x:Name="ga">
+       <DataGrid x:Name="ga" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True">
         <DataGrid.Columns>
          <DataGridTemplateColumn Header="NAME" Width="*" SortMemberPath="Name"><DataGridTemplateColumn.CellTemplate><DataTemplate>
           <DockPanel><Border DockPanel.Dock="Left" Width="26" Height="26" CornerRadius="6" Background="#1AFFFFFF" Margin="0,0,10,0">
@@ -1221,7 +1306,7 @@ namespace CyberDisk
        <Grid>
         <TextBlock x:Name="apEmpty" Text="Select an app to see details" Foreground="#8195B0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <DockPanel x:Name="apBody" Visibility="Collapsed">
-         <Button x:Name="bUn" DockPanel.Dock="Bottom" Content="☠ UNINSTALL" Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A" Margin="0,12,0,0"/>
+         <Button x:Name="bUn" DockPanel.Dock="Bottom"  Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A" Margin="0,12,0,0"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="UNINSTALL"/></StackPanel></Button>
          <CheckBox x:Name="chkLeft" DockPanel.Dock="Bottom" IsChecked="True" Margin="0,14,0,0"><TextBlock Text="Also remove leftovers (files, registry, startup entries, crash dumps) - you review the list first" TextWrapping="Wrap" FontSize="12" Foreground="#C7D6EE"/></CheckBox>
          <ScrollViewer x:Name="svApp" VerticalScrollBarVisibility="Auto">
           <StackPanel Margin="0,0,8,0">
@@ -1269,13 +1354,13 @@ namespace CyberDisk
       <LinearGradientBrush.RelativeTransform><TranslateTransform x:Name="gradC"/></LinearGradientBrush.RelativeTransform>
       <GradientStop Color="#3DD6F5" Offset="0"/><GradientStop Color="#8B7CFF" Offset="0.25"/><GradientStop Color="#FF6B8A" Offset="0.5"/><GradientStop Color="#FFB84D" Offset="0.75"/><GradientStop Color="#3DD6F5" Offset="1"/>
      </LinearGradientBrush></TextBlock.Foreground></TextBlock>
-    <Button x:Name="bResetLayout" DockPanel.Dock="Right" Content="⟲ RESET LAYOUT" Style="{StaticResource Neon}" FontSize="11" Padding="10,0" Margin="0,3,14,3" ToolTip="Reset zoom, menu order, drive order and pane sizes"/>
+    <Button x:Name="bResetLayout" DockPanel.Dock="Right"  Style="{StaticResource Neon}" FontSize="11" Padding="10,0" Margin="0,3,14,3" ToolTip="Reset zoom, menu order, drive order and pane sizes"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET LAYOUT"/></StackPanel></Button>
     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,3,14,3" VerticalAlignment="Center">
      <Button x:Name="bZoomOut" Content="−" Style="{StaticResource Neon}" FontSize="12" Padding="9,0" Margin="0,0,4,0" ToolTip="Zoom out (Ctrl + wheel / Ctrl -)"/>
      <TextBlock x:Name="txtZoom" Text="100%" Foreground="#C7D6EE" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center" MinWidth="38" TextAlignment="Center"/>
      <Button x:Name="bZoomIn" Content="+" Style="{StaticResource Neon}" FontSize="12" Padding="9,0" Margin="4,0,0,0" ToolTip="Zoom in (Ctrl + wheel / Ctrl +)"/>
     </StackPanel>
-    <Button x:Name="bStopAll" DockPanel.Dock="Right" Content="■ STOP SCAN" Style="{StaticResource Neon}" Padding="10,0" Margin="0,3,12,3" Foreground="#FF6B8A" BorderBrush="#FF6B8A" Visibility="Collapsed"/>
+    <Button x:Name="bStopAll" DockPanel.Dock="Right"  Style="{StaticResource Neon}" Padding="10,0" Margin="0,3,12,3" Foreground="#FF6B8A" BorderBrush="#FF6B8A" Visibility="Collapsed"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M7 7h10v10H7z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="STOP SCAN"/></StackPanel></Button>
     <TextBlock x:Name="txtStatus" Foreground="#3DDC97" FontFamily="Segoe UI" FontSize="11" VerticalAlignment="Center" Margin="16,0" Text="READY"/>
    </DockPanel>
   </Border>

@@ -36,7 +36,7 @@ namespace CyberDisk
             fx = F<Canvas>("fx"); itemsClean = F<ItemsControl>("itemsClean"); itemsBrowsers = F<ItemsControl>("itemsBrowsers");
             svJunk = F<FrameworkElement>("svJunk"); svBrowsers = F<FrameworkElement>("svBrowsers");
             txtReclaim = F<TextBlock>("txtReclaim"); txtCleanStatus = F<TextBlock>("txtCleanStatus"); txtCleanPct = F<TextBlock>("txtCleanPct"); txtFreed = F<TextBlock>("txtFreed");
-            pvInfoL = F<TextBlock>("pvInfoL"); txtZoom = F<TextBlock>("txtZoom");
+            txtZoom = F<TextBlock>("txtZoom");
             cleanBar = F<ProgressBar>("cleanBar");
             bAnalyze = F<Button>("bAnalyze"); bClean = F<Button>("bClean"); navClean = F<Button>("navClean"); bFull = F<Button>("bFull"); bMax = F<Button>("bMax");
             bTabJunk = F<Button>("bTabJunk"); bTabBrowsers = F<Button>("bTabBrowsers");

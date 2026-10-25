@@ -69,7 +69,53 @@ namespace CyberDisk
             boostTm.Tick += (_, _) => BoostTick();
         }
 
-        void StartupHead() { txtStartupHead.Text = "STARTUP APPS  ·  " + startup.Count(x => x.Enabled) + " of " + startup.Count + " enabled"; }
+        // ── startup apps: search, filter, switches ──
+        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll;
+        System.Windows.Data.ListCollectionView startupView; string startupFilter = "all";
+
+        void StartupHead()
+        {
+            int on = startup.Count(x => x.Enabled);
+            txtStartupCount.Text = on + " of " + startup.Count + " ON";
+            txtStartupHead.Text = "STARTUP APPS";
+            bStartupOffAll.IsEnabled = on > 0;
+            if (startupView != null) { startupView.Refresh(); txtStartupEmpty.Visibility = startupView.Count == 0 && startup.Count > 0 ? Visibility.Visible : Visibility.Collapsed; }
+        }
+
+        void WireStartupUx()
+        {
+            txtStartupSearch = F<TextBox>("txtStartupSearch"); txtStartupCount = F<TextBlock>("txtStartupCount"); txtStartupEmpty = F<TextBlock>("txtStartupEmpty");
+            sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll");
+            StartupVm.OnFail = n => w.Dispatcher.BeginInvoke(new Action(() => { txtStatus.Text = "COULD NOT CHANGE " + n.ToUpperInvariant() + " - WINDOWS REFUSED THE CHANGE"; StartupHead(); }));
+            Action<string> setFilter = f =>
+            {
+                startupFilter = f;
+                foreach (var kv in new[] { Tuple.Create(sfAll, "all"), Tuple.Create(sfOn, "on"), Tuple.Create(sfOff, "off") }) kv.Item1.Background = Br(kv.Item2 == f ? "#333DD6F5" : "#111E31");
+                StartupHead();
+            };
+            sfAll.Click += (_, _) => setFilter("all"); sfOn.Click += (_, _) => setFilter("on"); sfOff.Click += (_, _) => setFilter("off");
+            txtStartupSearch.TextChanged += (_, _) => StartupHead();
+            bStartupOffAll.Click += async (_, _) =>
+            {
+                var on = startup.Where(x => x.Enabled && !x.Missing).ToList();
+                if (on.Count == 0) return;
+                if (!(await Confirm("TURN ALL OFF", "Turn off " + on.Count + " startup app(s)?\n\nWindows itself and drivers are not affected. You can turn any app back on later.", "TURN ALL OFF", "CANCEL", "warn"))) return;
+                int fail = 0;
+                foreach (var v in on) { v.Enabled = false; if (v.Enabled) fail++; }
+                StartupHead();
+                txtStatus.Text = fail == 0 ? "ALL STARTUP APPS TURNED OFF" : fail + " APP(S) COULD NOT BE CHANGED";
+            };
+            setFilter("all");
+        }
+
+        bool StartupMatch(object o)
+        {
+            var v = o as StartupVm; if (v == null) return false;
+            if (startupFilter == "on" && !v.Enabled) return false;
+            if (startupFilter == "off" && v.Enabled) return false;
+            string q = txtStartupSearch == null ? "" : txtStartupSearch.Text.Trim();
+            return q.Length == 0 || v.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || v.Publisher.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || v.Command.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
 
         async void EnterBoost()
         {
@@ -83,7 +129,8 @@ namespace CyberDisk
                 gp.ItemsSource = procView;
                 Mem.Cpu();
                 try { startup = await Task.Run(() => Startup.List()); } catch { startup = new List<StartupVm>(); }
-                itemsStartup.ItemsSource = startup;
+                startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
+                itemsStartup.ItemsSource = startupView;
                 StartupHead();
             }
             BoostTick();

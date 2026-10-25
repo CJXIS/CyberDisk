@@ -37,6 +37,31 @@ namespace CyberDisk
             hungTm.Start();
         }
 
+        Button bErrClear, bErrRestore;
+
+        void WireErrorsExtra()
+        {
+            bErrClear = F<Button>("bErrClear"); bErrRestore = F<Button>("bErrRestore");
+            bErrClear.Click += async (_, _) =>
+            {
+                if (errApps == null || errApps.Count == 0) { txtStatus.Text = "THE LIST IS ALREADY EMPTY"; return; }
+                if (!(await Confirm("CLEAR THE LIST", "Remove all " + errApps.Count + " app(s) from this list?\n\nThe Windows event log is not touched. An app comes back only if it crashes again.", "CLEAR LIST", "CANCEL", "warn"))) return;
+                AppErr.DismissAll(errApps); errApps = new List<ErrApp>(); ShowErrorList(); txtStatus.Text = "APP ERROR LIST CLEARED";
+            };
+            bErrRestore.Click += (_, _) => { AppErr.RestoreAll(); ScanErrors(); txtStatus.Text = "REMOVED ERRORS ARE SHOWN AGAIN"; };
+        }
+
+        /// <summary>Shows errApps (after one was removed) without scanning the event log again.</summary>
+        void ShowErrorList()
+        {
+            itemsErrors.ItemsSource = null; itemsErrors.ItemsSource = errApps;
+            txtErrEmpty.Visibility = errApps.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            RenderErrorSummary(errApps);
+            int events = errApps.Sum(a => a.Events.Count);
+            txtErrHead.Text = errApps.Count == 0 ? "No problems found ✦" : events + " event(s) from " + errApps.Count + " app(s)";
+            bErrRestore.Visibility = AppErr.Dismissed.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         void UpdateBadge()
         {
             if (errBadge == null) return;
@@ -60,10 +85,8 @@ namespace CyberDisk
             }
             catch { res = new List<ErrApp>(); }
             errApps = res;
-            itemsErrors.ItemsSource = null; itemsErrors.ItemsSource = res;
-            txtErrEmpty.Visibility = res.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            RenderErrorSummary(res);
-            txtErrHead.Text = res.Count == 0 ? "No problems found ✦" : total + " event(s) from " + res.Count + " app(s)";
+            ShowErrorList();
+            if (res.Count > 0) txtErrHead.Text = total + " event(s) from " + res.Count + " app(s)" + (AppErr.HiddenEvents > 0 ? "  ·  " + AppErr.HiddenEvents + " removed" : "");
             errScanning = false; bErrScan.IsEnabled = true;
             txtStatus.Text = res.Count == 0 ? "NO APP ERRORS FOUND" : "APP ERRORS · " + res.Count + " APP(S) AFFECTED";
         }
@@ -130,6 +153,10 @@ namespace CyberDisk
                 switch (what)
                 {
                     case "toggle": a.Open = !a.Open; break;
+                    case "dismiss":
+                        AppErr.Dismiss(a); errApps.Remove(a); ShowErrorList();
+                        txtStatus.Text = "REMOVED " + a.Name.ToUpperInvariant() + " FROM THE LIST";
+                        break;
                     case "folder":
                         if (!string.IsNullOrEmpty(a.ExePath) && File.Exists(a.ExePath)) Process.Start("explorer.exe", "/select,\"" + a.ExePath + "\"");
                         break;

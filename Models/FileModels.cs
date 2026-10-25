@@ -40,5 +40,8 @@ namespace CyberDisk
         public string Path;
         public Node Node;
         public DateTime Modified;
+        public Brush PctBrush { get; set; }
+        public string ModText { get { return Modified == DateTime.MinValue ? "" : Modified.ToString("yyyy-MM-dd HH:mm"); } }
+        public long ModSort { get { return Modified.Ticks; } }
     }
 }

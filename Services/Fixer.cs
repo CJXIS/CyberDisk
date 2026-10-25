@@ -41,6 +41,10 @@ namespace CyberDisk
         public static string LogPath { get { return Path.Combine(Settings.Dir, "fixes.log"); } }
 
         // runs a program with no window; returns its exit code (-1 = could not start or timed out)
+        /// <summary>Set by the STOP button: running programs are ended and no new fix starts.</summary>
+        public static volatile bool CancelRequested;
+        static readonly object runLock = new object();
+
         public static int Exec(string file, string args, int timeoutMs, out string output, Encoding enc = null)
         {
             output = "";
@@ -54,7 +58,11 @@ namespace CyberDisk
                     p.OutputDataReceived += (s, e) => { if (e.Data != null) lock (sb) sb.AppendLine(e.Data); };
                     p.ErrorDataReceived += (s, e) => { if (e.Data != null) lock (sb) sb.AppendLine(e.Data); };
                     p.BeginOutputReadLine(); p.BeginErrorReadLine();
-                    if (!p.WaitForExit(timeoutMs)) { try { p.Kill(); } catch { } lock (sb) output = sb.ToString(); return -1; }
+                    var clock = Stopwatch.StartNew();
+                    while (!p.WaitForExit(300))                                     // wait in small steps so STOP works at once
+                    {
+                        if (CancelRequested || clock.ElapsedMilliseconds > timeoutMs) { try { p.Kill(); } catch { } lock (sb) output = sb.ToString(); return -1; }
+                    }
                     p.WaitForExit();
                     lock (sb) output = sb.ToString();
                     return p.ExitCode;
@@ -121,12 +129,31 @@ namespace CyberDisk
         }
 
         // ── the fixes (all of them run on a worker thread) ──
+        public static bool IsAdmin()
+        {
+            try { return new System.Security.Principal.WindowsPrincipal(System.Security.Principal.WindowsIdentity.GetCurrent()).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator); } catch { return false; }
+        }
+
+        /// <summary>Fixes that can take many minutes (shown with a time warning and always run last).</summary>
+        public static bool IsLong(string id) { return id == "sfc" || id == "disk" || id == "dirty" || id == "defs"; }
+
         public static Result Run(Finding f)
+        {
+            lock (runLock)                                                          // only one repair at a time: they change the same system parts
+            {
+                if (CancelRequested) return new Result { Text = "Stopped before it started." };
+                return RunLocked(f);
+            }
+        }
+
+        static Result RunLocked(Finding f)
         {
             Log("FIX " + f.FixId + " · " + f.Title);
             Result r;
             try
             {
+                if (!IsAdmin() && f.FixId != "ack" && f.FixId != "memdiag" && f.FixId != "mem")
+                { r = Bad("CyberDisk needs administrator rights for this repair. Close it and start it again with \"Run as administrator\"."); Log("  -> NO ADMIN"); return r; }
                 switch (f.FixId)
                 {
                     case "svc-core": r = Services(f.FixData, true); break;
@@ -142,6 +169,7 @@ namespace CyberDisk
                     case "ack": r = Good("Marked as reviewed."); break;
                     default: r = Bad("This fix is not available."); break;
                 }
+                if (CancelRequested && !r.Ok) r = Bad("Stopped by you.");
                 if (r.Ok && f.Key != null) Health.MarkReviewed(f.Key);
             }
             catch (Exception ex) { r = Bad("The fix failed: " + ex.Message); }
@@ -168,12 +196,12 @@ namespace CyberDisk
                         sc.Refresh();
                         if (sc.Status == System.ServiceProcess.ServiceControllerStatus.StopPending) sc.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(15));
                         sc.Refresh();
-                        if (sc.Status != System.ServiceProcess.ServiceControllerStatus.Running)
+                        for (int attempt = 0; attempt < 2 && sc.Status != System.ServiceProcess.ServiceControllerStatus.Running; attempt++)
                         {
-                            sc.Start();
-                            sc.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Running, TimeSpan.FromSeconds(20));
+                            try { sc.Start(); sc.WaitForStatus(System.ServiceProcess.ServiceControllerStatus.Running, TimeSpan.FromSeconds(20)); }
+                            catch (Exception ex) { Log("  start " + disp + " attempt " + (attempt + 1) + ": " + ex.Message); Thread.Sleep(1500); }
+                            sc.Refresh();
                         }
-                        sc.Refresh();
                         if (sc.Status == System.ServiceProcess.ServiceControllerStatus.Running) ok.Add(disp); else bad.Add(disp);
                     }
                 }

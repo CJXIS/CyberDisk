@@ -44,6 +44,8 @@ namespace CyberDisk
         static readonly Dictionary<int, string> CpuArch = new Dictionary<int, string> { { 0, "x86" }, { 5, "ARM" }, { 9, "x64" }, { 12, "ARM64" } };
 
         /// <summary>Collects everything. Takes a few seconds - call it from a background thread.</summary>
+        static T Safe<T>(Func<T> f) where T : class { try { return f(); } catch { return null; } }
+
         public static HwReport Collect()
         {
             var rep = new HwReport();
@@ -57,16 +59,20 @@ namespace CyberDisk
             if (boot.HasValue) { var up = DateTime.Now - boot.Value; rep.Uptime = (up.Days > 0 ? up.Days + " d " : "") + up.Hours + " h " + up.Minutes + " min"; }
 
             var cpu = Wmi.Query("SELECT Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed, CurrentClockSpeed, L2CacheSize, L3CacheSize, Architecture, SocketDesignation, VirtualizationFirmwareEnabled, ProcessorId, Family, Revision, LoadPercentage, Description, VoltageCaps FROM Win32_Processor");
-            Add(rep, CpuCard(cpu));
-            Add(rep, MemoryCard(cs));
-            foreach (var g in GpuCards()) Add(rep, g);
-            Add(rep, BoardCard(cs));
-            Add(rep, StorageCard());
-            Add(rep, DisplayCard());
-            Add(rep, NetworkCard());
-            Add(rep, OsCard(os, cs, boot));
-            Add(rep, BatteryCard());
-            Add(rep, SecurityCard(cpu));
+            // every card is read at the same time: the slow ones (clock measuring, disks, Wi-Fi) no longer wait for each other
+            var tCpu = Task.Run(() => Safe(() => CpuCard(cpu)));
+            var tMem = Task.Run(() => Safe(() => MemoryCard(cs)));
+            var tGpu = Task.Run(() => Safe(() => GpuCards().ToList()));
+            var tBoard = Task.Run(() => Safe(() => BoardCard(cs)));
+            var tStore = Task.Run(() => Safe(() => StorageCard()));
+            var tDisp = Task.Run(() => Safe(() => DisplayCard()));
+            var tNet = Task.Run(() => Safe(() => NetworkCard()));
+            var tOs = Task.Run(() => Safe(() => OsCard(os, cs, boot)));
+            var tBat = Task.Run(() => Safe(() => BatteryCard()));
+            var tSec = Task.Run(() => Safe(() => SecurityCard(cpu)));
+            Add(rep, tCpu.Result); Add(rep, tMem.Result);
+            if (tGpu.Result != null) foreach (var g in tGpu.Result) Add(rep, g);
+            Add(rep, tBoard.Result); Add(rep, tStore.Result); Add(rep, tDisp.Result); Add(rep, tNet.Result); Add(rep, tOs.Result); Add(rep, tBat.Result); Add(rep, tSec.Result);
 
             var c0 = cpu.FirstOrDefault(); long ram = cs == null ? 0 : Wmi.Long(cs, "TotalPhysicalMemory");
             rep.Summary = Squash((c0 == null ? "" : ShortCpu(Wmi.Str(c0, "Name"))) + "  ·  " + (ram > 0 ? Ui.Fmt(ram) + " RAM" : ""));
@@ -114,6 +120,23 @@ namespace CyberDisk
             card.AdvRows.Add(R("Description", Wmi.Str(c, "Description")));
             string temp = CpuTemperature();
             card.AdvRows.Add(R("Thermal zone", temp));
+            card.Rows.Add(R("Hyper-Threading / SMT", threads > cores ? "On  ·  " + (threads / Math.Max(1, cores)) + " threads per core" : "Off"));
+            card.Rows.Add(R("Virtualization", Wmi.Bool(c, "VirtualizationFirmwareEnabled") ? "Enabled" : "Disabled or not supported"));
+            card.Rows.Add(R("Power plan", ActivePowerPlan()));
+            card.AdvRows.Add(R("Instruction sets", CpuFeatures()));
+            const string cpuKey = @"HARDWARE\DESCRIPTION\System\CentralProcessor\0";
+            card.AdvRows.Add(R("Vendor ID", HklmValue(cpuKey, "VendorIdentifier")));
+            card.AdvRows.Add(R("Identifier", HklmValue(cpuKey, "Identifier")));
+            try
+            {
+                using (var k = Registry.LocalMachine.OpenSubKey(cpuKey))
+                {
+                    var u = k == null ? null : k.GetValue("Update Revision") as byte[];
+                    if (u != null && u.Length >= 8) card.AdvRows.Add(R("Microcode revision", "0x" + BitConverter.ToUInt32(u, 4).ToString("X")));
+                }
+            }
+            catch { }
+            card.AdvRows.Add(R("Logical processors", Environment.ProcessorCount.ToString()));
             return card;
         }
 
@@ -136,6 +159,29 @@ namespace CyberDisk
             }
             catch { return 0; }
         }
+
+        [DllImport("kernel32.dll")] static extern bool IsProcessorFeaturePresent(uint feature);
+
+        static string CpuFeatures()
+        {
+            var l = new List<string>();
+            Action<uint, string> t = (id, n) => { try { if (IsProcessorFeaturePresent(id)) l.Add(n); } catch { } };
+            t(13, "SSE3"); t(36, "SSSE3"); t(37, "SSE4.1"); t(38, "SSE4.2"); t(39, "AVX"); t(40, "AVX2"); t(41, "AVX-512"); t(12, "NX"); t(20, "SLAT");
+            return string.Join(", ", l);
+        }
+
+        static string HklmValue(string sub, string name)
+        {
+            try { using (var k = Registry.LocalMachine.OpenSubKey(sub)) { var v = k == null ? null : k.GetValue(name); return v == null ? "" : RegText(v); } } catch { return ""; }
+        }
+
+        static string ActivePowerPlan()
+        {
+            try { var p = Wmi.Query(@"root\cimv2\power", "SELECT ElementName, IsActive FROM Win32_PowerPlan").FirstOrDefault(x => Wmi.Bool(x, "IsActive")); return p == null ? "" : Wmi.Str(p, "ElementName"); }
+            catch { return ""; }
+        }
+
+        static string OnOff(string v, string on, string off) { return v == "1" ? on : v == "0" ? off : ""; }
 
         static volatile bool boostStop;
 
@@ -182,7 +228,7 @@ namespace CyberDisk
         // ── memory ──
         static HwCard MemoryCard(System.Management.ManagementBaseObject cs)
         {
-            var mods = Wmi.Query("SELECT Capacity, Speed, ConfiguredClockSpeed, Manufacturer, PartNumber, SMBIOSMemoryType, FormFactor, DeviceLocator, BankLabel, ConfiguredVoltage, SerialNumber FROM Win32_PhysicalMemory");
+            var mods = Wmi.Query("SELECT DataWidth, TotalWidth, Capacity, Speed, ConfiguredClockSpeed, Manufacturer, PartNumber, SMBIOSMemoryType, FormFactor, DeviceLocator, BankLabel, ConfiguredVoltage, SerialNumber FROM Win32_PhysicalMemory");
             long total = cs == null ? 0 : Wmi.Long(cs, "TotalPhysicalMemory");
             long t, a; Mem.Status(out t, out a);
             if (total <= 0) total = t;
@@ -203,6 +249,14 @@ namespace CyberDisk
             card.Rows.Add(R("Type", type));
             card.Rows.Add(R("Speed", speed > 0 ? speed + " MHz" : "—"));
             card.Rows.Add(R("Modules", mods.Count + (slots > 0 ? " of " + slots + " slots" : "")));
+            card.Rows.Add(R("Available now", Ui.Fmt(a) + "  of  " + Ui.Fmt(t) + " usable"));
+            if (total > t && t > 0) card.Rows.Add(R("Reserved by hardware", Ui.Fmt(total - t)));
+            foreach (var m in mods)
+            {
+                string slot = Wmi.Str(m, "DeviceLocator"); if (slot.Length == 0) slot = "Module";
+                long sp = Math.Max(Wmi.Long(m, "ConfiguredClockSpeed"), Wmi.Long(m, "Speed"));
+                card.Rows.Add(R(slot, Ui.Fmt(Wmi.Long(m, "Capacity")) + (sp > 0 ? "  ·  " + sp + " MHz" : "") + "  ·  " + Wmi.Str(m, "Manufacturer")));
+            }
             int i = 0;
             foreach (var m in mods)
             {
@@ -212,6 +266,16 @@ namespace CyberDisk
                 card.AdvRows.Add(R(loc, Ui.Fmt(Wmi.Long(m, "Capacity")) + "  ·  " + Wmi.Str(m, "Manufacturer") + "  ·  " + Wmi.Str(m, "PartNumber") + (ff.Length > 0 ? "  ·  " + ff : "")));
             }
             if (arr != null && Wmi.Long(arr, "MaxCapacity") > 0) card.AdvRows.Add(R("Max supported", Ui.Fmt(Wmi.Long(arr, "MaxCapacity") * 1024)));
+            if (first != null && Wmi.Long(first, "TotalWidth") > 0) card.AdvRows.Add(R("Bus width / ECC", Wmi.Long(first, "DataWidth") + "-bit data  ·  " + (Wmi.Long(first, "TotalWidth") > Wmi.Long(first, "DataWidth") ? "ECC memory" : "no ECC")));
+            try
+            {
+                var pf = Wmi.Query("SELECT Name, AllocatedBaseSize, CurrentUsage, PeakUsage FROM Win32_PageFileUsage").FirstOrDefault();
+                if (pf != null) card.AdvRows.Add(R("Page file", Wmi.Str(pf, "Name") + "  ·  " + Wmi.Long(pf, "AllocatedBaseSize") + " MB  (using " + Wmi.Long(pf, "CurrentUsage") + " MB, peak " + Wmi.Long(pf, "PeakUsage") + " MB)"));
+                else card.AdvRows.Add(R("Page file", "None"));
+                var osv = Wmi.Query("SELECT TotalVirtualMemorySize FROM Win32_OperatingSystem").FirstOrDefault();
+                if (osv != null) card.AdvRows.Add(R("Virtual memory limit", Ui.Fmt(Wmi.Long(osv, "TotalVirtualMemorySize") * 1024)));
+            }
+            catch { }
             long volt = first == null ? 0 : Wmi.Long(first, "ConfiguredVoltage");
             if (volt > 0) card.AdvRows.Add(R("Voltage", (volt / 1000.0).ToString("0.00") + " V"));
             return card;
@@ -382,6 +446,23 @@ namespace CyberDisk
             if (bios != null) card.AdvRows.Add(R("SMBIOS version", Wmi.Str(bios, "SMBIOSMajorVersion") + "." + Wmi.Str(bios, "SMBIOSMinorVersion")));
             if (bb != null) { card.AdvRows.Add(R("Board version", Wmi.Str(bb, "Version"))); card.AdvRows.Add(R("Board serial", Wmi.Str(bb, "SerialNumber"))); }
             if (prod != null) card.AdvRows.Add(R("System UUID", Wmi.Str(prod, "UUID")));
+            if (bios != null) card.AdvRows.Add(R("BIOS serial", Wmi.Str(bios, "SerialNumber")));
+            if (cs != null)
+            {
+                var more = Wmi.Query("SELECT SystemSKUNumber, SystemFamily FROM Win32_ComputerSystem").FirstOrDefault();
+                if (more != null) { card.AdvRows.Add(R("System SKU", Wmi.Str(more, "SystemSKUNumber"))); card.AdvRows.Add(R("System family", Wmi.Str(more, "SystemFamily"))); }
+            }
+            try
+            {
+                var enc = Wmi.Query("SELECT ChassisTypes, Manufacturer, SerialNumber FROM Win32_SystemEnclosure").FirstOrDefault();
+                var ct = enc == null ? null : enc["ChassisTypes"] as ushort[];
+                if (ct != null && ct.Length > 0)
+                {
+                    string[] names = { "", "Other", "Unknown", "Desktop", "Low-profile desktop", "Pizza box", "Mini tower", "Tower", "Portable", "Laptop", "Notebook", "Handheld", "Docking station", "All-in-one", "Sub-notebook", "Space-saving", "Lunch box", "Main system chassis", "Expansion chassis", "Sub-chassis", "Bus expansion", "Peripheral", "RAID", "Rack-mount", "Sealed-case PC", "Multi-system", "CompactPCI", "AdvancedTCA", "Blade", "Blade enclosure", "Tablet", "Convertible", "Detachable", "IoT gateway", "Embedded PC", "Mini PC", "Stick PC" };
+                    card.Rows.Add(R("Chassis type", ct[0] < names.Length ? names[ct[0]] : "Type " + ct[0]));
+                }
+            }
+            catch { }
             return card;
         }
 
@@ -397,6 +478,15 @@ namespace CyberDisk
                 Title = "STORAGE", IconData = Vec.Drives, AccentBrush = Accent("#3DDC97"), Headline = disks.Count + " drive(s)  ·  " + Ui.Fmt(total),
                 Sub = string.Join("  ·  ", disks.Select(d => d.Kind).Distinct())
             };
+            long vTotal = disks.Sum(d => d.Volumes.Sum(v => v.Size)), vFree = disks.Sum(d => d.Volumes.Sum(v => v.Free));
+            if (vTotal > 0)
+            {
+                card.Rows.Add(R("Space used", Ui.Fmt(vTotal - vFree) + "  of  " + Ui.Fmt(vTotal) + "  (" + (100.0 * (vTotal - vFree) / vTotal).ToString("0") + "%)"));
+                card.Rows.Add(R("Free space", Ui.Fmt(vFree)));
+            }
+            card.Rows.Add(R("Drive types", string.Join("  ·  ", disks.GroupBy(d => d.Kind).Select(g => g.Count() + " × " + g.Key))));
+            int weak = disks.Count(d => d.Score < 70);
+            card.Rows.Add(R("Drives needing attention", weak == 0 ? "None - all drives look healthy" : weak + " drive(s) with a health score below 70"));
             foreach (var d in disks)
             {
                 string nm = Squash(string.IsNullOrWhiteSpace(d.Model) ? "Disk " + d.Number : d.Model);
@@ -504,6 +594,28 @@ namespace CyberDisk
                 card.Rows.Add(R("MAC address", mac));
                 card.Rows.Add(R("Link speed", speed));
                 var v6 = ip.UnicastAddresses.FirstOrDefault(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 && !a.Address.IsIPv6LinkLocal);
+                if (v4 != null && v4.IPv4Mask != null) card.Rows.Add(R("Subnet mask", v4.IPv4Mask.ToString()));
+                if (main.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211)
+                {
+                    var wl = WifiInfo();
+                    string val;
+                    if (wl.TryGetValue("SSID", out val)) card.Rows.Add(R("Wi-Fi network", val));
+                    if (wl.TryGetValue("Signal", out val)) card.Rows.Add(R("Signal strength", val));
+                    string radio = wl.TryGetValue("Radio type", out val) ? val : "", chan = wl.TryGetValue("Channel", out val) ? val : "";
+                    if (radio.Length + chan.Length > 0) card.Rows.Add(R("Wi-Fi standard / channel", radio + (chan.Length > 0 ? "  ·  channel " + chan : "")));
+                    if (wl.TryGetValue("Receive rate (Mbps)", out val)) card.AdvRows.Add(R("Receive rate", val + " Mbps"));
+                    if (wl.TryGetValue("Transmit rate (Mbps)", out val)) card.AdvRows.Add(R("Transmit rate", val + " Mbps"));
+                    if (wl.TryGetValue("Authentication", out val)) card.AdvRows.Add(R("Security", val));
+                }
+                try
+                {
+                    var v4p = ip.GetIPv4Properties(); var st = main.GetIPv4Statistics();
+                    card.AdvRows.Add(R("DHCP", v4p.IsDhcpEnabled ? "Enabled" + (ip.DhcpServerAddresses.Count > 0 ? "  ·  server " + ip.DhcpServerAddresses[0] : "") : "Static address"));
+                    card.AdvRows.Add(R("MTU", v4p.Mtu.ToString()));
+                    card.AdvRows.Add(R("Data received", Ui.Fmt(st.BytesReceived)));
+                    card.AdvRows.Add(R("Data sent", Ui.Fmt(st.BytesSent)));
+                }
+                catch { }
                 card.AdvRows.Add(R("IPv6 address", v6 == null ? "" : v6.Address.ToString()));
                 card.AdvRows.Add(R("DNS suffix", ip.DnsSuffix));
                 card.AdvRows.Add(R("Host name", System.Net.Dns.GetHostName()));
@@ -511,6 +623,25 @@ namespace CyberDisk
                 return card;
             }
             catch { return null; }
+        }
+
+        /// <summary>Current Wi-Fi connection from "netsh wlan show interfaces" (English Windows only; empty otherwise).</summary>
+        static Dictionary<string, string> WifiInfo()
+        {
+            var d = new Dictionary<string, string>();
+            try
+            {
+                string o;
+                if (Fixer.Exec("netsh.exe", "wlan show interfaces", 6000, out o) != 0) return d;
+                foreach (var line in o.Split('\n'))
+                {
+                    int i = line.IndexOf(':'); if (i <= 0) continue;
+                    string k = line.Substring(0, i).Trim(), v = line.Substring(i + 1).Trim();
+                    if (k.Length > 0 && !d.ContainsKey(k)) d[k] = v;
+                }
+            }
+            catch { }
+            return d;
         }
 
         // ── operating system ──
@@ -542,6 +673,25 @@ namespace CyberDisk
             card.AdvRows.Add(R("System language", System.Globalization.CultureInfo.InstalledUICulture.DisplayName));
             card.AdvRows.Add(R("Domain / workgroup", cs == null ? "" : Wmi.Str(cs, "Domain")));
             card.AdvRows.Add(R(".NET Framework", Environment.Version.ToString()));
+            string act = "Unknown";
+            try
+            {
+                var lic = Wmi.Query("SELECT LicenseStatus FROM SoftwareLicensingProduct WHERE PartialProductKey IS NOT NULL AND ApplicationId = '55c92734-d682-4d71-983e-d6ec3f16059f'").FirstOrDefault();
+                if (lic != null) act = Wmi.Long(lic, "LicenseStatus") == 1 ? "Activated" : "Not activated";
+            }
+            catch { }
+            card.Rows.Add(R("Activation", act));
+            try
+            {
+                var sysRoot = Path.GetPathRoot(Environment.SystemDirectory); var di = new DriveInfo(sysRoot);
+                card.Rows.Add(R("System drive", sysRoot.TrimEnd('\\') + "  ·  " + Ui.Fmt(di.AvailableFreeSpace) + " free of " + Ui.Fmt(di.TotalSize)));
+            }
+            catch { }
+            card.AdvRows.Add(R("Build lab", HklmValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "BuildLabEx")));
+            card.AdvRows.Add(R("Fast startup", OnOff(HklmValue(@"SYSTEM\CurrentControlSet\Control\Session Manager\Power", "HiberbootEnabled"), "On (shut down keeps part of the session)", "Off")));
+            card.AdvRows.Add(R("Hibernation file", File.Exists(Path.Combine(Path.GetPathRoot(Environment.SystemDirectory), "hiberfil.sys")) ? "Present" : "Not present"));
+            try { card.AdvRows.Add(R("Running processes", Process.GetProcesses().Length.ToString())); } catch { }
+            card.AdvRows.Add(R("Product name", HklmValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ProductName")));
             return card;
         }
 
@@ -572,6 +722,21 @@ namespace CyberDisk
                 }
             }
             catch { }
+            try
+            {
+                var cyc = Wmi.Query(@"root\wmi", "SELECT CycleCount FROM BatteryCycleCount").FirstOrDefault();
+                if (cyc != null && Wmi.Long(cyc, "CycleCount") > 0) card.Rows.Add(R("Charge cycles", Wmi.Long(cyc, "CycleCount").ToString()));
+                var b = Wmi.Query("SELECT Name, Chemistry, DesignVoltage, DeviceID FROM Win32_Battery").FirstOrDefault();
+                if (b != null)
+                {
+                    string[] chem = { "", "Other", "Unknown", "Lead acid", "Nickel cadmium", "Nickel metal hydride", "Lithium-ion", "Zinc air", "Lithium polymer" };
+                    long cm = Wmi.Long(b, "Chemistry");
+                    card.AdvRows.Add(R("Battery name", Wmi.Str(b, "Name")));
+                    card.AdvRows.Add(R("Chemistry", cm > 0 && cm < chem.Length ? chem[cm] : ""));
+                    if (Wmi.Long(b, "DesignVoltage") > 0) card.AdvRows.Add(R("Design voltage", (Wmi.Long(b, "DesignVoltage") / 1000.0).ToString("0.0") + " V"));
+                }
+            }
+            catch { }
             return card;
         }
 
@@ -595,6 +760,35 @@ namespace CyberDisk
             card.Rows.Add(R("Secure Boot", secure));
             card.Rows.Add(R("TPM", tpm + (tpmVer.Length > 0 ? "  (" + tpmVer + ")" : "")));
             card.Rows.Add(R("Antivirus", defender));
+            string fw = "";
+            try
+            {
+                var prof = new[] { "StandardProfile", "PublicProfile", "DomainProfile" };
+                int on = prof.Count(pn => HklmValue(@"SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\" + pn, "EnableFirewall") == "1");
+                fw = on == prof.Length ? "On for all networks" : on == 0 ? "Off" : "On for " + on + " of " + prof.Length + " network types";
+            }
+            catch { }
+            card.Rows.Add(R("Firewall", fw));
+            string uac = HklmValue(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System", "EnableLUA");
+            card.Rows.Add(R("User Account Control", OnOff(uac, "On", "Off")));
+            string bl = "";
+            try
+            {
+                var vol = Wmi.Query(@"root\cimv2\Security\MicrosoftVolumeEncryption", "SELECT DriveLetter, ProtectionStatus FROM Win32_EncryptableVolume").FirstOrDefault(v => string.Equals(Wmi.Str(v, "DriveLetter"), Path.GetPathRoot(Environment.SystemDirectory).TrimEnd('\\'), StringComparison.OrdinalIgnoreCase));
+                if (vol != null) bl = Wmi.Long(vol, "ProtectionStatus") == 1 ? "On for the system drive" : "Off for the system drive";
+            }
+            catch { }
+            card.Rows.Add(R("BitLocker", bl.Length > 0 ? bl : "Not available"));
+            string hvci = HklmValue(@"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity", "Enabled");
+            card.AdvRows.Add(R("Memory integrity (HVCI)", OnOff(hvci, "On", "Off")));
+            try
+            {
+                var av = Wmi.Query(@"root\SecurityCenter2", "SELECT displayName FROM AntivirusProduct").Select(a => Wmi.Str(a, "displayName")).Where(n => n.Length > 0).Distinct().ToList();
+                if (av.Count > 0) card.AdvRows.Add(R("Registered antivirus", string.Join(", ", av)));
+                var mp = Wmi.Query(@"root\Microsoft\Windows\Defender", "SELECT AntivirusSignatureAge, AntivirusSignatureLastUpdated FROM MSFT_MpComputerStatus").FirstOrDefault();
+                if (mp != null) card.AdvRows.Add(R("Virus definitions", Wmi.Long(mp, "AntivirusSignatureAge") + " day(s) old"));
+            }
+            catch { }
             card.AdvRows.Add(R("CPU virtualization", virt ? "Enabled" : "Disabled or not supported"));
             card.AdvRows.Add(R("Running as administrator", admin ? "Yes" : "No"));
             return card;

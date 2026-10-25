@@ -52,6 +52,20 @@ namespace CyberDisk
             }
             catch { }
         }
+        // findings the user chose to ignore (kept between runs)
+        public static readonly HashSet<string> Ignored = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        static string IP { get { return Path.Combine(Settings.Dir, "ignored.ini"); } }
+        public static void LoadIgnored()
+        {
+            try { foreach (var l in File.ReadAllLines(IP)) if (l.Length > 0) Ignored.Add(l); } catch { }
+        }
+        public static void SetIgnored(string key, bool on)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            if (on) Ignored.Add(key); else Ignored.Remove(key);
+            try { Directory.CreateDirectory(Settings.Dir); File.WriteAllLines(IP, Ignored); } catch { }
+        }
+
         public static void MarkReviewed(string key)
         {
             if (string.IsNullOrEmpty(key)) return;

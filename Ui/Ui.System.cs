@@ -37,6 +37,20 @@ namespace CyberDisk
         TextBlock txtPcLoading; TextBox txtPcName, txtPcModel, txtPcOs, txtPcSummary;
         FrameworkElement pcContent;
         HwReport hw;
+        Task<HwReport> hwPre;                                   // read quietly in the background shortly after start, so MY PC opens at once
+
+        /// <summary>A few seconds after start (when the PC is idle) the hardware and disk data are read once in the background.</summary>
+        void StartPrewarm()
+        {
+            var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4) };
+            t.Tick += (_, _) =>
+            {
+                t.Stop();
+                if (hw == null && hwPre == null) hwPre = Task.Run(() => { try { return SystemInfo.Collect(); } catch { return (HwReport)null; } });
+                Task.Run(() => { try { DiskInfo.Get(300); } catch { } });
+            };
+            t.Start();
+        }
         bool pcAdv, pcLoading;
 
         void WirePc()
@@ -47,7 +61,7 @@ namespace CyberDisk
             txtPcOs = F<TextBox>("txtPcOs"); txtPcSummary = F<TextBox>("txtPcSummary");
 
             navPc.Click += (_, _) => { Go(vPc); EnterPc(); };
-            bPcRefresh.Click += async (_, _) => { DiskInfo.Invalidate(); await LoadPc(); };
+            bPcRefresh.Click += async (_, _) => { hwPre = null; DiskInfo.Invalidate(); await LoadPc(); };
             bPcAdv.Click += (_, _) =>
             {
                 pcAdv = !pcAdv;
@@ -73,7 +87,12 @@ namespace CyberDisk
             txtPcLoading.Text = "Reading your hardware…"; txtPcLoading.Visibility = Visibility.Visible; svPc.Visibility = Visibility.Collapsed;
             txtStatus.Text = "READING HARDWARE…";
             HwReport rep;
-            try { rep = await Task.Run(() => SystemInfo.Collect()); }
+            try
+            {
+                var pre = hwPre; hwPre = null; rep = null;
+                if (pre != null) rep = await pre;                                       // already read in the background: no waiting
+                if (rep == null) rep = await Task.Run(() => SystemInfo.Collect());
+            }
             catch (Exception ex) { rep = null; txtPcLoading.Text = "Could not read the hardware information: " + ex.Message; }
             pcLoading = false; bPcRefresh.IsEnabled = true;
             if (rep == null) return;

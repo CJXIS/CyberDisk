@@ -40,9 +40,9 @@ namespace CyberDisk
         }
 
         /// <summary>Button content: a small icon followed by the label.</summary>
-        static object IconLabel(string iconData, string text)
+        static object IconLabel(string iconData, string text, string color = "#3DD6F5")
         {
-            var icon = IconShape(iconData, Br("#3DD6F5"), 15, 2); icon.Margin = new Thickness(0, 0, 7, 0);
+            var icon = IconShape(iconData, Br(color), 15, 2); icon.Margin = new Thickness(0, 0, 7, 0);
             var sp = new StackPanel { Orientation = Orientation.Horizontal };
             sp.Children.Add(icon); sp.Children.Add(new TextBlock { Text = text });
             return sp;

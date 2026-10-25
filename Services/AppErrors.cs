@@ -62,9 +62,35 @@ namespace CyberDisk
             return e;
         }
 
+        // errors the user removed from the list: only crashes NEWER than the moment of removal are shown again
+        public static readonly Dictionary<string, DateTime> Dismissed = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+        static string DP { get { return Path.Combine(Settings.Dir, "dismissed-errors.ini"); } }
+        public static void LoadDismissed()
+        {
+            try
+            {
+                foreach (var l in File.ReadAllLines(DP))
+                {
+                    int i = l.LastIndexOf('='); long t;
+                    if (i > 0 && long.TryParse(l.Substring(i + 1), out t)) Dismissed[l.Substring(0, i)] = new DateTime(t, DateTimeKind.Utc);
+                }
+            }
+            catch { }
+        }
+        static void SaveDismissed() { try { Directory.CreateDirectory(Settings.Dir); File.WriteAllLines(DP, Dismissed.Select(kv => kv.Key + "=" + kv.Value.Ticks)); } catch { } }
+        public static void Dismiss(ErrApp a)
+        {
+            if (a == null) return;
+            var newest = a.Events.Count == 0 ? DateTime.UtcNow : a.Events.Max(e => e.Time).ToUniversalTime();
+            Dismissed[a.Name] = newest.AddSeconds(1); SaveDismissed();
+        }
+        public static void DismissAll(IEnumerable<ErrApp> apps) { foreach (var a in apps) Dismiss(a); }
+        public static void RestoreAll() { Dismissed.Clear(); try { File.Delete(DP); } catch { } }
+        public static int HiddenEvents;                         // events left out of the last scan because they were removed
+
         public static List<ErrApp> Scan(int days, out int totalEvents)
         {
-            var all = new List<CrashEvt>();
+            var all = new List<CrashEvt>(); int hidden = 0;
             try
             {
                 string xp = "*[System[(EventID=1000 or EventID=1002 or EventID=1026) and TimeCreated[timediff(@SystemTime) <= " + (days * 86400000L) + "]]]";
@@ -73,11 +99,17 @@ namespace CyberDisk
                 {
                     System.Diagnostics.Eventing.Reader.EventRecord ev; int cap = 0;
                     while ((ev = r.ReadEvent()) != null && cap++ < 5000)
-                        using (ev) { var c = Parse(ev); if (c != null) all.Add(c); }
+                        using (ev)
+                        {
+                            var c = Parse(ev); if (c == null) continue;
+                            DateTime gone;
+                            if (Dismissed.TryGetValue(c.App, out gone) && c.Time.ToUniversalTime() <= gone) { hidden++; continue; }
+                            all.Add(c);
+                        }
                 }
             }
             catch { }
-            totalEvents = all.Count;
+            totalEvents = all.Count; HiddenEvents = hidden;
             var list = new List<ErrApp>();
             foreach (var g in all.GroupBy(x => x.App, StringComparer.OrdinalIgnoreCase))
             {

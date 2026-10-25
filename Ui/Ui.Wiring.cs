@@ -52,6 +52,15 @@ namespace CyberDisk
         System.Diagnostics.Eventing.Reader.EventLogWatcher crashWatcher;
         System.Windows.Forms.ContextMenuStrip trayMenu;
 
+        readonly List<string> wireErrors = new List<string>();
+
+        /// <summary>Runs one setup step; if it fails the error is written to the log and shown once, and the rest of the app still starts.</summary>
+        void Guard(string what, Action step)
+        {
+            try { step(); }
+            catch (Exception ex) { Dbg("SETUP FAILED - " + what + ": " + ex); wireErrors.Add(what + ": " + ex.Message); }
+        }
+
         void WireNew()
         {
             vErrors = F<FrameworkElement>("vErrors"); vSettings = F<FrameworkElement>("vSettings");
@@ -72,7 +81,8 @@ namespace CyberDisk
             };
             bLinkedIn.Click += (_, _) => OpenUrl(DevLinkedIn);
             txtGrade = F<TextBlock>("txtGrade"); txtHealthCounts = F<TextBlock>("txtHealthCounts"); txtHealthMeta = F<TextBlock>("txtHealthMeta"); itemsCats = F<ItemsControl>("itemsCats");
-            WireDisks(); WirePc(); WireAppDetails();
+            Guard("disk health", WireDisks); Guard("my pc", WirePc); Guard("app details", WireAppDetails); Guard("health extras", WireHealthExtra);
+            Guard("app errors", WireErrorsExtra); Guard("file preview", WireBrowserExtra); Guard("startup apps", WireStartupUx);
             WindowChrome.SetIsHitTestVisibleInChrome(bLang, true);
             bLang.Click += (_, _) => ApplyLang(!Loc.Ar, true);
 
@@ -85,7 +95,9 @@ namespace CyberDisk
             itemsHealth.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) =>
             {
                 var b = e.OriginalSource as Button; var f = b == null ? null : b.DataContext as Finding;
-                if (b != null && f != null && (b.Tag as string) == "fix") RunFix(f);
+                if (b == null || f == null) return;
+                string tag = b.Tag as string;
+                if (tag == "fix") RunFix(f); else if (tag == "ignore") ToggleIgnore(f);
             }));
 
             // app errors

@@ -40,11 +40,17 @@ namespace CyberDisk
             var instanceLock = new Mutex(true, "CyberDisk.Ahmad.SingleInstance", out firstInstance);
             if (!firstInstance) { try { EventWaitHandle.OpenExisting("CyberDisk.ShowWindow").Set(); } catch { } return; }
             ThreadPool.SetMinThreads(64, 64);
+            try { Directory.CreateDirectory(Settings.Dir); System.Runtime.ProfileOptimization.SetProfileRoot(Settings.Dir); System.Runtime.ProfileOptimization.StartProfile("startup.prof"); } catch { }   // remembers what to pre-compile: the next start is faster
             var app = new Application();
             var ui = new Ui { StartHidden = args != null && args.Any(a => string.Equals(a, "--tray", StringComparison.OrdinalIgnoreCase)) };
             app.DispatcherUnhandledException += (s, e) => { e.Handled = true; Ui.Dbg("UNHANDLED: " + e.Exception); ui.Fail(e.Exception.Message); };
             TaskScheduler.UnobservedTaskException += (s, e) => { Ui.Dbg("UNOBSERVED: " + e.Exception); e.SetObserved(); };
-            app.Run(ui.Build());
+            try { app.Run(ui.Build()); }
+            catch (Exception ex)
+            {
+                try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "CyberDisk-crash.log"), DateTime.Now + Environment.NewLine + ex + Environment.NewLine + Environment.NewLine); } catch { }
+                MessageBox.Show("CyberDisk could not start.\n\n" + ex.Message + (ex.InnerException != null ? "\n" + ex.InnerException.Message : "") + "\n\nFull details: " + Path.Combine(Path.GetTempPath(), "CyberDisk-crash.log"), "CYBERDISK", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             GC.KeepAlive(instanceLock);
         }
     }

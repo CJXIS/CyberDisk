@@ -61,6 +61,37 @@ namespace CyberDisk
             catch { return false; }
         }
 
+        static string ExeOf(string cmd)
+        {
+            cmd = Environment.ExpandEnvironmentVariables((cmd ?? "").Trim());
+            if (cmd.StartsWith("\"")) { int e = cmd.IndexOf('"', 1); if (e > 1) return cmd.Substring(1, e - 1); }
+            var m = System.Text.RegularExpressions.Regex.Match(cmd, @"^(.*?\.(exe|bat|cmd|lnk|com|msi|vbs))(\s|$)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (m.Success) return m.Groups[1].Value;
+            int sp = cmd.IndexOf(' ');
+            return sp > 0 ? cmd.Substring(0, sp) : cmd;
+        }
+
+        /// <summary>Finds the program behind an entry: its icon, publisher and whether the file still exists.</summary>
+        static void Resolve(StartupVm vm)
+        {
+            try
+            {
+                string exe = ExeOf(vm.Command);
+                vm.ExePath = exe;
+                bool ok = exe.Length > 0 && (File.Exists(exe) || Directory.Exists(exe));
+                vm.Missing = !ok;
+                if (ok)
+                {
+                    try { var vi = FileVersionInfo.GetVersionInfo(exe); vm.Publisher = !string.IsNullOrWhiteSpace(vi.CompanyName) ? vi.CompanyName.Trim() : (vi.ProductName ?? "").Trim(); } catch { }
+                    string ext = Path.GetExtension(exe).ToLowerInvariant();
+                    if (ext == ".exe") vm.Icon = ShellIcons.FromFile(exe, 0);
+                    if (vm.Icon == null) vm.Icon = ShellIcons.Get(ext, false).Icon;
+                }
+                else vm.Icon = ShellIcons.Get(".exe", false).Icon;
+            }
+            catch { }
+        }
+
         public static List<StartupVm> List()
         {
             var res = new List<StartupVm>();
@@ -83,7 +114,7 @@ namespace CyberDisk
                             var v = rk.GetValue(n) as string;
                             if (string.IsNullOrEmpty(n) || v == null) continue;
                             var vm = new StartupVm { Name = n, Command = v, Source = t.Item4, Hive = t.Item1, ApprovedKey = t.Item3 };
-                            vm.Init(IsOn(t.Item1, t.Item3, n));
+                            vm.Init(IsOn(t.Item1, t.Item3, n)); Resolve(vm);
                             res.Add(vm);
                         }
                     }
@@ -105,13 +136,13 @@ namespace CyberDisk
                         var n = Path.GetFileName(file);
                         if (n.Equals("desktop.ini", StringComparison.OrdinalIgnoreCase)) continue;
                         var vm = new StartupVm { Name = n, Command = file, Source = f.Item3, Hive = f.Item2, ApprovedKey = "StartupFolder" };
-                        vm.Init(IsOn(f.Item2, "StartupFolder", n));
+                        vm.Init(IsOn(f.Item2, "StartupFolder", n)); Resolve(vm);
                         res.Add(vm);
                     }
                 }
                 catch { }
             }
-            return res.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            return res.OrderByDescending(x => x.Enabled).ThenBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
     }
 }
