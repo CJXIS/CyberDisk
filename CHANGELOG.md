@@ -2,6 +2,23 @@
 
 All notable changes to CyberDisk are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.1] - 2026-10-27
+
+### Changed
+- **Temperatures card**: short, readable labels ("GPU · RTX 4060", "Drive 0 · HDS721010CLA332"); the CPU / graphics explanation is a small note with a button instead of a long row; a stopped GPU fan is explained; sensors that appear while the page is open (for example when LibreHardwareMonitor is started) get their row automatically; cards no longer stretch to the height of their neighbour.
+- README shows the first screenshot.
+
+## [1.4.0] - 2026-10-26
+
+### Added
+- **My PC - Temperatures**: a live card (refreshes every two seconds) with every sensor Windows exposes: motherboard thermal zones, NVIDIA graphics (temperature, fan, power), drive temperatures, and CPU / AMD / Intel graphics sensors when LibreHardwareMonitor or OpenHardwareMonitor is running. Colour-coded (green / amber / red). The values are included in the PDF, picture, text export and "copy all text".
+- **Screenshots**: SETTINGS > SCREENSHOT TOUR saves a picture of every page to Pictures\CyberDisk Screenshots; F12 saves the page you are on. `tools/update-gallery.ps1` puts the pictures from `docs/screenshots` into the README.
+- GitHub releases now publish a single `CyberDisk.exe` with its SHA-256 checksum, and the release notes are taken from this changelog.
+- README: SmartScreen explanation and how to verify the download.
+
+### Changed
+- The developer name uses calm theme colours instead of the animated rainbow.
+
 ## [1.3.2] - 2026-10-25
 
 ### Fixed

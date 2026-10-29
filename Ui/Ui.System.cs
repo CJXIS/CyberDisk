@@ -37,6 +37,25 @@ namespace CyberDisk
         TextBlock txtPcLoading; TextBox txtPcName, txtPcModel, txtPcOs, txtPcSummary;
         FrameworkElement pcContent;
         HwReport hw;
+        DispatcherTimer tempTm; int tempTicks; bool tempBusy;
+
+        /// <summary>While MY PC is open the temperature rows refresh every two seconds (drive sensors every minute).</summary>
+        void StartTempTimer()
+        {
+            if (tempTm != null) return;
+            tempTm = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            tempTm.Tick += async (_, _) =>
+            {
+                if (tempBusy || hw == null || vPc.Visibility != Visibility.Visible || !w.IsActive) return;
+                var card = hw.Cards.FirstOrDefault(c => c.LiveRows.Count > 0); if (card == null) return;
+                tempBusy = true;
+                try { tempTicks++; bool disks = tempTicks % 30 == 0; var rs = await Task.Run(() => Thermals.Read(disks)); Thermals.Fill(card, rs, false); }
+                catch { }
+                finally { tempBusy = false; }
+            };
+            tempTm.Start();
+        }
+
         Task<HwReport> hwPre;                                   // read quietly in the background shortly after start, so MY PC opens at once
 
         /// <summary>A few seconds after start (when the PC is idle) the hardware and disk data are read once in the background.</summary>
@@ -71,6 +90,11 @@ namespace CyberDisk
             bPcAdv.Content = IconLabel(Vec.Settings, "ADVANCED");
             svPc.PreviewMouseWheel += (s, e) => { svPc.ScrollToVerticalOffset(svPc.VerticalOffset - e.Delta); e.Handled = true; };
             svPc.SizeChanged += (_, _) => FitPcCards();
+            itemsHw.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) =>
+            {
+                var b = e.OriginalSource as Button; var c = b == null ? null : b.DataContext as HwCard;
+                if (b != null && (b.Tag as string) == "notelink" && c != null && c.NoteLink.Length > 0) OpenUrl(c.NoteLink);
+            }));
             bPcExport.Click += (_, _) =>
             {
                 if (hw == null) { txtStatus.Text = "THE HARDWARE INFORMATION IS STILL LOADING"; return; }
@@ -102,7 +126,7 @@ namespace CyberDisk
             txtPcModel.Text = hw.Model.Length > 0 ? hw.Model : "Custom-built PC";
             txtPcOs.Text = hw.Os + (hw.Uptime.Length > 0 ? "  ·  up " + hw.Uptime : "");
             txtPcSummary.Text = hw.Summary;
-            itemsHw.ItemsSource = null; itemsHw.ItemsSource = hw.Cards; FitPcCards();
+            itemsHw.ItemsSource = null; itemsHw.ItemsSource = hw.Cards; FitPcCards(); StartTempTimer();
             txtPcLoading.Visibility = Visibility.Collapsed; svPc.Visibility = Visibility.Visible;
             txtStatus.Text = "HARDWARE INFORMATION READY";
         }

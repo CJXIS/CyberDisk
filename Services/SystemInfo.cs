@@ -61,6 +61,7 @@ namespace CyberDisk
             var cpu = Wmi.Query("SELECT Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed, CurrentClockSpeed, L2CacheSize, L3CacheSize, Architecture, SocketDesignation, VirtualizationFirmwareEnabled, ProcessorId, Family, Revision, LoadPercentage, Description, VoltageCaps FROM Win32_Processor");
             // every card is read at the same time: the slow ones (clock measuring, disks, Wi-Fi) no longer wait for each other
             var tCpu = Task.Run(() => Safe(() => CpuCard(cpu)));
+            var tTemp = Task.Run(() => Safe(() => TempCard()));
             var tMem = Task.Run(() => Safe(() => MemoryCard(cs)));
             var tGpu = Task.Run(() => Safe(() => GpuCards().ToList()));
             var tBoard = Task.Run(() => Safe(() => BoardCard(cs)));
@@ -70,7 +71,7 @@ namespace CyberDisk
             var tOs = Task.Run(() => Safe(() => OsCard(os, cs, boot)));
             var tBat = Task.Run(() => Safe(() => BatteryCard()));
             var tSec = Task.Run(() => Safe(() => SecurityCard(cpu)));
-            Add(rep, tCpu.Result); Add(rep, tMem.Result);
+            Add(rep, tCpu.Result); Add(rep, tTemp.Result); Add(rep, tMem.Result);
             if (tGpu.Result != null) foreach (var g in tGpu.Result) Add(rep, g);
             Add(rep, tBoard.Result); Add(rep, tStore.Result); Add(rep, tDisp.Result); Add(rep, tNet.Result); Add(rep, tOs.Result); Add(rep, tBat.Result); Add(rep, tSec.Result);
 
@@ -182,6 +183,13 @@ namespace CyberDisk
         }
 
         static string OnOff(string v, string on, string off) { return v == "1" ? on : v == "0" ? off : ""; }
+
+        static HwCard TempCard()
+        {
+            var card = new HwCard { Title = "TEMPERATURES", IconData = Vec.Thermo, AccentBrush = Accent("#FF9F6B"), Headline = "Reading sensors…", Sub = "" };
+            Thermals.Fill(card, Thermals.Read(true), true);
+            return card;
+        }
 
         static volatile bool boostStop;
 
@@ -806,6 +814,7 @@ namespace CyberDisk
                 sb.AppendLine(); sb.AppendLine(c.Title + "  -  " + c.Headline); if (!string.IsNullOrEmpty(c.Sub)) sb.AppendLine("  " + c.Sub);
                 foreach (var dk in c.Disks) sb.AppendLine("  " + dk.Plain);
                 foreach (var r in c.Rows) sb.AppendLine("  " + r.K.PadRight(26) + r.V);
+                if (c.LiveRows.Count > 0) sb.AppendLine("  (live values at the moment of export)");
                 if (c.AdvRows.Count > 0) { sb.AppendLine("  -- advanced --"); foreach (var r in c.AdvRows) sb.AppendLine("  " + r.K.PadRight(26) + r.V); }
             }
             return sb.ToString();

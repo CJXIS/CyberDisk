@@ -224,6 +224,24 @@ namespace CyberDisk
             A("Virus definitions", "تعريفات الفيروسات");
             A("Activated", "منشّط");
             A("Not activated", "غير منشّط");
+            // ── v1.4: temperatures, screenshots ──
+            A("TEMPERATURES", "درجات الحرارة");
+            A("Live sensors", "حساسات حية");
+            A("No sensor available", "لا يوجد حساس متاح");
+            A("Reading sensors…", "جارٍ قراءة الحساسات…");
+            A("Windows does not expose the CPU temperature on this PC. Start LibreHardwareMonitor to show it here.", "ويندوز لا يوفّر حرارة المعالج في هذا الجهاز. شغّل LibreHardwareMonitor لتظهر هنا.");
+            A("Not exposed for this graphics card (shown automatically for NVIDIA cards).", "غير متاحة لكرت الشاشة هذا (تظهر تلقائياً لكروت NVIDIA).");
+            A("Processor", "المعالج");
+            A("Graphics", "كرت الشاشة");
+            A("GPU fan", "مروحة كرت الشاشة");
+            A("GPU power draw", "استهلاك طاقة كرت الشاشة");
+            A("SCREENSHOT TOUR", "جولة لقطات الشاشة");
+            A("START", "ابدأ");
+            A("SCREENSHOTS SAVED", "تم حفظ اللقطات");
+            A("SHOW FOLDER", "إظهار المجلد");
+            A("SCREENSHOT TOUR STOPPED", "توقفت جولة اللقطات");
+            A("COULD NOT SAVE THE SCREENSHOT", "تعذر حفظ لقطة الشاشة");
+            A("Saves a picture of every page to your Pictures folder. F12 saves the page you are on.", "يحفظ صورة لكل صفحة في مجلد الصور. زر F12 يحفظ الصفحة الحالية.");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

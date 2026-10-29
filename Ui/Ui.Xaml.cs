@@ -999,6 +999,7 @@ namespace CyberDisk
         <WrapPanel>
          <Button x:Name="bOpenData"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN SETTINGS FOLDER"/></StackPanel></Button>
          <Button x:Name="bOpenLog"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN FIX LOG"/></StackPanel></Button>
+         <Button x:Name="bShots" Style="{StaticResource Neon}" ToolTip="Saves a picture of every page to your Pictures folder. F12 saves the page you are on."><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M8 21h8 M12 17v4" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="SCREENSHOT TOUR"/></StackPanel></Button>
          <Button x:Name="bSetResetLayout"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET LAYOUT"/></StackPanel></Button>
          <Button x:Name="bResetSettings"  Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M18 6L6 18 M6 6l12 12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET ALL SETTINGS"/></StackPanel></Button>
         </WrapPanel>
@@ -1197,7 +1198,7 @@ namespace CyberDisk
        <ItemsControl x:Name="itemsHw">
         <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate><DataTemplate>
-         <Border Width="{Binding CardWidth}" CornerRadius="16" BorderBrush="#21304A" BorderThickness="1" Padding="20,18" Margin="0,0,16,16">
+         <Border Width="{Binding CardWidth}" VerticalAlignment="Top" CornerRadius="16" BorderBrush="#21304A" BorderThickness="1" Padding="20,18" Margin="0,0,16,16">
           <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="0,1"><GradientStop Color="#0F192B" Offset="0"/><GradientStop Color="#0A1220" Offset="1"/></LinearGradientBrush></Border.Background>
           <StackPanel>
            <DockPanel>
@@ -1240,9 +1241,13 @@ namespace CyberDisk
             <ItemsControl ItemsSource="{Binding Rows}"><ItemsControl.ItemTemplate><DataTemplate>
              <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="128"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
               <TextBox Style="{StaticResource Sel}" Text="{Binding K, Mode=OneWay}" Foreground="#8195B0" FontSize="12" VerticalAlignment="Top"/>
-              <TextBox Grid.Column="1" Style="{StaticResource Sel}" Text="{Binding V, Mode=OneWay}" Foreground="#E6EEFA" FontSize="12" VerticalAlignment="Top"/>
+              <TextBox Grid.Column="1" Style="{StaticResource Sel}" Text="{Binding V, Mode=OneWay}" Foreground="{Binding Tone}" FontSize="12" VerticalAlignment="Top"/>
              </Grid>
             </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+           </StackPanel>
+           <StackPanel Visibility="{Binding NoteVis}" Margin="0,10,0,0">
+            <TextBox Style="{StaticResource Sel}" Text="{Binding Note, Mode=OneWay}" Foreground="#6B7E99" FontSize="11"/>
+            <Button Tag="notelink" Visibility="{Binding NoteLinkVis}" Style="{StaticResource Neon}" Padding="12,5" FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Left"><TextBlock Text="{Binding NoteButton}"/></Button>
            </StackPanel>
            <StackPanel Visibility="{Binding AdvVis}">
             <Border Height="1" Background="#21304A" Margin="0,10,0,8"/>
@@ -1352,7 +1357,7 @@ namespace CyberDisk
     <TextBlock DockPanel.Dock="Right" Text="By Ahmad Qashqesh" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0">
      <TextBlock.Foreground><LinearGradientBrush StartPoint="0,0" EndPoint="0.5,0" SpreadMethod="Repeat">
       <LinearGradientBrush.RelativeTransform><TranslateTransform x:Name="gradC"/></LinearGradientBrush.RelativeTransform>
-      <GradientStop Color="#3DD6F5" Offset="0"/><GradientStop Color="#8B7CFF" Offset="0.25"/><GradientStop Color="#FF6B8A" Offset="0.5"/><GradientStop Color="#FFB84D" Offset="0.75"/><GradientStop Color="#3DD6F5" Offset="1"/>
+      <GradientStop Color="#8FA9C4" Offset="0"/><GradientStop Color="#C7D6EE" Offset="0.5"/><GradientStop Color="#8FA9C4" Offset="1"/>
      </LinearGradientBrush></TextBlock.Foreground></TextBlock>
     <Button x:Name="bResetLayout" DockPanel.Dock="Right"  Style="{StaticResource Neon}" FontSize="11" Padding="10,0" Margin="0,3,14,3" ToolTip="Reset zoom, menu order, drive order and pane sizes"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET LAYOUT"/></StackPanel></Button>
     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,3,14,3" VerticalAlignment="Center">
@@ -1398,7 +1403,7 @@ namespace CyberDisk
    <TextBlock x:Name="wCredit" Text="By Ahmad Qashqesh" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,2,0,0">
     <TextBlock.Foreground><LinearGradientBrush StartPoint="0,0" EndPoint="0.5,0" SpreadMethod="Repeat">
      <LinearGradientBrush.RelativeTransform><TranslateTransform x:Name="gradB"/></LinearGradientBrush.RelativeTransform>
-     <GradientStop Color="#3DDC97" Offset="0"/><GradientStop Color="#3DD6F5" Offset="0.25"/><GradientStop Color="#8B7CFF" Offset="0.5"/><GradientStop Color="#FF6B8A" Offset="0.75"/><GradientStop Color="#3DDC97" Offset="1"/>
+     <GradientStop Color="#8FA9C4" Offset="0"/><GradientStop Color="#DCE8F7" Offset="0.5"/><GradientStop Color="#8FA9C4" Offset="1"/>
     </LinearGradientBrush></TextBlock.Foreground>
    </TextBlock>
    <TextBlock x:Name="wTag" Text="Disk intelligence  ·  App control  ·  Deep cleanup" Foreground="#8195B0" FontSize="14" HorizontalAlignment="Center" Margin="0,12,0,0"/>

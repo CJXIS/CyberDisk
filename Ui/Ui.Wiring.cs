@@ -82,7 +82,7 @@ namespace CyberDisk
             bLinkedIn.Click += (_, _) => OpenUrl(DevLinkedIn);
             txtGrade = F<TextBlock>("txtGrade"); txtHealthCounts = F<TextBlock>("txtHealthCounts"); txtHealthMeta = F<TextBlock>("txtHealthMeta"); itemsCats = F<ItemsControl>("itemsCats");
             Guard("disk health", WireDisks); Guard("my pc", WirePc); Guard("app details", WireAppDetails); Guard("health extras", WireHealthExtra);
-            Guard("app errors", WireErrorsExtra); Guard("file preview", WireBrowserExtra); Guard("startup apps", WireStartupUx);
+            Guard("app errors", WireErrorsExtra); Guard("file preview", WireBrowserExtra); Guard("startup apps", WireStartupUx); Guard("screenshots", WireShots);
             WindowChrome.SetIsHitTestVisibleInChrome(bLang, true);
             bLang.Click += (_, _) => ApplyLang(!Loc.Ar, true);
 

@@ -1,10 +1,20 @@
 # CyberDisk
 
+**[⬇ Download CyberDisk.exe](https://github.com/CJXIS/CyberDisk/releases/latest/download/CyberDisk.exe)** - one file, no installer (Windows 10 / 11). [All releases](https://github.com/CJXIS/CyberDisk/releases)
+
 **A fast, all-in-one Windows toolbox: disk analyzer, cleaner, app uninstaller, PC booster, health checker and hardware viewer.**
 
 One small `.exe` (WPF, .NET Framework 4.8) for Windows 10 / 11. English and Arabic (with full right-to-left layout).
 
 By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · [LinkedIn](https://linkedin.com/in/ahmadrq)
+
+<!-- screenshots:start -->
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/10-temperatures.png" width="49%" alt="temperatures">
+</p>
+<!-- screenshots:end -->
 
 ## What it does
 
@@ -17,7 +27,17 @@ By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · 
 | **Boost** | Release idle memory, review heavy processes and startup apps. |
 | **Health** | One-click PC check (updates, file system, drivers, services, security) with a fix button for each finding. |
 | **Errors** | App crash and hang history from the Windows event log. |
-| **My PC** | Processor (base, current and measured max clock), memory, graphics, motherboard, storage, displays (refresh rate, colour depth, HDR), network, OS, battery and security. Selectable text, export as PDF / picture / text. |
+| **My PC** | Live temperatures, processor (base, current and measured max clock), memory, graphics, motherboard, storage, displays (refresh rate, colour depth, HDR), network, OS, battery and security. Selectable text, export as PDF / picture / text. |
+
+## Windows says "Windows protected your PC"?
+
+New programs that are not signed with a paid code-signing certificate show a blue **SmartScreen** notice until enough people have downloaded them. It does not mean the file is harmful. CyberDisk is open source: every line is in this repository.
+
+1. Click **More info**, then **Run anyway**.
+2. To be sure the file is the one published here, compare its SHA-256 with the value in the release notes:
+   `Get-FileHash .\CyberDisk.exe -Algorithm SHA256`
+
+CyberDisk asks for administrator rights because disk health, cleanup and repairs need them.
 
 ## Build
 

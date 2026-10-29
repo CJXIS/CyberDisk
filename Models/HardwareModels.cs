@@ -28,7 +28,16 @@ namespace CyberDisk
 {
     // ───────────────────────── PC hardware information ─────────────────────────
     /// <summary>A label / value line inside a hardware card.</summary>
-    sealed class HwRow { public string K { get; set; } public string V { get; set; } public string W { get; set; } }
+    sealed class HwRow : Obs
+    {
+        static readonly Brush defaultTone = Freeze(new SolidColorBrush(Ui.Col("#E6EEFA")));
+        static Brush Freeze(SolidColorBrush b) { b.Freeze(); return b; }
+        string v; Brush tone;
+        public string K { get; set; }
+        public string V { get { return v; } set { if (v != value) { v = value; Raise("V"); } } }
+        public string W { get; set; }
+        public Brush Tone { get { return tone ?? defaultTone; } set { tone = value; Raise("Tone"); } }
+    }
 
     /// <summary>One drive line in the Storage card.</summary>
     sealed class HwDisk
@@ -54,9 +63,18 @@ namespace CyberDisk
         public Visibility DisksVis { get { return Disks.Count > 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility RowsVis { get { return Rows.Count > 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public Brush AccentBrush { get; set; }
-        public string Headline { get; set; }           // the model name
-        public string Sub { get; set; }                // one-line summary
-        public List<HwRow> Rows { get; set; } = new List<HwRow>();
+        string headline, sub;
+        public string Headline { get { return headline; } set { headline = value; Raise("Headline"); } }     // the model name
+        public string Sub { get { return sub; } set { sub = value; Raise("Sub"); } }                          // one-line summary
+        public Dictionary<string, HwRow> LiveRows = new Dictionary<string, HwRow>();                          // rows that refresh by themselves (temperatures)
+        List<HwRow> rows = new List<HwRow>();
+        public List<HwRow> Rows { get { return rows; } set { rows = value; Raise("Rows"); Raise("RowsVis"); } }
+        string note = "", noteLink = "", noteButton = "";
+        public string Note { get { return note; } set { note = value ?? ""; Raise("Note"); Raise("NoteVis"); } }          // small grey explanation under the rows
+        public string NoteLink { get { return noteLink; } set { noteLink = value ?? ""; Raise("NoteLink"); Raise("NoteLinkVis"); } }
+        public string NoteButton { get { return noteButton; } set { noteButton = value ?? ""; Raise("NoteButton"); } }
+        public Visibility NoteVis { get { return note.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility NoteLinkVis { get { return noteLink.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
         public List<HwRow> AdvRows { get; set; } = new List<HwRow>();
         // optional live gauge (CPU load, memory in use, battery level)
         public double GaugeValue { get; set; }
