@@ -11,7 +11,9 @@ By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · 
 <!-- screenshots:start -->
 ## Screenshots
 
-
+<p align="center">
+  <img src="docs/screenshots/10-temperatures.png" width="49%" alt="temperatures">
+</p>
 <!-- screenshots:end -->
 
 ## What it does
