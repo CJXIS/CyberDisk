@@ -71,6 +71,14 @@ The SDK compiles every `.cs` file in the sub-folders automatically. The app asks
 * **A new Arabic string** - add `A("English", "العربية");` in `Localization/Loc.Arabic.cs`.
 * **An icon** - add a path to `Core/Vec.cs`.
 
+## Publishing a release
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\release.ps1 -Version 1.4.2
+```
+
+Builds `CyberDisk.exe`, writes its SHA-256, pushes the code, tags it and creates the GitHub release (with the GitHub CLI) or opens the release page so the .exe can be dragged onto it. The notes come from the matching section of `CHANGELOG.md`.
+
 ## Contributing
 
 Questions, ideas and bug reports are welcome - open an issue or write to the email above.

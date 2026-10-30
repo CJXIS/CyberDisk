@@ -134,8 +134,6 @@ namespace CyberDisk
 
         static int Order(string g) { return g == "cpu" ? 0 : g == "board" ? 1 : g == "gpu" ? 2 : g == "drive" ? 3 : 4; }
 
-        const string MonitorUrl = "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/releases";
-
         /// <summary>Creates the rows of the card (create = true) or refreshes the numbers; sensors that appear later get a row too.</summary>
         public static void Fill(HwCard card, List<Reading> rs, bool create)
         {
@@ -156,13 +154,6 @@ namespace CyberDisk
                 if (!card.LiveRows.TryGetValue(r.Key, out row)) continue;
                 row.V = TextOf(r); row.Tone = ToneOf(r);
             }
-            bool cpu = rs.Any(r => r.IsTemp && r.Group == "cpu"), gpu = rs.Any(r => r.IsTemp && r.Group == "gpu");
-            string note = "";
-            if (!cpu) note = "Windows does not give programs the CPU temperature. CyberDisk shows it here as soon as LibreHardwareMonitor (free) is running.";
-            if (!gpu) note += (note.Length > 0 ? "\n" : "") + "Graphics temperature appears automatically for NVIDIA cards; for other cards LibreHardwareMonitor provides it.";
-            card.Note = note;
-            card.NoteLink = note.Length > 0 ? MonitorUrl : "";
-            card.NoteButton = "GET LIBREHARDWAREMONITOR";
             var hottest = rs.Where(r => r.IsTemp).OrderByDescending(r => r.Value).FirstOrDefault();
             card.Headline = hottest == null ? "No sensor available" : "Hottest: " + TextOf(hottest) + "  ·  " + hottest.Label;
             card.Sub = "Live  ·  updated " + DateTime.Now.ToString("HH:mm:ss");

@@ -32,7 +32,7 @@ namespace CyberDisk
         void SetTrayOnClose(bool on)
         {
             trayOnClose = on; Settings.TrayOnClose = on;
-            if (trayChk != null && trayChk.Checked != on) trayChk.Checked = on;
+            FillTray();                                                  // redraws the tray menu so its check icon matches
             SyncSettings();
         }
 

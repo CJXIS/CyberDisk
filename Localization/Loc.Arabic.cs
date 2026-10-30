@@ -242,6 +242,8 @@ namespace CyberDisk
             A("SCREENSHOT TOUR STOPPED", "توقفت جولة اللقطات");
             A("COULD NOT SAVE THE SCREENSHOT", "تعذر حفظ لقطة الشاشة");
             A("Saves a picture of every page to your Pictures folder. F12 saves the page you are on.", "يحفظ صورة لكل صفحة في مجلد الصور. زر F12 يحفظ الصفحة الحالية.");
+            // ── tray menu (no symbols in front of the text any more) ──
+            A("Boost memory now", "تسريع الذاكرة الآن"); A("Cleanup", "التنظيف"); A("Health check", "فحص الصحة"); A("My PC", "جهازي"); A("App errors", "أخطاء التطبيقات"); A("Settings", "الإعدادات");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

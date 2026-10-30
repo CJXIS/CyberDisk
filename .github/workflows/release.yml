@@ -1,8 +1,14 @@
-﻿name: Release
+name: Release (manual)
 
+# Optional: builds CyberDisk on GitHub and publishes the release. Start it yourself:
+# GitHub > Actions > "Release (manual)" > Run workflow > type the version, for example 1.4.2.
+# The normal way is tools/release.ps1 on your own PC.
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number, for example 1.4.2'
+        required: true
 
 permissions:
   contents: write
@@ -20,17 +26,28 @@ jobs:
       - name: Build
         run: dotnet build CyberDisk.csproj -c Release
 
-      - name: Package
+      - name: Prepare the release files
         shell: pwsh
         run: |
-          $name = "CyberDisk-${{ github.ref_name }}"
-          New-Item -ItemType Directory -Force -Path "dist/$name" | Out-Null
-          Copy-Item "bin/Release/net48/*" "dist/$name" -Recurse -Exclude *.pdb
-          Compress-Archive -Path "dist/$name/*" -DestinationPath "$name.zip"
+          $exe = Get-ChildItem -Path bin -Recurse -Filter CyberDisk.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $exe) { throw 'CyberDisk.exe was not found after the build.' }
+          Copy-Item $exe.FullName CyberDisk.exe
+          $hash = (Get-FileHash CyberDisk.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  CyberDisk.exe" | Out-File -Encoding ascii CyberDisk.exe.sha256
+
+          $version = '${{ github.event.inputs.version }}'
+          $text = Get-Content CHANGELOG.md -Raw
+          $m = [regex]::Match($text, "(?ms)^## \[$([regex]::Escape($version))\].*?(?=^## \[|\z)")
+          $notes = if ($m.Success) { $m.Value.Trim() } else { "CyberDisk $version" }
+          $notes += "`n`n---`n**SHA-256:** ``$hash```n`nWindows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**."
+          Set-Content -Path release-notes.md -Value $notes -Encoding UTF8
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          name: CyberDisk ${{ github.ref_name }}
-          files: CyberDisk-${{ github.ref_name }}.zip
-          generate_release_notes: true
+          tag_name: v${{ github.event.inputs.version }}
+          name: CyberDisk ${{ github.event.inputs.version }}
+          body_path: release-notes.md
+          files: |
+            CyberDisk.exe
+            CyberDisk.exe.sha256

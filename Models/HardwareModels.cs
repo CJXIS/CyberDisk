@@ -69,12 +69,7 @@ namespace CyberDisk
         public Dictionary<string, HwRow> LiveRows = new Dictionary<string, HwRow>();                          // rows that refresh by themselves (temperatures)
         List<HwRow> rows = new List<HwRow>();
         public List<HwRow> Rows { get { return rows; } set { rows = value; Raise("Rows"); Raise("RowsVis"); } }
-        string note = "", noteLink = "", noteButton = "";
-        public string Note { get { return note; } set { note = value ?? ""; Raise("Note"); Raise("NoteVis"); } }          // small grey explanation under the rows
-        public string NoteLink { get { return noteLink; } set { noteLink = value ?? ""; Raise("NoteLink"); Raise("NoteLinkVis"); } }
-        public string NoteButton { get { return noteButton; } set { noteButton = value ?? ""; Raise("NoteButton"); } }
-        public Visibility NoteVis { get { return note.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
-        public Visibility NoteLinkVis { get { return noteLink.Length > 0 ? Visibility.Visible : Visibility.Collapsed; } }
+
         public List<HwRow> AdvRows { get; set; } = new List<HwRow>();
         // optional live gauge (CPU load, memory in use, battery level)
         public double GaugeValue { get; set; }

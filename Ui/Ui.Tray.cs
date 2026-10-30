@@ -43,6 +43,11 @@ namespace CyberDisk
             public override System.Drawing.Color MenuItemSelected { get { return C(30, 56, 84); } }
             public override System.Drawing.Color MenuItemSelectedGradientBegin { get { return C(30, 56, 84); } }
             public override System.Drawing.Color MenuItemSelectedGradientEnd { get { return C(30, 56, 84); } }
+            public override System.Drawing.Color CheckBackground { get { return C(28, 74, 92); } }
+            public override System.Drawing.Color CheckSelectedBackground { get { return C(28, 74, 92); } }
+            public override System.Drawing.Color CheckPressedBackground { get { return C(28, 74, 92); } }
+            public override System.Drawing.Color MenuItemPressedGradientBegin { get { return C(30, 56, 84); } }
+            public override System.Drawing.Color MenuItemPressedGradientEnd { get { return C(30, 56, 84); } }
             public override System.Drawing.Color SeparatorDark { get { return C(42, 61, 94); } }
             public override System.Drawing.Color SeparatorLight { get { return C(42, 61, 94); } }
         }
@@ -64,7 +69,7 @@ namespace CyberDisk
                 trayOnClose = Settings.TrayOnClose;
                 tray = new System.Windows.Forms.NotifyIcon { Text = "CyberDisk", Visible = true };
                 tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                var menu = new System.Windows.Forms.ContextMenuStrip { Renderer = new DarkRenderer(), ShowImageMargin = false, Font = new System.Drawing.Font("Segoe UI", 9.5f) };
+                var menu = new System.Windows.Forms.ContextMenuStrip { Renderer = new DarkRenderer(), ShowImageMargin = true, ShowCheckMargin = false, ImageScalingSize = new System.Drawing.Size(18, 18), Font = new System.Drawing.Font("Segoe UI", 9.5f) };
                 trayMenu = menu; FillTray();
                 tray.ContextMenuStrip = menu;
                 tray.MouseDoubleClick += (s, e) => ShowFromTray();
@@ -122,23 +127,49 @@ namespace CyberDisk
 
         // ───────── tray menu (rebuilt when the language changes) ─────────
         System.Windows.Forms.ToolStripMenuItem trayChk;
+
+        /// <summary>A vector icon as a bitmap for the tray menu (drawn at twice the size so it stays sharp).</summary>
+        static System.Drawing.Image MenuIcon(string vecPath, string hex)
+        {
+            const int px = 36;
+            var dv = new DrawingVisual();
+            using (var dc = dv.RenderOpen())
+            {
+                dc.PushTransform(new ScaleTransform(px / 24.0, px / 24.0));
+                dc.DrawGeometry(null, new Pen(Br(hex), 1.8) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round }, Vec.Geo(vecPath));
+                dc.Pop();
+            }
+            var rtb = new RenderTargetBitmap(px, px, 96, 96, PixelFormats.Pbgra32);
+            rtb.Render(dv);
+            var enc = new PngBitmapEncoder(); enc.Frames.Add(BitmapFrame.Create(rtb));
+            using (var ms = new MemoryStream())
+            {
+                enc.Save(ms); ms.Position = 0;
+                using (var tmp = new System.Drawing.Bitmap(ms)) return new System.Drawing.Bitmap(tmp);
+            }
+        }
         void FillTray()
         {
             if (trayMenu == null) return;
             trayMenu.Items.Clear();
             trayMenu.RightToLeft = Loc.Ar ? System.Windows.Forms.RightToLeft.Yes : System.Windows.Forms.RightToLeft.No;
-            trayMenu.Items.Add(Loc.T("Open CyberDisk"), null, (s, e) => ShowFromTray());
-            trayMenu.Items.Add(Loc.T("⚡  Boost memory now"), null, (s, e) => TrayBoost());
-            trayMenu.Items.Add(Loc.T("✦  Cleanup"), null, (s, e) => { ShowFromTray(); Go(vClean); EnterClean(); });
-            trayMenu.Items.Add(Loc.T("✚  Health check"), null, (s, e) => { ShowFromTray(); Go(vHealth); });
-            trayMenu.Items.Add(Loc.T("▣  My PC"), null, (s, e) => { ShowFromTray(); Go(vPc); EnterPc(); });
-            trayMenu.Items.Add(Loc.T("⚠  App errors"), null, (s, e) => { ShowFromTray(); Go(vErrors); EnterErrors(); });
-            trayMenu.Items.Add(Loc.T("⚙  Settings"), null, (s, e) => { ShowFromTray(); Go(vSettings); SyncSettings(); });
+            Func<string, string, string, EventHandler, System.Windows.Forms.ToolStripMenuItem> item = (text, icon, color, click) =>
+            {
+                var it = new System.Windows.Forms.ToolStripMenuItem(Loc.T(text), MenuIcon(icon, color), click) { Padding = new System.Windows.Forms.Padding(2, 5, 2, 5) };
+                trayMenu.Items.Add(it);
+                return it;
+            };
+            var open = item("Open CyberDisk", Vec.Drives, "#3DD6F5", (s, e) => ShowFromTray());
+            open.Font = new System.Drawing.Font(trayMenu.Font, System.Drawing.FontStyle.Bold);
+            item("Boost memory now", Vec.Boost, "#3DD6F5", (s, e) => TrayBoost());
+            item("Cleanup", Vec.Clean, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vClean); EnterClean(); });
+            item("Health check", Vec.Health, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vHealth); });
+            item("My PC", Vec.Cpu, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vPc); EnterPc(); });
+            item("App errors", Vec.Errors, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vErrors); EnterErrors(); });
+            item("Settings", Vec.Settings, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vSettings); SyncSettings(); });
             trayMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
-            trayChk = new System.Windows.Forms.ToolStripMenuItem(Loc.T("Close button hides to the tray")) { Checked = trayOnClose, CheckOnClick = true };
-            trayChk.CheckedChanged += (s, e) => { if (trayOnClose != trayChk.Checked) SetTrayOnClose(trayChk.Checked); };
-            trayMenu.Items.Add(trayChk);
-            trayMenu.Items.Add(Loc.T("Exit"), null, (s, e) => ExitApp());
+            trayChk = item("Close button hides to the tray", trayOnClose ? Vec.Check : Vec.Close, trayOnClose ? "#3DDC97" : "#8195B0", (s, e) => SetTrayOnClose(!trayOnClose));
+            item("Exit", Vec.Power, "#FF6B8A", (s, e) => ExitApp());
         }
     }
 }

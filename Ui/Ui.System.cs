@@ -89,12 +89,8 @@ namespace CyberDisk
             };
             bPcAdv.Content = IconLabel(Vec.Settings, "ADVANCED");
             svPc.PreviewMouseWheel += (s, e) => { svPc.ScrollToVerticalOffset(svPc.VerticalOffset - e.Delta); e.Handled = true; };
+            itemsHw.ItemsPanel = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(MasonryPanel)));          // columns that fill up evenly
             svPc.SizeChanged += (_, _) => FitPcCards();
-            itemsHw.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) =>
-            {
-                var b = e.OriginalSource as Button; var c = b == null ? null : b.DataContext as HwCard;
-                if (b != null && (b.Tag as string) == "notelink" && c != null && c.NoteLink.Length > 0) OpenUrl(c.NoteLink);
-            }));
             bPcExport.Click += (_, _) =>
             {
                 if (hw == null) { txtStatus.Text = "THE HARDWARE INFORMATION IS STILL LOADING"; return; }

@@ -1245,10 +1245,6 @@ namespace CyberDisk
              </Grid>
             </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
            </StackPanel>
-           <StackPanel Visibility="{Binding NoteVis}" Margin="0,10,0,0">
-            <TextBox Style="{StaticResource Sel}" Text="{Binding Note, Mode=OneWay}" Foreground="#6B7E99" FontSize="11"/>
-            <Button Tag="notelink" Visibility="{Binding NoteLinkVis}" Style="{StaticResource Neon}" Padding="12,5" FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Left"><TextBlock Text="{Binding NoteButton}"/></Button>
-           </StackPanel>
            <StackPanel Visibility="{Binding AdvVis}">
             <Border Height="1" Background="#21304A" Margin="0,10,0,8"/>
             <TextBlock Text="ADVANCED" FontSize="10" FontWeight="Bold" Foreground="#8B7CFF" Margin="0,0,0,2"/>
