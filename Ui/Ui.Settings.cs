@@ -36,8 +36,44 @@ namespace CyberDisk
             SyncSettings();
         }
 
+        Button bThemeDark, bThemeLight, bThemeAuto;
+
+        void WireTheme()
+        {
+            bThemeDark = F<Button>("bThemeDark"); bThemeLight = F<Button>("bThemeLight"); bThemeAuto = F<Button>("bThemeAuto");
+            bThemeDark.Click += (_, _) => ChooseTheme("dark");
+            bThemeLight.Click += (_, _) => ChooseTheme("light");
+            bThemeAuto.Click += (_, _) => ChooseTheme("system");
+            SyncSettings();
+        }
+
+        async void ChooseTheme(string t)
+        {
+            if (Settings.Theme == t) return;
+            Settings.Theme = t; SyncSettings();
+            int pick = await Ask("RESTART TO APPLY THE THEME", "CyberDisk has to restart to change its colours. Nothing you have open is lost - scans and cleanups that are running will stop.", "question", "RESTART NOW", "LATER");
+            if (pick == 0) RestartApp();
+        }
+
+        /// <summary>Starts a fresh copy a few seconds after this one has closed (only one copy may run at a time).</summary>
+        void RestartApp()
+        {
+            try
+            {
+                string exe = System.Reflection.Assembly.GetEntryAssembly().Location;
+                Process.Start(new ProcessStartInfo("cmd.exe", "/c ping 127.0.0.1 -n 4 >nul & start \"\" \"" + exe + "\"") { CreateNoWindow = true, UseShellExecute = false });
+            }
+            catch { }
+            ExitApp();
+        }
+
         void SyncSettings()
         {
+            if (bThemeDark != null)
+            {
+                string t = Settings.Theme;
+                bThemeDark.Background = Br(t == "dark" ? "#333DD6F5" : "#111E31"); bThemeLight.Background = Br(t == "light" ? "#333DD6F5" : "#111E31"); bThemeAuto.Background = Br(t == "system" ? "#333DD6F5" : "#111E31");
+            }
             if (chkTray == null) return;
             settingsSync = true;
             try

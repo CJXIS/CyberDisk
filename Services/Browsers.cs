@@ -119,7 +119,7 @@ namespace CyberDisk
                     var it = new CleanItem
                     {
                         Name = t.Name, Desc = t.Desc, Glyph = t.Glyph, Group = d.Name, Browser = d.Key,
-                        Accent = new SolidColorBrush(Ui.Col(t.Accent)), Checked = t.On,
+                        Accent = new SolidColorBrush(Ui.Col(t.Accent)), Checked = false,          // nothing is selected until the user chooses it
                         Roots = () => plist.SelectMany(p => dirs.Select(r => Path.Combine(p, r))).Where(x => Directory.Exists(x)).ToList(),
                         SingleFiles = () => plist.SelectMany(p => files.Select(r => Path.Combine(p, r))).Where(x => File.Exists(x)).ToList()
                     };

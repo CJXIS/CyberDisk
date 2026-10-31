@@ -111,7 +111,7 @@ namespace CyberDisk
             if (found.Count == 0) { txtStatus.Text = "NO LEFTOVERS · " + a.Name + " is completely gone"; return; }
             txtStatus.Text = "READY";
 
-            var root = (FrameworkElement)XamlReader.Parse(DlgXaml);
+            var root = (FrameworkElement)XamlReader.Parse(Theme.MapXaml(DlgXaml));
             var list = (ItemsControl)root.FindName("dlgList"); var sub = (TextBlock)root.FindName("dlgSub"); var sum = (TextBlock)root.FindName("dlgSum");
             var bScan = (Button)root.FindName("dlgScan"); var bSkip = (Button)root.FindName("dlgSkip"); var bDel = (Button)root.FindName("dlgDelete");
             var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);

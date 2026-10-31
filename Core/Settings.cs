@@ -47,6 +47,7 @@ namespace CyberDisk
         static void SetB(string k, bool v) { d[k] = v ? "1" : "0"; Save(); }
 
         public static string Lang { get { string v; return d.TryGetValue("lang", out v) && v == "ar" ? "ar" : "en"; } set { d["lang"] = value; Save(); } }
+        public static string Theme { get { string v; return d.TryGetValue("theme", out v) && (v == "light" || v == "system") ? v : "dark"; } set { d["theme"] = value; Save(); } }
         public static bool TrayOnClose { get { return B("tray", true); } set { SetB("tray", value); } }
         public static bool ShowWelcome { get { return B("welcome", true); } set { SetB("welcome", value); } }
         public static bool Animations { get { return B("anim", true); } set { SetB("anim", value); } }

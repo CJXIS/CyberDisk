@@ -95,7 +95,7 @@ namespace CyberDisk
         static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Color> colCache = new System.Collections.Concurrent.ConcurrentDictionary<string, Color>();
         static readonly System.Collections.Concurrent.ConcurrentDictionary<string, SolidColorBrush> brCache = new System.Collections.Concurrent.ConcurrentDictionary<string, SolidColorBrush>();
         /// <summary>Colour from "#RRGGBB" text - parsed once, then served from a cache (this is called thousands of times).</summary>
-        public static Color Col(string c) => colCache.GetOrAdd(c, k => (Color)ColorConverter.ConvertFromString(k));
+        public static Color Col(string c) => colCache.GetOrAdd(c, k => (Color)ColorConverter.ConvertFromString(Theme.Map(k)));
         /// <summary>Shared frozen brush: frozen brushes are cheaper to render and safe to use from any thread.</summary>
         static SolidColorBrush Br(string c) => brCache.GetOrAdd(c, k => { var b = new SolidColorBrush(Col(k)); b.Freeze(); return b; });
         static double Pct(long a, long b) => b > 0 ? 100.0 * a / b : 0;
@@ -118,7 +118,7 @@ namespace CyberDisk
         public Window Build()
         {
             Settings.Load(cfg); Health.LoadReviewed(); Health.LoadIgnored(); AppErr.LoadDismissed(); Loc.Ar = Settings.Lang == "ar";
-            w = (Window)XamlReader.Parse(Xaml);
+            w = (Window)XamlReader.Parse(Theme.MapXaml(Xaml));
             vDrives = F<FrameworkElement>("vDrives"); vBrowse = F<FrameworkElement>("vBrowse"); vApps = F<FrameworkElement>("vApps");
             pvBody = F<FrameworkElement>("pvBody"); apBody = F<FrameworkElement>("apBody");
             itemsDrives = F<ItemsControl>("itemsDrives"); gs = F<DataGrid>("gs"); ga = F<DataGrid>("ga");

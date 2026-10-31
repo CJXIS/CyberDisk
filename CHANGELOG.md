@@ -2,6 +2,14 @@
 
 All notable changes to CyberDisk are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.0] - 2026-10-30
+
+### Added
+- **Light theme**: SETTINGS > APPEARANCE > Theme: Dark, Light or Follow Windows. Every colour of the app (pages, dialogs, charts, exports) switches together; accent colours are darkened automatically so text stays readable on white. CyberDisk restarts to apply the change.
+
+### Changed
+- **Clean > Browsers**: nothing is selected by default any more. Tick a browser (or a single item) to include it.
+
 ## [1.4.2] - 2026-10-27
 
 ### Added

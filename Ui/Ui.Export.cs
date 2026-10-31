@@ -113,7 +113,7 @@ namespace CyberDisk
             var logo = IconShape(Vec.Drives, Br("#3DD6F5"), 20, 1.8); logo.Margin = new Thickness(0, 0, 8, 0);
             brand.Children.Add(logo); brand.Children.Add(new TextBlock { Text = "CYBERDISK", FontSize = 13, FontWeight = FontWeights.Bold, Foreground = Br("#3DD6F5"), VerticalAlignment = VerticalAlignment.Center });
             left.Children.Add(brand);
-            left.Children.Add(new TextBlock { Text = title, FontSize = 26, FontWeight = FontWeights.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 10, 0, 0) });
+            left.Children.Add(new TextBlock { Text = title, FontSize = 26, FontWeight = FontWeights.Bold, Foreground = Br("#FFFFFF"), Margin = new Thickness(0, 10, 0, 0) });
             if (!string.IsNullOrWhiteSpace(subtitle)) left.Children.Add(new TextBlock { Text = subtitle, FontSize = 13, Foreground = Br("#8195B0"), Margin = new Thickness(0, 4, 0, 0), TextWrapping = TextWrapping.Wrap });
             hg.Children.Add(left);
             var right = new StackPanel { VerticalAlignment = VerticalAlignment.Top, HorizontalAlignment = HorizontalAlignment.Right };

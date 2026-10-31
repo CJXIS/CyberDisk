@@ -244,6 +244,16 @@ namespace CyberDisk
             A("Saves a picture of every page to your Pictures folder. F12 saves the page you are on.", "يحفظ صورة لكل صفحة في مجلد الصور. زر F12 يحفظ الصفحة الحالية.");
             // ── tray menu (no symbols in front of the text any more) ──
             A("Boost memory now", "تسريع الذاكرة الآن"); A("Cleanup", "التنظيف"); A("Health check", "فحص الصحة"); A("My PC", "جهازي"); A("App errors", "أخطاء التطبيقات"); A("Settings", "الإعدادات");
+            // ── v1.5: theme ──
+            A("Theme", "المظهر");
+            A("Dark", "داكن");
+            A("Light", "فاتح");
+            A("Follow Windows", "حسب ويندوز");
+            A("Dark or light colours. CyberDisk restarts to apply the change.", "ألوان داكنة أو فاتحة. يعيد CyberDisk التشغيل لتطبيق التغيير.");
+            A("RESTART TO APPLY THE THEME", "إعادة التشغيل لتطبيق المظهر");
+            A("CyberDisk has to restart to change its colours. Nothing you have open is lost - scans and cleanups that are running will stop.", "يجب أن يعيد CyberDisk التشغيل لتغيير الألوان. لن يضيع شيء من ملفاتك، لكن عمليات الفحص والتنظيف الجارية ستتوقف.");
+            A("RESTART NOW", "إعادة التشغيل الآن");
+            A("LATER", "لاحقاً");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

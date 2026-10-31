@@ -954,6 +954,17 @@ namespace CyberDisk
         <TextBlock Text="APPEARANCE" FontSize="11" FontWeight="Bold" Foreground="#3DD6F5"/>
         <DockPanel Margin="0,10,0,0">
          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button x:Name="bThemeDark" Content="Dark" Style="{StaticResource Neon}" Padding="16,6"/>
+          <Button x:Name="bThemeLight" Content="Light" Style="{StaticResource Neon}" Padding="16,6"/>
+          <Button x:Name="bThemeAuto" Content="Follow Windows" Style="{StaticResource Neon}" Padding="16,6" Margin="0"/>
+         </StackPanel>
+         <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="Theme" FontWeight="SemiBold"/>
+          <TextBlock Text="Dark or light colours. CyberDisk restarts to apply the change." Foreground="#8195B0" FontSize="12" TextWrapping="Wrap"/>
+         </StackPanel>
+        </DockPanel>
+        <DockPanel Margin="0,16,0,0">
+         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
           <Button x:Name="bSetZoomOut" Content="−" Style="{StaticResource Neon}" Padding="14,4" FontSize="16"/>
           <TextBlock x:Name="txtSetZoom" Text="100%" Width="54" TextAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
           <Button x:Name="bSetZoomIn" Content="+" Style="{StaticResource Neon}" Padding="14,4" Margin="0" FontSize="16"/>

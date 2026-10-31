@@ -4,7 +4,7 @@
 
 **A fast, all-in-one Windows toolbox: disk analyzer, cleaner, app uninstaller, PC booster, health checker and hardware viewer.**
 
-One small `.exe` (WPF, .NET Framework 4.8) for Windows 10 / 11. English and Arabic (with full right-to-left layout).
+One small `.exe` (WPF, .NET Framework 4.8) for Windows 10 / 11. English and Arabic (with full right-to-left layout), dark and light themes.
 
 By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · [LinkedIn](https://linkedin.com/in/ahmadrq)
 
