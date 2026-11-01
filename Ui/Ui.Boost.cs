@@ -119,11 +119,31 @@ namespace CyberDisk
 
         async void RemoveStartup(StartupVm vm)
         {
-            if (!(await Confirm("REMOVE FROM STARTUP", "Remove \"" + vm.Name + "\" from Windows startup?\n\nThe program stays installed - it just stops starting with Windows. A copy of the entry is kept, so RESTORE REMOVED can bring it back.", "REMOVE", "CANCEL", "warn"))) return;
-            string err = await Task.Run(() => Startup.Remove(vm));
-            if (err != null) { await Msg("COULD NOT REMOVE IT", err, "danger"); return; }
-            startup.Remove(vm); StartupHead();
-            txtStatus.Text = "REMOVED " + vm.Name.ToUpperInvariant() + " FROM STARTUP";
+            var matches = await Task.Run(() => Startup.Matches(vm));
+            if (matches.Count == 0)
+            {
+                try { startup = await Task.Run(() => Startup.List()); } catch { }
+                startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
+                itemsStartup.ItemsSource = startupView; StartupHead();
+                await Msg("ALREADY GONE", "\"" + vm.Name + "\" is no longer in the Windows startup lists. The list was refreshed.", "info");
+                return;
+            }
+            string list = string.Join("\n", matches.Select(m => "• " + m.Name + "   (" + m.Label + ")"));
+            if (!(await Confirm("REMOVE FROM STARTUP", "These entries start \"" + vm.Name + "\" with Windows and will be deleted from the system:\n\n" + list + "\n\nThe program stays installed. A copy is kept, so RESTORE REMOVED can bring them back.", "REMOVE", "CANCEL", "warn"))) return;
+
+            var res = await Task.Run(() => Startup.Remove(matches, vm.Name, vm.ExePath));
+            try { startup = await Task.Run(() => Startup.List()); } catch { }
+            startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
+            itemsStartup.ItemsSource = startupView;
+            StartupHead();
+
+            var sb = new StringBuilder();
+            if (res.Places.Count > 0) { sb.AppendLine("Deleted:"); foreach (var pl in res.Places) sb.AppendLine("  ✓ " + pl); }
+            if (res.Failed.Count > 0) { sb.AppendLine(); sb.AppendLine("Windows did not allow:"); foreach (var f in res.Failed) sb.AppendLine("  ✖ " + f); }
+            if (res.Failed.Count == 0) { sb.AppendLine(); sb.Append("Close Task Manager and open it again to see the change."); }
+            if (res.Running) { sb.AppendLine(); sb.Append("\n" + vm.Name + " is running right now. Some programs write their startup entry again when they start or close - if it comes back, turn off \"start with Windows\" inside that program too."); }
+            txtStatus.Text = res.Failed.Count == 0 ? "REMOVED " + vm.Name.ToUpperInvariant() + " FROM STARTUP" : "SOME ENTRIES COULD NOT BE REMOVED";
+            await Msg(res.Failed.Count == 0 ? "REMOVED FROM STARTUP" : "REMOVED WITH PROBLEMS", sb.ToString().Trim(), res.Failed.Count == 0 ? "info" : "warn");
         }
 
         async void RestoreStartup()

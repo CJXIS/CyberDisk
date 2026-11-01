@@ -2,6 +2,11 @@
 
 All notable changes to CyberDisk are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.2] - 2026-11-01
+
+### Fixed
+- **Startup removal is now complete.** Removing an app deletes every entry that starts it with Windows - the Run list of this user, of all users and of the 32-bit view, the policy Run lists, and the shortcuts in both startup folders - so it also disappears from Task Manager > Startup apps. Before deleting, the list of entries is shown; afterwards each one is checked to be really gone, a second method is tried when Windows refuses, and the final message says exactly what was deleted. If the program is running, you are told that some programs write their entry again and how to stop that.
+
 ## [1.5.1] - 2026-10-31
 
 ### Added

@@ -258,6 +258,11 @@ namespace CyberDisk
             A("Enabled", "مفعّل");
             A("Turned off in the BIOS / UEFI", "معطّل من BIOS / UEFI");
             A("Not available (turned off in the BIOS / UEFI or not supported)", "غير متاح (معطّل من BIOS / UEFI أو غير مدعوم)");
+            // ── v1.5.2 ──
+            A("ALREADY GONE","تمت إزالته بالفعل");
+            A("REMOVED FROM STARTUP", "تمت الإزالة من بدء التشغيل");
+            A("REMOVED WITH PROBLEMS", "تمت الإزالة مع بعض المشاكل");
+            A("SOME ENTRIES COULD NOT BE REMOVED", "تعذرت إزالة بعض العناصر");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

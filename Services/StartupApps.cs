@@ -96,43 +96,142 @@ namespace CyberDisk
         public static int RemovedCount() { return LoadRemoved().Count; }
         public static List<string> RemovedNames() { return LoadRemoved().Select(r => r.Name).ToList(); }
 
-        /// <summary>Deletes the entry from Windows startup. The program itself stays installed. Returns null when it worked, otherwise the reason.</summary>
-        public static string Remove(StartupVm s)
+        // every place Windows (and Task Manager) reads startup programs from
+        const string POLICY = @"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run";
+
+        internal sealed class Src { public RegistryHive Hive; public RegistryView View; public string Path, Approved, Label; }
+        static readonly Src[] RunSources =
         {
-            try
+            new Src { Hive = RegistryHive.CurrentUser,  View = RegistryView.Registry64, Path = RUN,    Approved = "Run",   Label = "Run list · this user" },
+            new Src { Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64, Path = RUN,    Approved = "Run",   Label = "Run list · all users" },
+            new Src { Hive = RegistryHive.LocalMachine, View = RegistryView.Registry32, Path = RUN,    Approved = "Run32", Label = "Run list · all users (32-bit)" },
+            new Src { Hive = RegistryHive.CurrentUser,  View = RegistryView.Registry64, Path = POLICY, Approved = null,    Label = "Policy list · this user" },
+            new Src { Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64, Path = POLICY, Approved = null,    Label = "Policy list · all users" },
+            new Src { Hive = RegistryHive.LocalMachine, View = RegistryView.Registry32, Path = POLICY, Approved = null,    Label = "Policy list · all users (32-bit)" },
+        };
+
+        /// <summary>One thing that starts the program: a registry value or a file in a startup folder.</summary>
+        public sealed class Match { internal Src Source; public string Name, Command, FilePath, Label; public RegistryHive FolderHive; }
+
+        public sealed class RemoveResult { public List<string> Places = new List<string>(), Failed = new List<string>(); public bool Running; public string ProgramName = ""; }
+
+        /// <summary>Everything that starts the same program as this entry (same name or same executable) - this is what will be removed.</summary>
+        public static List<Match> Matches(StartupVm s)
+        {
+            var res = new List<Match>();
+            string exe = ExeOf(s.Command).ToLowerInvariant();
+            bool useExe = exe.Length > 3;
+            foreach (var src in RunSources)
             {
-                var rec = new Removed { Hive = s.Hive.ToString(), Key = s.ApprovedKey, Name = s.Name, Command = s.Command, Original = "", Backup = "", View = "" };
-                if (s.ApprovedKey == "StartupFolder")
+                try
                 {
-                    if (!File.Exists(s.Command)) return "The startup file no longer exists.";
-                    Directory.CreateDirectory(RemovedDir);
-                    string copy = Path.Combine(RemovedDir, Guid.NewGuid().ToString("N") + "-" + Path.GetFileName(s.Command));
-                    File.Copy(s.Command, copy, true);
-                    File.SetAttributes(s.Command, FileAttributes.Normal);
-                    File.Delete(s.Command);
-                    rec.Kind = "file"; rec.Original = s.Command; rec.Backup = copy;
-                }
-                else
-                {
-                    var view = s.ApprovedKey == "Run32" ? RegistryView.Registry32 : RegistryView.Registry64;
-                    rec.Kind = "reg"; rec.View = view.ToString();
-                    using (var bk = RegistryKey.OpenBaseKey(s.Hive, view))
-                    using (var rk = bk.OpenSubKey(RUN, true))
+                    using (var bk = RegistryKey.OpenBaseKey(src.Hive, src.View))
+                    using (var rk = bk.OpenSubKey(src.Path))
                     {
-                        if (rk == null) return "The startup list could not be opened.";
-                        rk.DeleteValue(s.Name, false);
+                        if (rk == null) continue;
+                        foreach (var n in rk.GetValueNames())
+                        {
+                            string v = rk.GetValue(n) as string; if (string.IsNullOrEmpty(n) || v == null) continue;
+                            bool byName = src.Approved != null && string.Equals(n, s.Name, StringComparison.OrdinalIgnoreCase);
+                            bool byExe = useExe && ExeOf(v).ToLowerInvariant() == exe;
+                            if (byName || byExe) res.Add(new Match { Source = src, Name = n, Command = v, Label = src.Label });
+                        }
                     }
                 }
-                try   // the on / off flag of the entry goes too
+                catch { }
+            }
+            var folders = new[] { Tuple.Create(Environment.GetFolderPath(Environment.SpecialFolder.Startup), RegistryHive.CurrentUser, "Startup folder · this user"),
+                                  Tuple.Create(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), RegistryHive.LocalMachine, "Startup folder · all users") };
+            foreach (var f in folders)
+            {
+                try
                 {
-                    using (var bk = RegistryKey.OpenBaseKey(s.Hive, RegistryView.Registry64))
-                    using (var k = bk.OpenSubKey(APPROVED + s.ApprovedKey, true)) { if (k != null) k.DeleteValue(s.Name, false); }
+                    if (!Directory.Exists(f.Item1)) continue;
+                    foreach (var file in Directory.GetFiles(f.Item1))
+                    {
+                        string n = Path.GetFileName(file);
+                        if (n.Equals("desktop.ini", StringComparison.OrdinalIgnoreCase)) continue;
+                        bool same = string.Equals(file, s.Command, StringComparison.OrdinalIgnoreCase) || (s.ApprovedKey == "StartupFolder" && string.Equals(n, s.Name, StringComparison.OrdinalIgnoreCase));
+                        if (same) res.Add(new Match { FilePath = file, Name = n, Command = file, Label = f.Item3, FolderHive = f.Item2 });
+                    }
                 }
                 catch { }
-                var all = LoadRemoved(); all.Add(rec); SaveRemoved(all);
-                return null;
             }
-            catch (Exception ex) { return ex.Message; }
+            return res;
+        }
+
+        static void DeleteApproved(RegistryHive hive, string key, string name)
+        {
+            if (string.IsNullOrEmpty(key)) return;
+            try
+            {
+                using (var bk = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
+                using (var k = bk.OpenSubKey(APPROVED + key, true)) { if (k != null) k.DeleteValue(name, false); }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Deletes the startup entries for good (registry values and startup-folder files), checks that each one is really gone,
+        /// and keeps a copy of everything so RestoreAll can put it back.
+        /// </summary>
+        public static RemoveResult Remove(List<Match> matches, string programName, string exePath)
+        {
+            var result = new RemoveResult { ProgramName = programName };
+            var records = LoadRemoved();
+            foreach (var m in matches)
+            {
+                try
+                {
+                    if (m.Source == null)                                    // a file in a startup folder
+                    {
+                        if (File.Exists(m.FilePath))
+                        {
+                            Directory.CreateDirectory(RemovedDir);
+                            string copy = Path.Combine(RemovedDir, Guid.NewGuid().ToString("N") + "-" + Path.GetFileName(m.FilePath));
+                            File.Copy(m.FilePath, copy, true);
+                            File.SetAttributes(m.FilePath, FileAttributes.Normal);
+                            File.Delete(m.FilePath);
+                            if (File.Exists(m.FilePath)) { result.Failed.Add(m.Label + " · " + m.Name); continue; }
+                            records.Add(new Removed { Kind = "file", Hive = m.FolderHive.ToString(), View = "", Key = "StartupFolder", Name = m.Name, Command = m.Command, Original = m.FilePath, Backup = copy });
+                        }
+                        DeleteApproved(m.FolderHive, "StartupFolder", m.Name);
+                        result.Places.Add(m.Label + " · " + m.Name);
+                        continue;
+                    }
+                    var src = m.Source; bool gone = false;
+                    using (var bk = RegistryKey.OpenBaseKey(src.Hive, src.View))
+                    using (var rk = bk.OpenSubKey(src.Path, true))
+                    {
+                        if (rk != null)
+                        {
+                            rk.DeleteValue(m.Name, false);
+                            gone = rk.GetValue(m.Name) == null;
+                        }
+                        else gone = true;
+                    }
+                    if (!gone)                                                // second try with the built-in registry tool
+                    {
+                        string root = src.Hive == RegistryHive.CurrentUser ? "HKCU" : "HKLM", o;
+                        Fixer.Exec("reg.exe", "delete \"" + root + "\\" + src.Path + "\" /v \"" + m.Name + "\" /f /reg:" + (src.View == RegistryView.Registry32 ? "32" : "64"), 8000, out o);
+                        using (var bk = RegistryKey.OpenBaseKey(src.Hive, src.View))
+                        using (var rk = bk.OpenSubKey(src.Path)) gone = rk == null || rk.GetValue(m.Name) == null;
+                    }
+                    if (!gone) { result.Failed.Add(m.Label + " · " + m.Name); continue; }
+                    DeleteApproved(src.Hive, src.Approved, m.Name);
+                    records.Add(new Removed { Kind = "reg", Hive = src.Hive.ToString(), View = src.View.ToString(), Key = src.Approved ?? "", Name = m.Name, Command = m.Command, Original = src.Path == RUN ? "" : src.Path, Backup = "" });
+                    result.Places.Add(m.Label + " · " + m.Name);
+                }
+                catch (Exception ex) { result.Failed.Add(m.Label + " · " + m.Name + " (" + ex.Message + ")"); }
+            }
+            SaveRemoved(records);
+            try
+            {
+                string pn = Path.GetFileNameWithoutExtension(exePath ?? "");
+                result.Running = pn.Length > 0 && Process.GetProcessesByName(pn).Length > 0;
+            }
+            catch { }
+            return result;
         }
 
         /// <summary>Puts every removed entry back. Returns how many could not be restored.</summary>
@@ -154,14 +253,9 @@ namespace CyberDisk
                     {
                         var view = (RegistryView)Enum.Parse(typeof(RegistryView), r.View);
                         using (var bk = RegistryKey.OpenBaseKey(hive, view))
-                        using (var rk = bk.CreateSubKey(RUN)) rk.SetValue(r.Name, r.Command, RegistryValueKind.String);
+                        using (var rk = bk.CreateSubKey(string.IsNullOrEmpty(r.Original) ? RUN : r.Original)) rk.SetValue(r.Name, r.Command, RegistryValueKind.String);
                     }
-                    try
-                    {
-                        using (var bk = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
-                        using (var k = bk.OpenSubKey(APPROVED + r.Key, true)) { if (k != null) k.DeleteValue(r.Name, false); }       // back to "on"
-                    }
-                    catch { }
+                    DeleteApproved(hive, r.Key, r.Name);                                                                           // back to "on"
                 }
                 catch { failed++; keep.Add(r); }
             }

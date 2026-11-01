@@ -10,6 +10,6 @@
 - The screenshot tour and the screenshots section of the README.
 
 ---
-**SHA-256:** `803b974bba473c75c60e0b270b9bcc82f3809ab1aac023afe89e7f30d30529de`
+**SHA-256:** `55d69f313724d821461be822c9bad9411ffe970641daf70bced2afbde788f601`
 
 Windows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**.
