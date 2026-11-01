@@ -115,14 +115,13 @@ namespace CyberDisk
             card.AdvRows.Add(R("Socket", Wmi.Str(c, "SocketDesignation")));
             card.AdvRows.Add(R("L2 cache", Kb(Wmi.Long(c, "L2CacheSize"))));
             card.AdvRows.Add(R("L3 cache", Kb(Wmi.Long(c, "L3CacheSize"))));
-            card.AdvRows.Add(R("Virtualization", Wmi.Bool(c, "VirtualizationFirmwareEnabled") ? "Enabled in firmware" : "Disabled or not supported"));
             card.AdvRows.Add(R("Family / revision", Wmi.Str(c, "Family") + " / " + Wmi.Str(c, "Revision")));
             card.AdvRows.Add(R("Processor ID", Wmi.Str(c, "ProcessorId")));
             card.AdvRows.Add(R("Description", Wmi.Str(c, "Description")));
             string temp = CpuTemperature();
             card.AdvRows.Add(R("Thermal zone", temp));
             card.Rows.Add(R("Hyper-Threading / SMT", threads > cores ? "On  ·  " + (threads / Math.Max(1, cores)) + " threads per core" : "Off"));
-            card.Rows.Add(R("Virtualization", Wmi.Bool(c, "VirtualizationFirmwareEnabled") ? "Enabled" : "Disabled or not supported"));
+            card.Rows.Add(R("Virtualization", VirtualizationText()));
             card.Rows.Add(R("Power plan", ActivePowerPlan()));
             card.AdvRows.Add(R("Instruction sets", CpuFeatures()));
             const string cpuKey = @"HARDWARE\DESCRIPTION\System\CentralProcessor\0";
@@ -189,6 +188,25 @@ namespace CyberDisk
             var card = new HwCard { Title = "TEMPERATURES", IconData = Vec.Thermo, AccentBrush = Accent("#FF9F6B"), Headline = "Reading sensors…", Sub = "" };
             Thermals.Fill(card, Thermals.Read(true), true);
             return card;
+        }
+
+        /// <summary>
+        /// Windows hides the firmware switch once its own hypervisor runs (Hyper-V, WSL2, memory integrity), so "VirtualizationFirmwareEnabled" alone
+        /// reports "off" on PCs where virtualization is on. The hypervisor flag and the processor feature flag are checked too.
+        /// </summary>
+        static string VirtualizationText()
+        {
+            bool hv = false, fw = false, supported = false;
+            try { var cs = Wmi.Query("SELECT HypervisorPresent FROM Win32_ComputerSystem").FirstOrDefault(); hv = cs != null && Wmi.Bool(cs, "HypervisorPresent"); } catch { }
+            try
+            {
+                var p = Wmi.Query("SELECT VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor").FirstOrDefault();
+                if (p != null) { fw = Wmi.Bool(p, "VirtualizationFirmwareEnabled"); supported = Wmi.Bool(p, "VMMonitorModeExtensions"); }
+            }
+            catch { }
+            try { if (IsProcessorFeaturePresent(21)) fw = true; } catch { }              // PF_VIRT_FIRMWARE_ENABLED
+            if (fw || hv) return "Enabled" + (hv ? "  ·  in use by Windows (Hyper-V / WSL / memory integrity)" : "");
+            return supported ? "Turned off in the BIOS / UEFI" : "Not available (turned off in the BIOS / UEFI or not supported)";
         }
 
         static volatile bool boostStop;
@@ -762,7 +780,6 @@ namespace CyberDisk
             catch { }
             string defender = "Unknown";
             try { var m = Wmi.Query(@"root\Microsoft\Windows\Defender", "SELECT RealTimeProtectionEnabled FROM MSFT_MpComputerStatus").FirstOrDefault(); if (m != null) defender = Wmi.Bool(m, "RealTimeProtectionEnabled") ? "Real-time protection on" : "Real-time protection off"; } catch { }
-            bool virt = cpu.Any(c => Wmi.Bool(c, "VirtualizationFirmwareEnabled"));
             bool admin = new System.Security.Principal.WindowsPrincipal(System.Security.Principal.WindowsIdentity.GetCurrent()).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
             var card = new HwCard { Title = "SECURITY", IconData = Vec.Shield, AccentBrush = Accent("#FF9F6B"), Headline = defender, Sub = "Secure Boot " + secure + "  ·  TPM " + (tpmVer.Length > 0 ? tpmVer : tpm) };
             card.Rows.Add(R("Secure Boot", secure));
@@ -797,7 +814,7 @@ namespace CyberDisk
                 if (mp != null) card.AdvRows.Add(R("Virus definitions", Wmi.Long(mp, "AntivirusSignatureAge") + " day(s) old"));
             }
             catch { }
-            card.AdvRows.Add(R("CPU virtualization", virt ? "Enabled" : "Disabled or not supported"));
+            card.AdvRows.Add(R("CPU virtualization", VirtualizationText()));
             card.AdvRows.Add(R("Running as administrator", admin ? "Yes" : "No"));
             return card;
         }

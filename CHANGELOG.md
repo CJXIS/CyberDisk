@@ -2,6 +2,17 @@
 
 All notable changes to CyberDisk are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.5.1] - 2026-10-31
+
+### Added
+- **Startup apps**: a remove button on every entry deletes it from Windows startup (the program itself stays installed). A copy of each removed entry is kept, and RESTORE REMOVED puts them back. Works for the registry Run lists and for startup-folder shortcuts.
+
+### Fixed
+- **My PC > Processor**: virtualization showed "Disabled" on PCs where it is on. Windows hides the firmware flag once its own hypervisor runs, so the hypervisor and the processor feature flag are checked too, and the BIOS case is now worded clearly.
+
+### Removed
+- The screenshot tour and the screenshots section of the README.
+
 ## [1.5.0] - 2026-10-30
 
 ### Added

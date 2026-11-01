@@ -235,13 +235,6 @@ namespace CyberDisk
             A("Graphics", "كرت الشاشة");
             A("GPU fan", "مروحة كرت الشاشة");
             A("GPU power draw", "استهلاك طاقة كرت الشاشة");
-            A("SCREENSHOT TOUR", "جولة لقطات الشاشة");
-            A("START", "ابدأ");
-            A("SCREENSHOTS SAVED", "تم حفظ اللقطات");
-            A("SHOW FOLDER", "إظهار المجلد");
-            A("SCREENSHOT TOUR STOPPED", "توقفت جولة اللقطات");
-            A("COULD NOT SAVE THE SCREENSHOT", "تعذر حفظ لقطة الشاشة");
-            A("Saves a picture of every page to your Pictures folder. F12 saves the page you are on.", "يحفظ صورة لكل صفحة في مجلد الصور. زر F12 يحفظ الصفحة الحالية.");
             // ── tray menu (no symbols in front of the text any more) ──
             A("Boost memory now", "تسريع الذاكرة الآن"); A("Cleanup", "التنظيف"); A("Health check", "فحص الصحة"); A("My PC", "جهازي"); A("App errors", "أخطاء التطبيقات"); A("Settings", "الإعدادات");
             // ── v1.5: theme ──
@@ -254,6 +247,17 @@ namespace CyberDisk
             A("CyberDisk has to restart to change its colours. Nothing you have open is lost - scans and cleanups that are running will stop.", "يجب أن يعيد CyberDisk التشغيل لتغيير الألوان. لن يضيع شيء من ملفاتك، لكن عمليات الفحص والتنظيف الجارية ستتوقف.");
             A("RESTART NOW", "إعادة التشغيل الآن");
             A("LATER", "لاحقاً");
+            // ── v1.5.1: startup removal, virtualization ──
+            A("REMOVE FROM STARTUP", "إزالة من بدء التشغيل");
+            A("REMOVE", "إزالة");
+            A("COULD NOT REMOVE IT", "تعذّرت الإزالة");
+            A("RESTORE REMOVED ENTRIES", "استعادة العناصر المُزالة");
+            A("RESTORE", "استعادة");
+            A("STARTUP ENTRIES RESTORED", "تمت استعادة عناصر بدء التشغيل");
+            A("Remove this entry from Windows startup (the program stays installed)", "إزالة هذا العنصر من بدء تشغيل ويندوز (يبقى البرنامج مثبتاً)");
+            A("Enabled", "مفعّل");
+            A("Turned off in the BIOS / UEFI", "معطّل من BIOS / UEFI");
+            A("Not available (turned off in the BIOS / UEFI or not supported)", "غير متاح (معطّل من BIOS / UEFI أو غير مدعوم)");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

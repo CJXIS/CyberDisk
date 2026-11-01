@@ -8,14 +8,6 @@ One small `.exe` (WPF, .NET Framework 4.8) for Windows 10 / 11. English and Arab
 
 By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · [LinkedIn](https://linkedin.com/in/ahmadrq)
 
-<!-- screenshots:start -->
-## Screenshots
-
-<p align="center">
-  <img src="docs/screenshots/10-temperatures.png" width="49%" alt="temperatures">
-</p>
-<!-- screenshots:end -->
-
 ## What it does
 
 | Area | Highlights |

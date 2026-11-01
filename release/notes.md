@@ -1,12 +1,15 @@
-﻿## [1.5.0] - 2026-10-30
+﻿## [1.5.1] - 2026-10-31
 
 ### Added
-- **Light theme**: SETTINGS > APPEARANCE > Theme: Dark, Light or Follow Windows. Every colour of the app (pages, dialogs, charts, exports) switches together; accent colours are darkened automatically so text stays readable on white. CyberDisk restarts to apply the change.
+- **Startup apps**: a remove button on every entry deletes it from Windows startup (the program itself stays installed). A copy of each removed entry is kept, and RESTORE REMOVED puts them back. Works for the registry Run lists and for startup-folder shortcuts.
 
-### Changed
-- **Clean > Browsers**: nothing is selected by default any more. Tick a browser (or a single item) to include it.
+### Fixed
+- **My PC > Processor**: virtualization showed "Disabled" on PCs where it is on. Windows hides the firmware flag once its own hypervisor runs, so the hypervisor and the processor feature flag are checked too, and the BIOS case is now worded clearly.
+
+### Removed
+- The screenshot tour and the screenshots section of the README.
 
 ---
-**SHA-256:** `01bf3e02a6f86c0eceb713f259ac9bfdf57b59e2e224adf66a93423e654282a9`
+**SHA-256:** `803b974bba473c75c60e0b270b9bcc82f3809ab1aac023afe89e7f30d30529de`
 
 Windows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**.

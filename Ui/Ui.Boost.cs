@@ -64,13 +64,13 @@ namespace CyberDisk
             bLower.Click += (_, _) => LowerSel();
             bEnd.Click += (_, _) => EndSel();
             bHealth.Click += (_, _) => DoHealth();
-            itemsStartup.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) => StartupHead()));
+            itemsStartup.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) => StartupClick(e)));
             boostTm = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             boostTm.Tick += (_, _) => BoostTick();
         }
 
         // ── startup apps: search, filter, switches ──
-        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll;
+        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll, bStartupRestore;
         System.Windows.Data.ListCollectionView startupView; string startupFilter = "all";
 
         void StartupHead()
@@ -79,13 +79,15 @@ namespace CyberDisk
             txtStartupCount.Text = on + " of " + startup.Count + " ON";
             txtStartupHead.Text = "STARTUP APPS";
             bStartupOffAll.IsEnabled = on > 0;
+            if (bStartupRestore != null) { int rem = Startup.RemovedCount(); bStartupRestore.Visibility = rem > 0 ? Visibility.Visible : Visibility.Collapsed; bStartupRestore.Content = "RESTORE REMOVED (" + rem + ")"; }
             if (startupView != null) { startupView.Refresh(); txtStartupEmpty.Visibility = startupView.Count == 0 && startup.Count > 0 ? Visibility.Visible : Visibility.Collapsed; }
         }
 
         void WireStartupUx()
         {
             txtStartupSearch = F<TextBox>("txtStartupSearch"); txtStartupCount = F<TextBlock>("txtStartupCount"); txtStartupEmpty = F<TextBlock>("txtStartupEmpty");
-            sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll");
+            sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll"); bStartupRestore = F<Button>("bStartupRestore");
+            bStartupRestore.Click += (_, _) => RestoreStartup();
             StartupVm.OnFail = n => w.Dispatcher.BeginInvoke(new Action(() => { txtStatus.Text = "COULD NOT CHANGE " + n.ToUpperInvariant() + " - WINDOWS REFUSED THE CHANGE"; StartupHead(); }));
             Action<string> setFilter = f =>
             {
@@ -106,6 +108,35 @@ namespace CyberDisk
                 txtStatus.Text = fail == 0 ? "ALL STARTUP APPS TURNED OFF" : fail + " APP(S) COULD NOT BE CHANGED";
             };
             setFilter("all");
+        }
+
+        void StartupClick(RoutedEventArgs e)
+        {
+            var b = e.OriginalSource as Button; var vm = b == null ? null : b.DataContext as StartupVm;
+            if (b != null && (b.Tag as string) == "remove" && vm != null) { RemoveStartup(vm); return; }
+            StartupHead();
+        }
+
+        async void RemoveStartup(StartupVm vm)
+        {
+            if (!(await Confirm("REMOVE FROM STARTUP", "Remove \"" + vm.Name + "\" from Windows startup?\n\nThe program stays installed - it just stops starting with Windows. A copy of the entry is kept, so RESTORE REMOVED can bring it back.", "REMOVE", "CANCEL", "warn"))) return;
+            string err = await Task.Run(() => Startup.Remove(vm));
+            if (err != null) { await Msg("COULD NOT REMOVE IT", err, "danger"); return; }
+            startup.Remove(vm); StartupHead();
+            txtStatus.Text = "REMOVED " + vm.Name.ToUpperInvariant() + " FROM STARTUP";
+        }
+
+        async void RestoreStartup()
+        {
+            var names = Startup.RemovedNames();
+            if (names.Count == 0) { StartupHead(); return; }
+            if (!(await Confirm("RESTORE REMOVED ENTRIES", "Put these back into Windows startup?\n\n" + string.Join("\n", names.Select(n => "• " + n)), "RESTORE", "CANCEL", "question"))) return;
+            int failed = await Task.Run(() => Startup.RestoreAll());
+            try { startup = await Task.Run(() => Startup.List()); } catch { startup = new List<StartupVm>(); }
+            startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
+            itemsStartup.ItemsSource = startupView;
+            StartupHead();
+            txtStatus.Text = failed == 0 ? "STARTUP ENTRIES RESTORED" : failed + " ENTRY(IES) COULD NOT BE RESTORED";
         }
 
         bool StartupMatch(object o)

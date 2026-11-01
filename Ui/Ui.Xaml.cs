@@ -701,6 +701,7 @@ namespace CyberDisk
           <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
           <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
           <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
+          <Button x:Name="bStartupRestore" Content="RESTORE REMOVED" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5" Margin="8,0,0,0" Visibility="Collapsed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
           <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5" Margin="8,0,0,0" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><TextBlock Text="TURN ALL OFF"/></Button>
          </StackPanel>
         </StackPanel>
@@ -710,6 +711,9 @@ namespace CyberDisk
           <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" ToolTip="{Binding Command}" Opacity="{Binding Dim}">
            <DockPanel>
             <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="12,0,0,0"/>
+            <Button DockPanel.Dock="Right" Tag="remove" Style="{StaticResource Neon}" Padding="8,6" Margin="10,0,0,0" ToolTip="Remove this entry from Windows startup (the program stays installed)" Foreground="#FF6B8A" BorderBrush="#2A3B5C">
+             <Viewbox Width="15" Height="15"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+            </Button>
             <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
             <StackPanel VerticalAlignment="Center">
              <DockPanel>
@@ -1010,7 +1014,6 @@ namespace CyberDisk
         <WrapPanel>
          <Button x:Name="bOpenData"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN SETTINGS FOLDER"/></StackPanel></Button>
          <Button x:Name="bOpenLog"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="OPEN FIX LOG"/></StackPanel></Button>
-         <Button x:Name="bShots" Style="{StaticResource Neon}" ToolTip="Saves a picture of every page to your Pictures folder. F12 saves the page you are on."><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M8 21h8 M12 17v4" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="SCREENSHOT TOUR"/></StackPanel></Button>
          <Button x:Name="bSetResetLayout"  Style="{StaticResource Neon}"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET LAYOUT"/></StackPanel></Button>
          <Button x:Name="bResetSettings"  Style="{StaticResource Neon}" Foreground="#FF6B8A" BorderBrush="#FF6B8A"><StackPanel Orientation="Horizontal"><Viewbox Width="14" Height="14" Margin="0,0,7,0"><Canvas Width="24" Height="24"><Path Data="M18 6L6 18 M6 6l12 12" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESET ALL SETTINGS"/></StackPanel></Button>
         </WrapPanel>
