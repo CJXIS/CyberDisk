@@ -79,7 +79,7 @@ namespace CyberDisk
             txtStartupCount.Text = on + " of " + startup.Count + " ON";
             txtStartupHead.Text = "STARTUP APPS";
             bStartupOffAll.IsEnabled = on > 0;
-            if (bStartupRestore != null) { int rem = Startup.RemovedCount(); bStartupRestore.Visibility = rem > 0 ? Visibility.Visible : Visibility.Collapsed; bStartupRestore.Content = "RESTORE REMOVED (" + rem + ")"; }
+            if (bStartupRestore != null) { int rem = Startup.RemovedCount(); bStartupRestore.Visibility = rem > 0 ? Visibility.Visible : Visibility.Collapsed; bStartupRestore.Content = IconLabel(Vec.Undo, Loc.T("RESTORE (" + rem + ")"), "#8195B0"); }
             if (startupView != null) { startupView.Refresh(); txtStartupEmpty.Visibility = startupView.Count == 0 && startup.Count > 0 ? Visibility.Visible : Visibility.Collapsed; }
         }
 

@@ -1,15 +1,9 @@
-﻿## [1.5.1] - 2026-10-31
+﻿## [1.5.3] - 2026-11-02
 
-### Added
-- **Startup apps**: a remove button on every entry deletes it from Windows startup (the program itself stays installed). A copy of each removed entry is kept, and RESTORE REMOVED puts them back. Works for the registry Run lists and for startup-folder shortcuts.
-
-### Fixed
-- **My PC > Processor**: virtualization showed "Disabled" on PCs where it is on. Windows hides the firmware flag once its own hypervisor runs, so the hypervisor and the processor feature flag are checked too, and the BIOS case is now worded clearly.
-
-### Removed
-- The screenshot tour and the screenshots section of the README.
+### Changed
+- **Startup apps panel redesigned**: rounded search box with an icon and a hint text; one tidy filter row (ALL / ON / OFF, ALL OFF, RESTORE) that wraps instead of being cut off; cards with the app name on its own line, publisher, a status line with the scope badge; a compact remove button and the ON / OFF switch centred on every card; startup-folder shortcuts are shown without ".lnk"; programs without a usable icon get a clean letter tile.
 
 ---
-**SHA-256:** `55d69f313724d821461be822c9bad9411ffe970641daf70bced2afbde788f601`
+**SHA-256:** `629b4953604e115a28344d4ea556a592db2a4b35818927b6cb517fdb5bdcecf5`
 
 Windows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**.

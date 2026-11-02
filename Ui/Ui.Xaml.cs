@@ -247,6 +247,17 @@ namespace CyberDisk
      <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.4"/></Trigger>
     </ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
   </Style>
+  <Style x:Key="SearchBox" TargetType="TextBox">
+   <Setter Property="Foreground" Value="#E6EEFA"/><Setter Property="CaretBrush" Value="#3DD6F5"/><Setter Property="FontSize" Value="12.5"/>
+   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="TextBox">
+    <Border x:Name="bd" CornerRadius="10" Background="#0E1A2D" BorderBrush="#2A3B5C" BorderThickness="1" Height="36">
+     <ScrollViewer x:Name="PART_ContentHost" Margin="38,0,10,0" VerticalAlignment="Center" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+    </Border>
+    <ControlTemplate.Triggers>
+     <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="BorderBrush" Value="#3B5278"/></Trigger>
+     <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="bd" Property="BorderBrush" Value="#3DD6F5"/></Trigger>
+    </ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+  </Style>
   <Style x:Key="Sel" TargetType="TextBox">
    <Setter Property="IsReadOnly" Value="True"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Background" Value="Transparent"/>
    <Setter Property="Padding" Value="0"/><Setter Property="Foreground" Value="#E6EEFA"/><Setter Property="TextWrapping" Value="Wrap"/>
@@ -687,43 +698,58 @@ namespace CyberDisk
       </Border>
       <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="14,12,8,8">
        <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <StackPanel Margin="2,0,8,8">
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <StackPanel Margin="2,0,8,10">
          <DockPanel>
           <Border DockPanel.Dock="Right" CornerRadius="9" Background="#12382B" Padding="10,3" VerticalAlignment="Center"><TextBlock x:Name="txtStartupCount" FontSize="11" FontWeight="Bold" Foreground="#3DDC97"/></Border>
           <TextBlock x:Name="txtStartupHead" Text="STARTUP APPS" FontSize="12" FontWeight="Bold" Foreground="#C7D6EE" VerticalAlignment="Center"/>
          </DockPanel>
-         <TextBlock Text="Turn off what you do not need so Windows starts faster. You can turn any app back on at any time - changes apply at the next restart." FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,5,0,0"/>
+         <TextBlock Text="Turn off apps you do not need so Windows starts faster. Changes apply at the next restart." FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,5,0,0"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Margin="2,0,8,10">
-         <TextBox x:Name="txtStartupSearch" ToolTip="Search startup apps"/>
-         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-          <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
-          <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
-          <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5"/>
-          <Button x:Name="bStartupRestore" Content="RESTORE REMOVED" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5" Margin="8,0,0,0" Visibility="Collapsed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
-          <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="12,4" FontSize="10.5" Margin="8,0,0,0" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><TextBlock Text="TURN ALL OFF"/></Button>
-         </StackPanel>
+         <Grid>
+          <TextBox x:Name="txtStartupSearch" Style="{StaticResource SearchBox}"/>
+          <Viewbox Width="15" Height="15" HorizontalAlignment="Left" Margin="13,0,0,0" IsHitTestVisible="False"><Canvas Width="24" Height="24"><Path Data="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.35-4.35" Stroke="#6B7E99" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+          <TextBlock Text="Search startup apps" Foreground="#6B7E99" FontSize="12.5" Margin="38,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+           <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=txtStartupSearch}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+          </TextBlock>
+         </Grid>
+         <WrapPanel Margin="0,10,0,0">
+          <StackPanel Orientation="Horizontal" Margin="0,0,10,6">
+           <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0,0,6,0"/>
+           <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0,0,6,0"/>
+           <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+           <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="11,4" FontSize="10.5" Margin="0,0,6,0" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ALL OFF"/></StackPanel></Button>
+           <Button x:Name="bStartupRestore" Style="{StaticResource Neon}" Padding="11,4" FontSize="10.5" Margin="0" Visibility="Collapsed" ToolTip="Put back the startup entries you removed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
+          </StackPanel>
+         </WrapPanel>
         </StackPanel>
         <ScrollViewer x:Name="svStartup" Grid.Row="2" VerticalScrollBarVisibility="Auto">
          <StackPanel>
          <ItemsControl x:Name="itemsStartup" VirtualizingPanel.IsVirtualizing="True"><ItemsControl.ItemTemplate><DataTemplate>
           <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" ToolTip="{Binding Command}" Opacity="{Binding Dim}">
-           <DockPanel>
-            <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="12,0,0,0"/>
-            <Button DockPanel.Dock="Right" Tag="remove" Style="{StaticResource Neon}" Padding="8,6" Margin="10,0,0,0" ToolTip="Remove this entry from Windows startup (the program stays installed)" Foreground="#FF6B8A" BorderBrush="#2A3B5C">
-             <Viewbox Width="15" Height="15"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
-            </Button>
-            <Image DockPanel.Dock="Left" Source="{Binding Icon}" Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-            <StackPanel VerticalAlignment="Center">
-             <DockPanel>
+           <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Grid Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center">
+             <Border CornerRadius="10" Background="#1A2740" Visibility="{Binding LetterVis}"><TextBlock Text="{Binding Initial}" FontSize="15" FontWeight="Bold" Foreground="#8195B0" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+             <Image Source="{Binding Icon}" Width="28" Height="28" Visibility="{Binding IconVis}" RenderOptions.BitmapScalingMode="HighQuality"/>
+            </Grid>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+             <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+             <TextBlock Text="{Binding Publisher}" FontSize="11" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" Visibility="{Binding PublisherVis}"/>
+             <DockPanel Margin="0,4,0,0">
               <Border DockPanel.Dock="Right" CornerRadius="5" Background="#1A2740" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding Badge}" FontSize="8.5" FontWeight="Bold" Foreground="#A9BAD3"/></Border>
-              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+              <TextBlock Text="{Binding StateText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StateBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
              </DockPanel>
-             <TextBlock Text="{Binding Publisher}" FontSize="11" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,1,0,0"/>
-             <TextBlock Text="{Binding StateText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StateBrush}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/>
             </StackPanel>
-           </DockPanel>
+            <Button Grid.Column="2" Tag="remove" Width="34" Height="34" Style="{StaticResource Neon}" Padding="0" Margin="10,0,0,0" VerticalAlignment="Center" ToolTip="Remove this entry from Windows startup (the program stays installed)" Foreground="#FF6B8A" BorderBrush="#2A3B5C">
+             <Viewbox Width="15" Height="15" Margin="0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+            </Button>
+            <CheckBox Grid.Column="3" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="10,0,0,0"/>
+           </Grid>
           </Border>
          </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
          <TextBlock x:Name="txtStartupEmpty" Visibility="Collapsed" Text="No startup app matches your search." Foreground="#8195B0" FontSize="12" Margin="4,10,0,0"/>

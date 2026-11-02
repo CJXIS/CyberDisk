@@ -258,6 +258,10 @@ namespace CyberDisk
             A("Enabled", "مفعّل");
             A("Turned off in the BIOS / UEFI", "معطّل من BIOS / UEFI");
             A("Not available (turned off in the BIOS / UEFI or not supported)", "غير متاح (معطّل من BIOS / UEFI أو غير مدعوم)");
+            // ── v1.5.3 ──
+            A("ALL OFF","إيقاف الكل"); A("Search startup apps","ابحث في تطبيقات بدء التشغيل"); P("RESTORE ({0})","استعادة ({0})");
+            A("Turn off apps you do not need so Windows starts faster. Changes apply at the next restart.","أوقف التطبيقات التي لا تحتاجها ليبدأ ويندوز أسرع. تسري التغييرات عند إعادة التشغيل التالية.");
+            A("Put back the startup entries you removed","إرجاع عناصر بدء التشغيل التي أزلتها");
             // ── v1.5.2 ──
             A("ALREADY GONE","تمت إزالته بالفعل");
             A("REMOVED FROM STARTUP", "تمت الإزالة من بدء التشغيل");

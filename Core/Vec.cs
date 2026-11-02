@@ -57,6 +57,7 @@ namespace CyberDisk
         public const string Heart    = "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z";
 
         public const string Thermo   = "M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z M11.5 8v8";
+        public const string Undo     = "M1 4v6h6 M3.51 15a9 9 0 1 0 2.13-9.36L1 10";
         public const string Up       = "M18 15l-6-6-6 6";
         public const string Folder   = "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
         public const string FolderPlus = "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M12 11v6 M9 14h6";

@@ -38,6 +38,11 @@ namespace CyberDisk
         public string Publisher { get; set; } = "";
         public string ExePath { get; set; } = "";
         public bool Missing { get; set; }
+        public string DisplayName { get { return ApprovedKey == "StartupFolder" ? System.IO.Path.GetFileNameWithoutExtension(Name) : Name; } }
+        public string Initial { get { var n = DisplayName; return string.IsNullOrEmpty(n) ? "?" : n.Substring(0, 1).ToUpperInvariant(); } }
+        public Visibility IconVis { get { return Icon != null ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility LetterVis { get { return Icon == null ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility PublisherVis { get { return string.IsNullOrWhiteSpace(Publisher) ? Visibility.Collapsed : Visibility.Visible; } }
         public string Badge { get { return ApprovedKey == "StartupFolder" ? "STARTUP FOLDER" : Source.IndexOf("32-bit", StringComparison.OrdinalIgnoreCase) >= 0 ? "32-BIT" : Hive == RegistryHive.CurrentUser ? "THIS USER" : "ALL USERS"; } }
         public string ShortCommand { get { return string.IsNullOrEmpty(ExePath) ? Command : ExePath; } }
         public string StateText { get { return Missing ? "File not found - this entry does nothing" : en ? "Starts with Windows" : "Turned off"; } }

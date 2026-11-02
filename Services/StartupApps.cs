@@ -263,6 +263,21 @@ namespace CyberDisk
             return failed;
         }
 
+        /// <summary>True when an icon has no visible pixels at all.</summary>
+        static bool IsBlank(ImageSource src)
+        {
+            var bs = src as BitmapSource; if (bs == null) return src == null;
+            try
+            {
+                int w = bs.PixelWidth, h = bs.PixelHeight;
+                var px = new byte[w * h * 4];
+                new FormatConvertedBitmap(bs, PixelFormats.Bgra32, null, 0).CopyPixels(px, w * 4, 0);
+                for (int i = 3; i < px.Length; i += 4) if (px[i] > 24) return false;
+                return true;
+            }
+            catch { return false; }
+        }
+
         static string ExeOf(string cmd)
         {
             cmd = Environment.ExpandEnvironmentVariables((cmd ?? "").Trim());
@@ -288,8 +303,9 @@ namespace CyberDisk
                     string ext = Path.GetExtension(exe).ToLowerInvariant();
                     if (ext == ".exe") vm.Icon = ShellIcons.FromFile(exe, 0);
                     if (vm.Icon == null) vm.Icon = ShellIcons.Get(ext, false).Icon;
+                    if (IsBlank(vm.Icon)) vm.Icon = null;                       // some programs return an empty picture: show the letter tile instead
                 }
-                else vm.Icon = ShellIcons.Get(".exe", false).Icon;
+                else vm.Icon = null;
             }
             catch { }
         }
