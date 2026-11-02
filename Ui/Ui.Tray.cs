@@ -163,6 +163,7 @@ namespace CyberDisk
             open.Font = new System.Drawing.Font(trayMenu.Font, System.Drawing.FontStyle.Bold);
             item("Boost memory now", Vec.Boost, "#3DD6F5", (s, e) => TrayBoost());
             item("Cleanup", Vec.Clean, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vClean); EnterClean(); });
+            item("Startup apps", Vec.Power, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vStartup); });
             item("Health check", Vec.Health, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vHealth); });
             item("My PC", Vec.Cpu, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vPc); EnterPc(); });
             item("App errors", Vec.Errors, "#3DD6F5", (s, e) => { ShowFromTray(); Go(vErrors); EnterErrors(); });

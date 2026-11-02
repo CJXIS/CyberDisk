@@ -322,6 +322,7 @@ namespace CyberDisk
      <Button x:Name="navApps" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M4 4h6.5v6.5H4z M13.5 4H20v6.5h-6.5z M4 13.5h6.5V20H4z M13.5 13.5H20V20h-6.5z" Stroke="#8B7CFF" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="APPS" FontFamily="Segoe UI" FontSize="10" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
      <Button x:Name="navClean" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z M5 3l.5 1.3L6.8 4.8 5.5 5.3 5 6.6 4.5 5.3 3.2 4.8l1.3-.5z" Stroke="#3DDC97" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="CLEAN" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
      <Button x:Name="navBoost" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M13 2L4 14h7l-1 8 9-12h-7l1-8z" Stroke="#FFB84D" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="BOOST" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
+     <Button x:Name="navStartup" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v10" Stroke="#2DD4BF" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="STARTUP" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
      <Button x:Name="navHealth" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M3 12h4l2.5-6 4 12 2.5-6h5" Stroke="#FF6B8A" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="HEALTH" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
      <Button x:Name="navErrors" Style="{StaticResource Nav}"><Grid><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" Stroke="#FF9F6B" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ERRORS" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel><Border x:Name="errBadge" Visibility="Collapsed" Background="#FF6B8A" CornerRadius="8" MinWidth="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-4,6,0"><TextBlock x:Name="errBadgeText" Text="0" FontSize="10" FontWeight="Bold" Foreground="#06111D" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0"/></Border></Grid></Button>
      <Button x:Name="navPc" Style="{StaticResource Nav}"><StackPanel><Viewbox Width="24" Height="24" HorizontalAlignment="Center"><Canvas Width="24" Height="24"><Path Data="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M9 9h6v6H9z M9 1v3 M15 1v3 M9 20v3 M15 20v3 M20 9h3 M20 14h3 M1 9h3 M1 14h3" Stroke="#5B9BFF" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="MY PC" FontSize="10" FontWeight="SemiBold" Foreground="#A9BAD3" HorizontalAlignment="Center" Margin="0,2,0,0"/></StackPanel></Button>
@@ -645,7 +646,7 @@ namespace CyberDisk
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <StackPanel Margin="0,0,0,14">
       <TextBlock Text="BOOST" FontSize="24" FontWeight="Bold" Foreground="#FFB84D"/>
-      <TextBlock Text="Free memory, tame heavy processes and trim startup apps  ·  live CPU and RAM" Foreground="#8195B0" Margin="0,2,0,0"/>
+      <TextBlock Text="Free memory, tame heavy processes  ·  live CPU and RAM" Foreground="#8195B0" Margin="0,2,0,0"/>
      </StackPanel>
      <Border Grid.Row="1" Style="{StaticResource Panel}" Padding="22,18" Margin="0,0,0,14">
       <Grid>
@@ -674,7 +675,7 @@ namespace CyberDisk
       </Grid>
      </Border>
      <Grid Grid.Row="2" Margin="0,0,0,12">
-      <Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="320"/><ColumnDefinition Width="14"/><ColumnDefinition Width="380" MinWidth="280"/></Grid.ColumnDefinitions>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <Border Style="{StaticResource Panel}">
        <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
@@ -696,69 +697,75 @@ namespace CyberDisk
         </DataGrid>
        </Grid>
       </Border>
-      <Border Grid.Column="2" Style="{StaticResource Panel}" Padding="14,12,8,8">
-       <Grid>
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <StackPanel Margin="2,0,8,10">
-         <DockPanel>
-          <Border DockPanel.Dock="Right" CornerRadius="9" Background="#12382B" Padding="10,3" VerticalAlignment="Center"><TextBlock x:Name="txtStartupCount" FontSize="11" FontWeight="Bold" Foreground="#3DDC97"/></Border>
-          <TextBlock x:Name="txtStartupHead" Text="STARTUP APPS" FontSize="12" FontWeight="Bold" Foreground="#C7D6EE" VerticalAlignment="Center"/>
-         </DockPanel>
-         <TextBlock Text="Turn off apps you do not need so Windows starts faster. Changes apply at the next restart." FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,5,0,0"/>
-        </StackPanel>
-        <StackPanel Grid.Row="1" Margin="2,0,8,10">
-         <Grid>
-          <TextBox x:Name="txtStartupSearch" Style="{StaticResource SearchBox}"/>
-          <Viewbox Width="15" Height="15" HorizontalAlignment="Left" Margin="13,0,0,0" IsHitTestVisible="False"><Canvas Width="24" Height="24"><Path Data="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.35-4.35" Stroke="#6B7E99" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
-          <TextBlock Text="Search startup apps" Foreground="#6B7E99" FontSize="12.5" Margin="38,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
-           <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/>
-            <Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=txtStartupSearch}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
-          </TextBlock>
-         </Grid>
-         <WrapPanel Margin="0,10,0,0">
-          <StackPanel Orientation="Horizontal" Margin="0,0,10,6">
-           <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0,0,6,0"/>
-           <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0,0,6,0"/>
-           <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="14,4" FontSize="10.5" Margin="0"/>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-           <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="11,4" FontSize="10.5" Margin="0,0,6,0" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ALL OFF"/></StackPanel></Button>
-           <Button x:Name="bStartupRestore" Style="{StaticResource Neon}" Padding="11,4" FontSize="10.5" Margin="0" Visibility="Collapsed" ToolTip="Put back the startup entries you removed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
-          </StackPanel>
-         </WrapPanel>
-        </StackPanel>
-        <ScrollViewer x:Name="svStartup" Grid.Row="2" VerticalScrollBarVisibility="Auto">
-         <StackPanel>
-         <ItemsControl x:Name="itemsStartup" VirtualizingPanel.IsVirtualizing="True"><ItemsControl.ItemTemplate><DataTemplate>
-          <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" ToolTip="{Binding Command}" Opacity="{Binding Dim}">
-           <Grid>
-            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-            <Grid Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center">
-             <Border CornerRadius="10" Background="#1A2740" Visibility="{Binding LetterVis}"><TextBlock Text="{Binding Initial}" FontSize="15" FontWeight="Bold" Foreground="#8195B0" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-             <Image Source="{Binding Icon}" Width="28" Height="28" Visibility="{Binding IconVis}" RenderOptions.BitmapScalingMode="HighQuality"/>
-            </Grid>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
-             <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
-             <TextBlock Text="{Binding Publisher}" FontSize="11" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" Visibility="{Binding PublisherVis}"/>
-             <DockPanel Margin="0,4,0,0">
-              <Border DockPanel.Dock="Right" CornerRadius="5" Background="#1A2740" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center"><TextBlock Text="{Binding Badge}" FontSize="8.5" FontWeight="Bold" Foreground="#A9BAD3"/></Border>
-              <TextBlock Text="{Binding StateText}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StateBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-             </DockPanel>
-            </StackPanel>
-            <Button Grid.Column="2" Tag="remove" Width="34" Height="34" Style="{StaticResource Neon}" Padding="0" Margin="10,0,0,0" VerticalAlignment="Center" ToolTip="Remove this entry from Windows startup (the program stays installed)" Foreground="#FF6B8A" BorderBrush="#2A3B5C">
-             <Viewbox Width="15" Height="15" Margin="0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
-            </Button>
-            <CheckBox Grid.Column="3" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" Margin="10,0,0,0"/>
-           </Grid>
-          </Border>
-         </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
-         <TextBlock x:Name="txtStartupEmpty" Visibility="Collapsed" Text="No startup app matches your search." Foreground="#8195B0" FontSize="12" Margin="4,10,0,0"/>
-         </StackPanel>
-        </ScrollViewer>
-       </Grid>
-      </Border>
      </Grid>
      <Canvas x:Name="fxBoost" Grid.RowSpan="3" IsHitTestVisible="False"/>
+    </Grid>
+
+    <!-- ═════ STARTUP APPS ═════ -->
+    <Grid x:Name="vStartup" Margin="28,22,28,0" Visibility="Collapsed">
+     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+     <DockPanel Margin="0,0,0,14">
+      <Border DockPanel.Dock="Right" CornerRadius="10" Background="#12382B" Padding="14,6" VerticalAlignment="Center"><TextBlock x:Name="txtStartupCount" FontSize="12" FontWeight="Bold" Foreground="#3DDC97"/></Border>
+      <StackPanel>
+       <TextBlock x:Name="txtStartupHead" Text="STARTUP APPS" FontSize="24" FontWeight="Bold" Foreground="#2DD4BF"/>
+       <TextBlock Text="Choose which programs start with Windows. Fewer startup apps means a faster start. Changes apply at the next restart." Foreground="#8195B0" Margin="0,2,0,0"/>
+      </StackPanel>
+     </DockPanel>
+     <DockPanel Grid.Row="1" Margin="0,0,0,12">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+       <Button x:Name="bStartupOffAll" Style="{StaticResource Neon}" Padding="12,6" FontSize="11" ToolTip="Turn off every app that is currently on" Foreground="#FFB84D" BorderBrush="#FFB84D"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M18.36 6.64a9 9 0 1 1-12.73 0 M12 2v10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="ALL OFF"/></StackPanel></Button>
+       <Button x:Name="bStartupRestore" Style="{StaticResource Neon}" Padding="12,6" FontSize="11" Visibility="Collapsed" ToolTip="Put back the startup entries you removed" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
+       <Button x:Name="bStartupRefresh" Style="{StaticResource Neon}" Padding="12,6" FontSize="11" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 3v6h-6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="REFRESH"/></StackPanel></Button>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="0,0,14,0">
+       <Button x:Name="sfAll" Content="ALL" Style="{StaticResource Neon}" Padding="16,6" FontSize="11"/>
+       <Button x:Name="sfOn" Content="ON" Style="{StaticResource Neon}" Padding="16,6" FontSize="11"/>
+       <Button x:Name="sfOff" Content="OFF" Style="{StaticResource Neon}" Padding="16,6" FontSize="11" Margin="0"/>
+      </StackPanel>
+      <Grid MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,14,0">
+       <TextBox x:Name="txtStartupSearch" Style="{StaticResource SearchBox}"/>
+       <Viewbox Width="15" Height="15" HorizontalAlignment="Left" Margin="13,0,0,0" IsHitTestVisible="False"><Canvas Width="24" Height="24"><Path Data="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.35-4.35" Stroke="#6B7E99" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+       <TextBlock Text="Search startup apps" Foreground="#6B7E99" FontSize="12.5" Margin="38,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/>
+         <Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=txtStartupSearch}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+       </TextBlock>
+      </Grid>
+     </DockPanel>
+     <Border Grid.Row="2" Padding="13,0,18,6" Margin="0,0,0,2">
+      <Grid>
+       <Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="104"/><ColumnDefinition Width="178"/><ColumnDefinition Width="34"/><ColumnDefinition Width="34"/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+       <TextBlock Grid.Column="1" Text="NAME" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="2" Text="COMMAND" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="3" Text="SCOPE" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="4" Text="STATUS" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/>
+      </Grid>
+     </Border>
+     <ScrollViewer x:Name="svStartup" Grid.Row="3" VerticalScrollBarVisibility="Visible">
+      <StackPanel>
+       <ItemsControl x:Name="itemsStartup" VirtualizingPanel.IsVirtualizing="True"><ItemsControl.ItemTemplate><DataTemplate>
+        <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" Opacity="{Binding Dim}">
+         <Grid>
+          <Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="104"/><ColumnDefinition Width="178"/><ColumnDefinition Width="34"/><ColumnDefinition Width="34"/><ColumnDefinition Width="58"/></Grid.ColumnDefinitions>
+          <Grid Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center">
+           <Border CornerRadius="10" Background="#1A2740" Visibility="{Binding LetterVis}"><TextBlock Text="{Binding Initial}" FontSize="15" FontWeight="Bold" Foreground="#8195B0" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+           <Image Source="{Binding Icon}" Width="28" Height="28" Visibility="{Binding IconVis}" RenderOptions.BitmapScalingMode="HighQuality"/>
+          </Grid>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+           <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis"/>
+           <TextBlock Text="{Binding Publisher}" FontSize="11.5" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" Visibility="{Binding PublisherVis}"/>
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding ShortCommand}" ToolTip="{Binding Command}" FontFamily="Consolas" FontSize="11.5" Foreground="#8195B0" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,12,0"/>
+          <Border Grid.Column="3" CornerRadius="6" Background="#1A2740" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center"><TextBlock Text="{Binding Badge}" FontSize="9" FontWeight="Bold" Foreground="#A9BAD3"/></Border>
+          <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+           <Ellipse Width="8" Height="8" Fill="{Binding StateBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+           <TextBlock Text="{Binding StateText}" FontSize="12" FontWeight="SemiBold" Foreground="{Binding StateBrush}" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+          </StackPanel>
+          <Button Grid.Column="5" Tag="folder" Width="30" Height="30" Style="{StaticResource Neon}" Padding="0" VerticalAlignment="Center" ToolTip="Show the program in Explorer" Visibility="{Binding FolderVis}" Foreground="#8195B0" BorderBrush="#2A3B5C"><Viewbox Width="14" Height="14" Margin="0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox></Button>
+          <Button Grid.Column="6" Tag="remove" Width="30" Height="30" Style="{StaticResource Neon}" Padding="0" VerticalAlignment="Center" ToolTip="Remove this entry from Windows startup (the program stays installed)" Foreground="#FF6B8A" BorderBrush="#2A3B5C"><Viewbox Width="14" Height="14" Margin="0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox></Button>
+          <CheckBox Grid.Column="7" Style="{StaticResource Switch}" IsChecked="{Binding Enabled, Mode=TwoWay}" HorizontalAlignment="Right"/>
+         </Grid>
+        </Border>
+       </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+       <TextBlock x:Name="txtStartupEmpty" Visibility="Collapsed" Text="No startup app matches your search." Foreground="#8195B0" FontSize="13" Margin="6,14,0,0"/>
+      </StackPanel>
+     </ScrollViewer>
     </Grid>
 
     <!-- ═════ HEALTH ═════ -->

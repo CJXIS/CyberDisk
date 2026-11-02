@@ -29,11 +29,11 @@ namespace CyberDisk
     sealed partial class Ui
     {
         // ── BOOST + HEALTH ──
-        FrameworkElement vBoost, vHealth;
+        FrameworkElement vBoost, vHealth, vStartup;
         Canvas fxBoost;
         System.Windows.Shapes.Path ramArc, cpuArc, healthArc;
         TextBlock ramPct, cpuPct, ramTxt, cpuTxt, boostBig, boostMsg, txtStartupHead, txtScore, txtHealthStatus;
-        Button bBoost, bTrim, bLower, bEnd, bHealth, navBoost, navHealth;
+        Button bBoost, bTrim, bLower, bEnd, bHealth, navBoost, navHealth, navStartup;
         DataGrid gp;
         ItemsControl itemsStartup, itemsHealth;
         System.Collections.ObjectModel.ObservableCollection<ProcVm> procs = new System.Collections.ObjectModel.ObservableCollection<ProcVm>();
@@ -47,17 +47,18 @@ namespace CyberDisk
 
         void WireBoost()
         {
-            vBoost = F<FrameworkElement>("vBoost"); vHealth = F<FrameworkElement>("vHealth"); fxBoost = F<Canvas>("fxBoost");
+            vBoost = F<FrameworkElement>("vBoost"); vHealth = F<FrameworkElement>("vHealth"); vStartup = F<FrameworkElement>("vStartup"); fxBoost = F<Canvas>("fxBoost");
             ramArc = F<System.Windows.Shapes.Path>("ramArc"); cpuArc = F<System.Windows.Shapes.Path>("cpuArc"); healthArc = F<System.Windows.Shapes.Path>("healthArc");
             ramPct = F<TextBlock>("ramPct"); cpuPct = F<TextBlock>("cpuPct"); ramTxt = F<TextBlock>("ramTxt"); cpuTxt = F<TextBlock>("cpuTxt");
             boostBig = F<TextBlock>("boostBig"); boostMsg = F<TextBlock>("boostMsg"); txtStartupHead = F<TextBlock>("txtStartupHead");
             txtScore = F<TextBlock>("txtScore"); txtHealthStatus = F<TextBlock>("txtHealthStatus");
             bBoost = F<Button>("bBoost"); bTrim = F<Button>("bTrim"); bLower = F<Button>("bLower"); bEnd = F<Button>("bEnd"); bHealth = F<Button>("bHealth");
-            navBoost = F<Button>("navBoost"); navHealth = F<Button>("navHealth");
+            navBoost = F<Button>("navBoost"); navHealth = F<Button>("navHealth"); navStartup = F<Button>("navStartup");
             gp = F<DataGrid>("gp"); itemsStartup = F<ItemsControl>("itemsStartup"); itemsHealth = F<ItemsControl>("itemsHealth");
 
             healthArc.Data = DriveVm.Arc(0);
             navBoost.Click += (_, _) => Go(vBoost);
+            navStartup.Click += (_, _) => Go(vStartup);
             navHealth.Click += (_, _) => Go(vHealth);
             bBoost.Click += (_, _) => DoBoost();
             bTrim.Click += (_, _) => TrimSel();
@@ -70,7 +71,7 @@ namespace CyberDisk
         }
 
         // ── startup apps: search, filter, switches ──
-        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll, bStartupRestore;
+        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll, bStartupRestore, bStartupRefresh;
         System.Windows.Data.ListCollectionView startupView; string startupFilter = "all";
 
         void StartupHead()
@@ -86,7 +87,8 @@ namespace CyberDisk
         void WireStartupUx()
         {
             txtStartupSearch = F<TextBox>("txtStartupSearch"); txtStartupCount = F<TextBlock>("txtStartupCount"); txtStartupEmpty = F<TextBlock>("txtStartupEmpty");
-            sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll"); bStartupRestore = F<Button>("bStartupRestore");
+            sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll"); bStartupRestore = F<Button>("bStartupRestore"); bStartupRefresh = F<Button>("bStartupRefresh");
+            bStartupRefresh.Click += async (_, _) => { await LoadStartup(); txtStatus.Text = "STARTUP LIST REFRESHED"; };
             bStartupRestore.Click += (_, _) => RestoreStartup();
             StartupVm.OnFail = n => w.Dispatcher.BeginInvoke(new Action(() => { txtStatus.Text = "COULD NOT CHANGE " + n.ToUpperInvariant() + " - WINDOWS REFUSED THE CHANGE"; StartupHead(); }));
             Action<string> setFilter = f =>
@@ -114,6 +116,17 @@ namespace CyberDisk
         {
             var b = e.OriginalSource as Button; var vm = b == null ? null : b.DataContext as StartupVm;
             if (b != null && (b.Tag as string) == "remove" && vm != null) { RemoveStartup(vm); return; }
+            if (b != null && (b.Tag as string) == "folder" && vm != null)
+            {
+                try
+                {
+                    string target = vm.ApprovedKey == "StartupFolder" ? vm.Command : vm.ExePath;
+                    if (!string.IsNullOrEmpty(target) && File.Exists(target)) Process.Start("explorer.exe", "/select,\"" + target + "\"");
+                    else txtStatus.Text = "THE FILE WAS NOT FOUND";
+                }
+                catch { }
+                return;
+            }
             StartupHead();
         }
 
@@ -168,7 +181,7 @@ namespace CyberDisk
             return q.Length == 0 || v.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || v.Publisher.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || v.Command.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        async void EnterBoost()
+        void EnterBoost()
         {
             if (!boostInit)
             {
@@ -179,13 +192,27 @@ namespace CyberDisk
                 procView.LiveSortingProperties.Add("MemBytes");
                 gp.ItemsSource = procView;
                 Mem.Cpu();
-                try { startup = await Task.Run(() => Startup.List()); } catch { startup = new List<StartupVm>(); }
-                startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
-                itemsStartup.ItemsSource = startupView;
-                StartupHead();
             }
             BoostTick();
             boostTm.Start();
+        }
+
+        bool startupLoaded;
+
+        /// <summary>Opens the STARTUP page: the list is read from Windows the first time, then kept (REFRESH reads it again).</summary>
+        async void EnterStartup()
+        {
+            if (!startupLoaded) await LoadStartup(); else StartupHead();
+        }
+
+        async Task LoadStartup()
+        {
+            startupLoaded = true;
+            txtStartupCount.Text = "…";
+            try { startup = await Task.Run(() => Startup.List()); } catch { startup = new List<StartupVm>(); }
+            startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
+            itemsStartup.ItemsSource = startupView;
+            StartupHead();
         }
 
         void SetGauge(System.Windows.Shapes.Path arc, TextBlock pct, double v)

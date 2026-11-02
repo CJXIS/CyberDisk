@@ -135,6 +135,11 @@ namespace CyberDisk
             }
             var known = new HashSet<string>(ids);                                   // tabs added later (not in an old saved order) go to the end
             foreach (var el in navPanel.Children.OfType<FrameworkElement>().Where(x => !known.Contains(x.Name)).ToList()) { navPanel.Children.Remove(el); navPanel.Children.Add(el); }
+            if (!known.Contains("navStartup") && navStartup != null && navBoost != null)               // a saved order from an older version: put STARTUP right after BOOST
+            {
+                navPanel.Children.Remove(navStartup);
+                navPanel.Children.Insert(Math.Min(navPanel.Children.Count, navPanel.Children.IndexOf(navBoost) + 1), navStartup);
+            }
         }
 
         void ApplyLayout()
@@ -168,7 +173,7 @@ namespace CyberDisk
         {
             Cfg.Reset(); cfg.Clear();
             SetZoom(1.0, false);
-            ReorderNav(new[] { "navDrives", "navApps", "navClean", "navBoost", "navHealth", "navErrors", "navPc", "navSettings" });
+            ReorderNav(new[] { "navDrives", "navApps", "navClean", "navBoost", "navStartup", "navHealth", "navErrors", "navPc", "navSettings" });
             colBrowsePane.Width = new GridLength(350); colCleanPane.Width = new GridLength(370); colAppsPane.Width = new GridLength(320);
             drives = drives.OrderBy(d => d.Letter).ToList();
             itemsDrives.ItemsSource = null; itemsDrives.ItemsSource = drives;

@@ -267,6 +267,18 @@ namespace CyberDisk
             A("REMOVED FROM STARTUP", "تمت الإزالة من بدء التشغيل");
             A("REMOVED WITH PROBLEMS", "تمت الإزالة مع بعض المشاكل");
             A("SOME ENTRIES COULD NOT BE REMOVED", "تعذرت إزالة بعض العناصر");
+            // ── v1.6: startup page ──
+            A("STARTUP", "التشغيل");
+            A("Startup apps", "تطبيقات بدء التشغيل");
+            A("NAME", "الاسم");
+            A("COMMAND", "الأمر");
+            A("SCOPE", "النطاق");
+            A("STATUS", "الحالة");
+            A("REFRESH", "تحديث");
+            A("Choose which programs start with Windows. Fewer startup apps means a faster start. Changes apply at the next restart.", "اختر البرامج التي تبدأ مع ويندوز. كلما قلّت قلّ وقت الإقلاع. تسري التغييرات عند إعادة التشغيل التالية.");
+            A("Show the program in Explorer", "إظهار البرنامج في المستكشف");
+            A("STARTUP LIST REFRESHED", "تم تحديث قائمة بدء التشغيل");
+            A("THE FILE WAS NOT FOUND", "لم يُعثر على الملف");
             // ── navigation & titles ──
             A("DRIVES", "الأقراص"); A("APPS", "التطبيقات"); A("CLEAN", "التنظيف"); A("BOOST", "التسريع"); A("HEALTH", "الصحة"); A("ERRORS", "الأخطاء"); A("SETTINGS", "الإعدادات");
             A("DRIVE MATRIX", "مصفوفة الأقراص"); A("Live capacity telemetry  ·  click a drive to deep-scan it", "قياس السعة المباشر  ·  انقر على قرص لفحصه بعمق");

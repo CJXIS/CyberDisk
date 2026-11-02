@@ -39,18 +39,20 @@ namespace CyberDisk
         // ── navigation (now with BOOST and HEALTH) ──
         void Go(FrameworkElement v)
         {
-            foreach (var x in new[] { vDrives, vBrowse, vApps, vClean, vBoost, vHealth, vErrors, vPc, vDisk, vSettings }) x.Visibility = x == v ? Visibility.Visible : Visibility.Collapsed;
+            foreach (var x in new[] { vDrives, vBrowse, vApps, vClean, vBoost, vStartup, vHealth, vErrors, vPc, vDisk, vSettings }) x.Visibility = x == v ? Visibility.Visible : Visibility.Collapsed;
             Anim(v);
             Nav(navDrives, v == vDrives || v == vBrowse || v == vDisk, "3DD6F5");
             Nav(navApps, v == vApps, "8B7CFF");
             Nav(navClean, v == vClean, "3DDC97");
             Nav(navBoost, v == vBoost, "FFB84D");
+            Nav(navStartup, v == vStartup, "2DD4BF");
             Nav(navHealth, v == vHealth, "FF6B8A");
             Nav(navErrors, v == vErrors, "FF9F6B");
             Nav(navPc, v == vPc, "5B9BFF");
             Nav(navSettings, v == vSettings, "A9BAD3");
             if (v != vErrors && hungTm != null) hungTm.Stop();
             if (v == vBoost) EnterBoost(); else if (boostTm != null) boostTm.Stop();
+            if (v == vStartup) EnterStartup();
             if (!cleaning && scanning.Count == 0) txtStatus.Text = "READY";
         }
     }

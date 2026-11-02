@@ -1,9 +1,12 @@
-﻿## [1.5.3] - 2026-11-02
+﻿## [1.6.0] - 2026-11-03
+
+### Added
+- **STARTUP is now its own tab** (right after BOOST, also in the tray menu). A full-width table shows every startup program with its icon, publisher, command, scope, status, a button to show it in Explorer, a remove button and the ON / OFF switch. Search, ALL / ON / OFF filters, ALL OFF, RESTORE and REFRESH sit in one toolbar above the list.
 
 ### Changed
-- **Startup apps panel redesigned**: rounded search box with an icon and a hint text; one tidy filter row (ALL / ON / OFF, ALL OFF, RESTORE) that wraps instead of being cut off; cards with the app name on its own line, publisher, a status line with the scope badge; a compact remove button and the ON / OFF switch centred on every card; startup-folder shortcuts are shown without ".lnk"; programs without a usable icon get a clean letter tile.
+- BOOST now focuses on memory and processes; the startup list moved out of it.
 
 ---
-**SHA-256:** `629b4953604e115a28344d4ea556a592db2a4b35818927b6cb517fdb5bdcecf5`
+**SHA-256:** `19c415a2d1352e0022202afb92ef4256add9b5bbcd7e7e46704209091ac66189`
 
 Windows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**.
