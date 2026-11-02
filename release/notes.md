@@ -7,6 +7,6 @@
 - BOOST now focuses on memory and processes; the startup list moved out of it.
 
 ---
-**SHA-256:** `19c415a2d1352e0022202afb92ef4256add9b5bbcd7e7e46704209091ac66189`
+**SHA-256:** `63941656f73fecd073860df927731aabb0fc95fa9ad50cbab8e44ee136bc9619`
 
 Windows may show a SmartScreen notice for a new unsigned program: click **More info**, then **Run anyway**.

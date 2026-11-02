@@ -2,6 +2,11 @@
 
 All notable changes to CyberDisk are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.6.1] - 2026-11-03
+
+### Fixed
+- **Startup page**: the "show in Explorer" and remove buttons were squeezed and clipped on their right edge (the button style adds a right margin that did not fit the narrow column). The buttons are now full size, centred and evenly spaced.
+
 ## [1.6.0] - 2026-11-03
 
 ### Added
