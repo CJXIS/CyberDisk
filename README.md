@@ -16,7 +16,7 @@ By **Ahmad Qashqesh** · [ahmadrqash@gmail.com](mailto:ahmadrqash@gmail.com) · 
 | **Disk Health** | Per-disk health score, temperature, wear, SMART data, volumes and partitions. Export as PDF or picture. |
 | **Apps** | Installed apps, games and Store apps with install date, size and advanced details. Uninstall with a reviewed leftovers cleanup. |
 | **Clean** | System junk, Windows Disk Cleanup, browser data and app caches - analyze first, then clean. |
-| **Boost** | Release idle memory and review heavy processes. |
+| **Boost** | Release idle memory and inspect every running process: publisher, resources, parent, user, command line and services. |
 | **Startup** | Every program that starts with Windows: turn it off, remove it for good, or restore it. |
 | **Health** | One-click PC check (updates, file system, drivers, services, security) with a fix button for each finding. |
 | **Errors** | App crash and hang history from the Windows event log. |

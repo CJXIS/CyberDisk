@@ -73,6 +73,43 @@ namespace CyberDisk
             finally { if (h != new IntPtr(-1) && h != IntPtr.Zero) CloseHandle(h); }
         }
 
+        // ── which program a process runs (works for most processes without administrator tricks) ──
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern bool QueryFullProcessImageName(IntPtr h, int flags, StringBuilder name, ref int size);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool IsWow64Process(IntPtr h, out bool wow);
+
+        public static string ProcessPath(int pid)
+        {
+            IntPtr h = IntPtr.Zero;
+            try
+            {
+                h = OpenProcess(0x1000, false, pid);                                   // PROCESS_QUERY_LIMITED_INFORMATION
+                if (h == IntPtr.Zero) return "";
+                var sb = new StringBuilder(1024); int size = sb.Capacity;
+                return QueryFullProcessImageName(h, 0, sb, ref size) ? sb.ToString() : "";
+            }
+            catch { return ""; }
+            finally { if (h != IntPtr.Zero) CloseHandle(h); }
+        }
+
+        /// <summary>true = 32-bit program on a 64-bit Windows, false = 64-bit, null = unknown.</summary>
+        public static bool? ProcessIs32Bit(int pid)
+        {
+            IntPtr h = IntPtr.Zero;
+            try
+            {
+                if (!Environment.Is64BitOperatingSystem) return false;
+                h = OpenProcess(0x1000, false, pid);
+                if (h == IntPtr.Zero) return null;
+                bool wow; return IsWow64Process(h, out wow) ? wow : (bool?)null;
+            }
+            catch { return null; }
+            finally { if (h != IntPtr.Zero) CloseHandle(h); }
+        }
+
         // ── when a registry key was last written (used to ignore stale "restart pending" flags) ──
         [DllImport("advapi32.dll", CharSet = CharSet.Unicode)]
         static extern int RegQueryInfoKey(Microsoft.Win32.SafeHandles.SafeRegistryHandle hKey, IntPtr lpClass, IntPtr lpcbClass, IntPtr lpReserved, IntPtr lpcSubKeys, IntPtr lpcbMaxSubKeyLen,

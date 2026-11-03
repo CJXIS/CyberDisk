@@ -41,7 +41,8 @@ namespace CyberDisk
                 {
                     TimeSpan c;
                     try { c = p.TotalProcessorTime; } catch { c = TimeSpan.Zero; }
-                    l.Add(new ProcSnap { Pid = p.Id, Name = p.ProcessName, Mem = p.WorkingSet64, Cpu = c });
+                    int th = 0; try { th = p.Threads.Count; } catch { }
+                    l.Add(new ProcSnap { Pid = p.Id, Name = p.ProcessName, Mem = p.WorkingSet64, Priv = p.PrivateMemorySize64, Cpu = c, Threads = th, Handles = p.HandleCount });
                 }
                 catch { }
                 finally { p.Dispose(); }

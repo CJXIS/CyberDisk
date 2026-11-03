@@ -71,7 +71,7 @@ namespace CyberDisk
         }
 
         // ── startup apps: search, filter, switches ──
-        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll, bStartupRestore, bStartupRefresh;
+        TextBox txtStartupSearch; TextBlock txtStartupCount, txtStartupEmpty; Button sfAll, sfOn, sfOff, bStartupOffAll, bStartupRestore, bStartupRefresh, bRemRestoreAll, bRemClose; Border panelRemoved; ItemsControl itemsRemoved;
         System.Windows.Data.ListCollectionView startupView; string startupFilter = "all";
 
         void StartupHead()
@@ -89,7 +89,11 @@ namespace CyberDisk
             txtStartupSearch = F<TextBox>("txtStartupSearch"); txtStartupCount = F<TextBlock>("txtStartupCount"); txtStartupEmpty = F<TextBlock>("txtStartupEmpty");
             sfAll = F<Button>("sfAll"); sfOn = F<Button>("sfOn"); sfOff = F<Button>("sfOff"); bStartupOffAll = F<Button>("bStartupOffAll"); bStartupRestore = F<Button>("bStartupRestore"); bStartupRefresh = F<Button>("bStartupRefresh");
             bStartupRefresh.Click += async (_, _) => { await LoadStartup(); txtStatus.Text = "STARTUP LIST REFRESHED"; };
-            bStartupRestore.Click += (_, _) => RestoreStartup();
+            panelRemoved = F<Border>("panelRemoved"); itemsRemoved = F<ItemsControl>("itemsRemoved"); bRemRestoreAll = F<Button>("bRemRestoreAll"); bRemClose = F<Button>("bRemClose");
+            bStartupRestore.Click += (_, _) => ToggleRemovedPanel();
+            bRemClose.Click += (_, _) => panelRemoved.Visibility = Visibility.Collapsed;
+            bRemRestoreAll.Click += (_, _) => RestoreStartup();
+            itemsRemoved.AddHandler(System.Windows.Controls.Primitives.ButtonBase.ClickEvent, new RoutedEventHandler((s, e) => RemovedClick(e)));
             StartupVm.OnFail = n => w.Dispatcher.BeginInvoke(new Action(() => { txtStatus.Text = "COULD NOT CHANGE " + n.ToUpperInvariant() + " - WINDOWS REFUSED THE CHANGE"; StartupHead(); }));
             Action<string> setFilter = f =>
             {
@@ -159,6 +163,41 @@ namespace CyberDisk
             await Msg(res.Failed.Count == 0 ? "REMOVED FROM STARTUP" : "REMOVED WITH PROBLEMS", sb.ToString().Trim(), res.Failed.Count == 0 ? "info" : "warn");
         }
 
+        void BindRemoved()
+        {
+            var items = Startup.RemovedItems();
+            itemsRemoved.ItemsSource = items;
+            if (items.Count == 0) panelRemoved.Visibility = Visibility.Collapsed;
+            StartupHead();
+        }
+
+        void ToggleRemovedPanel()
+        {
+            if (panelRemoved.Visibility == Visibility.Visible) { panelRemoved.Visibility = Visibility.Collapsed; return; }
+            BindRemoved();
+            if (Startup.RemovedCount() > 0) panelRemoved.Visibility = Visibility.Visible;
+        }
+
+        async void RemovedClick(RoutedEventArgs e)
+        {
+            var b = e.OriginalSource as Button; var it = b == null ? null : b.DataContext as Startup.RemovedItem;
+            if (it == null) return;
+            string tag = b.Tag as string;
+            if (tag == "restore")
+            {
+                int failed = await Task.Run(() => Startup.Restore(new HashSet<int> { it.Index }));
+                await LoadStartup(); BindRemoved();
+                txtStatus.Text = failed == 0 ? "RESTORED " + it.Name.ToUpperInvariant() : "COULD NOT RESTORE " + it.Name.ToUpperInvariant();
+            }
+            else if (tag == "forget")
+            {
+                if (!(await Confirm("FORGET THIS ENTRY", "Delete the saved copy of \"" + it.Name + "\"?\n\nIt cannot be restored afterwards. The program itself is not touched.", "FORGET", "CANCEL", "warn"))) return;
+                await Task.Run(() => Startup.Forget(new HashSet<int> { it.Index }));
+                BindRemoved();
+                txtStatus.Text = "SAVED COPY OF " + it.Name.ToUpperInvariant() + " DELETED";
+            }
+        }
+
         async void RestoreStartup()
         {
             var names = Startup.RemovedNames();
@@ -169,6 +208,7 @@ namespace CyberDisk
             startupView = new System.Windows.Data.ListCollectionView(startup) { Filter = StartupMatch };
             itemsStartup.ItemsSource = startupView;
             StartupHead();
+            BindRemoved();
             txtStatus.Text = failed == 0 ? "STARTUP ENTRIES RESTORED" : failed + " ENTRY(IES) COULD NOT BE RESTORED";
         }
 
@@ -188,6 +228,7 @@ namespace CyberDisk
                 boostInit = true;
                 procView = new System.Windows.Data.ListCollectionView(procs);
                 procView.IsLiveSorting = true;
+                procView.Filter = ProcMatch;
                 procView.SortDescriptions.Add(new System.ComponentModel.SortDescription("MemBytes", System.ComponentModel.ListSortDirection.Descending));
                 procView.LiveSortingProperties.Add("MemBytes");
                 gp.ItemsSource = procView;
@@ -243,26 +284,107 @@ namespace CyberDisk
             var now = DateTime.UtcNow;
             double dt = Math.Max(200, (now - prevSampleAt).TotalMilliseconds);
             prevSampleAt = now;
-            var seen = new HashSet<int>(); var next = new Dictionary<int, TimeSpan>();
+            var seen = new HashSet<int>(); var next = new Dictionary<int, TimeSpan>(); var fresh = new List<ProcVm>(); long thTotal = 0, hdTotal = 0;
             foreach (var s in snap)
             {
-                seen.Add(s.Pid); next[s.Pid] = s.Cpu;
+                seen.Add(s.Pid); next[s.Pid] = s.Cpu; thTotal += s.Threads; hdTotal += s.Handles;
                 double cpu = 0; TimeSpan pv;
                 if (prevCpuT.TryGetValue(s.Pid, out pv)) cpu = Math.Max(0, (s.Cpu - pv).TotalMilliseconds / dt / Environment.ProcessorCount * 100.0);
                 ProcVm vm;
                 if (!procMap.TryGetValue(s.Pid, out vm))
                 {
                     vm = new ProcVm { Pid = s.Pid, Name = s.Name };
-                    vm.MemBytes = s.Mem; vm.Cpu = cpu;
-                    procMap[s.Pid] = vm; procs.Add(vm);
+                    vm.MemBytes = s.Mem; vm.Cpu = cpu; vm.PrivBytes = s.Priv; vm.Threads = s.Threads; vm.Handles = s.Handles;
+                    procMap[s.Pid] = vm; procs.Add(vm); fresh.Add(vm);
                 }
-                else { vm.MemBytes = s.Mem; vm.Cpu = cpu; }
+                else { vm.MemBytes = s.Mem; vm.Cpu = cpu; vm.PrivBytes = s.Priv; vm.Threads = s.Threads; vm.Handles = s.Handles; }
             }
             prevCpuT = next;
             foreach (var pid in procMap.Keys.Where(k => !seen.Contains(k)).ToList()) { procs.Remove(procMap[pid]); procMap.Remove(pid); }
+            txtProcSummary.Text = Loc.T(procs.Count + " processes  ·  " + thTotal.ToString("N0") + " threads  ·  " + hdTotal.ToString("N0") + " handles");
+            if (fresh.Count > 0) ResolveProcs(fresh);
+            var picked = SelProc(); if (picked != null) RefreshPdLive(picked);
         }
 
         ProcVm SelProc() { return gp.SelectedItem as ProcVm; }
+
+        // ───────── process details ─────────
+        TextBlock txtProcSummary, pdName, pdDesc, pdEmpty, pdNote, pdCpu, pdMem, pdThreads, pdHandles; Image pdIcon; ScrollViewer pdBody; ItemsControl pdRows;
+        Button bPdFolder, bPdCopy; TextBox txtProcSearch; int pdId;
+
+        void WireProcUx()
+        {
+            txtProcSummary = F<TextBlock>("txtProcSummary"); pdName = F<TextBlock>("pdName"); pdDesc = F<TextBlock>("pdDesc"); pdEmpty = F<TextBlock>("pdEmpty"); pdNote = F<TextBlock>("pdNote");
+            pdCpu = F<TextBlock>("pdCpu"); pdMem = F<TextBlock>("pdMem"); pdThreads = F<TextBlock>("pdThreads"); pdHandles = F<TextBlock>("pdHandles");
+            pdIcon = F<Image>("pdIcon"); pdBody = F<ScrollViewer>("pdBody"); pdRows = F<ItemsControl>("pdRows"); bPdFolder = F<Button>("bPdFolder"); bPdCopy = F<Button>("bPdCopy"); txtProcSearch = F<TextBox>("txtProcSearch");
+            pdBody.PreviewMouseWheel += (s, e) => { pdBody.ScrollToVerticalOffset(pdBody.VerticalOffset - e.Delta); e.Handled = true; };
+            txtProcSearch.TextChanged += (_, _) => { if (procView != null) procView.Refresh(); };
+            gp.SelectionChanged += (_, _) => ShowProc();
+            bPdFolder.Click += (_, _) =>
+            {
+                var p = SelProc(); if (p == null) return;
+                try { if (p.Path.Length > 0 && File.Exists(p.Path)) Process.Start("explorer.exe", "/select,\"" + p.Path + "\""); else txtStatus.Text = "THIS PROCESS HAS NO FILE ON DISK"; } catch { }
+            };
+            bPdCopy.Click += (_, _) =>
+            {
+                var p = SelProc(); if (p == null || p.Path.Length == 0) { txtStatus.Text = "THIS PROCESS HAS NO FILE ON DISK"; return; }
+                try { Clipboard.SetText(p.Path); txtStatus.Text = "PATH COPIED"; } catch { txtStatus.Text = "COULD NOT COPY"; }
+            };
+        }
+
+        bool ProcMatch(object o)
+        {
+            var p = o as ProcVm; if (p == null) return false;
+            string q = txtProcSearch == null ? "" : txtProcSearch.Text.Trim();
+            if (q.Length == 0) return true;
+            return p.Name.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || p.Description.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0
+                || p.Company.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || p.Path.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0 || p.Pid.ToString().StartsWith(q);
+        }
+
+        void RefreshPdLive(ProcVm p) { pdCpu.Text = p.CpuText; pdMem.Text = p.MemText; pdThreads.Text = p.Threads.ToString(); pdHandles.Text = p.Handles.ToString("N0"); }
+
+        void PdHeader(ProcVm p)
+        {
+            pdIcon.Source = p.Icon; pdName.Text = p.Name;
+            pdDesc.Text = (p.Description.Length > 0 ? p.Description : "No description") + (p.Company.Length > 0 ? "  ·  " + p.Company : "");
+        }
+
+        async void ShowProc()
+        {
+            var p = SelProc(); int id = ++pdId;
+            if (p == null) { pdBody.Visibility = Visibility.Collapsed; pdEmpty.Visibility = Visibility.Visible; return; }
+            pdEmpty.Visibility = Visibility.Collapsed; pdBody.Visibility = Visibility.Visible;
+            PdHeader(p); RefreshPdLive(p);
+            pdNote.Text = Procs.Protected.Contains(p.Name) || p.Pid <= 4 ? "Windows needs this process, so END TASK is blocked for it." : "";
+            var rows = new List<HwRow>();
+            if (p.Path.Length > 0) rows.Add(new HwRow { K = "FILE", V = p.Path });
+            if (p.Version.Length > 0) rows.Add(new HwRow { K = "VERSION", V = p.Version });
+            rows.Add(new HwRow { K = "PID", V = p.Pid.ToString() });
+            rows.Add(new HwRow { K = "PRIVATE MEMORY", V = p.PrivText });
+            pdRows.ItemsSource = rows;
+            List<KeyValuePair<string, string>> d;
+            try { d = await Task.Run(() => ProcInfo.Detail(p.Pid)); } catch { return; }
+            if (id != pdId) return;                                                    // another process was selected meanwhile
+            foreach (var kv in d) rows.Add(new HwRow { K = kv.Key, V = kv.Value });
+            pdRows.ItemsSource = null; pdRows.ItemsSource = rows;
+        }
+
+        /// <summary>Looks up program, publisher and icon of processes that just appeared (in the background).</summary>
+        async void ResolveProcs(List<ProcVm> list)
+        {
+            var input = list.Select(v => Tuple.Create(v.Pid, v.Name)).ToList();
+            List<ProcInfo.Info> res;
+            try { res = await Task.Run(() => ProcInfo.Resolve(input)); } catch { return; }
+            var sel = SelProc();
+            foreach (var r in res)
+            {
+                ProcVm vm;
+                if (!procMap.TryGetValue(r.Pid, out vm)) continue;
+                vm.Path = r.Path; vm.Description = r.Description; vm.Company = r.Company; vm.Version = r.Version; vm.Icon = r.Icon;
+                if (sel != null && sel.Pid == r.Pid) PdHeader(vm);
+            }
+            if (procView != null && txtProcSearch.Text.Length > 0) procView.Refresh();
+        }
 
         async void TrimSel()
         {

@@ -62,7 +62,7 @@ namespace CyberDisk
         }
 
         // ───────── removal (with a saved copy, so it can be restored) ─────────
-        sealed class Removed { public string Kind, Hive, View, Key, Name, Command, Original, Backup; }
+        sealed class Removed { public string Kind, Hive, View, Key, Name, Command, Original, Backup; public long Time; }
 
         static string RemovedFile { get { return Path.Combine(Settings.Dir, "removed-startup.ini"); } }
         static string RemovedDir { get { return Path.Combine(Settings.Dir, "removed-startup"); } }
@@ -76,7 +76,11 @@ namespace CyberDisk
                 foreach (var line in File.ReadAllLines(RemovedFile))
                 {
                     var f = line.Split('\t');
-                    if (f.Length >= 8) l.Add(new Removed { Kind = f[0], Hive = f[1], View = f[2], Key = f[3], Name = f[4], Command = f[5], Original = f[6], Backup = f[7] });
+                    if (f.Length >= 8)
+                    {
+                        long t = 0; if (f.Length >= 9) long.TryParse(f[8], out t);
+                        l.Add(new Removed { Kind = f[0], Hive = f[1], View = f[2], Key = f[3], Name = f[4], Command = f[5], Original = f[6], Backup = f[7], Time = t });
+                    }
                 }
             }
             catch { }
@@ -88,7 +92,7 @@ namespace CyberDisk
             try
             {
                 Directory.CreateDirectory(Settings.Dir);
-                File.WriteAllLines(RemovedFile, l.Select(r => string.Join("\t", new[] { r.Kind, r.Hive, r.View, r.Key, Clean(r.Name), Clean(r.Command), Clean(r.Original), Clean(r.Backup) })));
+                File.WriteAllLines(RemovedFile, l.Select(r => string.Join("\t", new[] { r.Kind, r.Hive, r.View, r.Key, Clean(r.Name), Clean(r.Command), Clean(r.Original), Clean(r.Backup), r.Time.ToString() })));
             }
             catch { }
         }
@@ -193,7 +197,7 @@ namespace CyberDisk
                             File.SetAttributes(m.FilePath, FileAttributes.Normal);
                             File.Delete(m.FilePath);
                             if (File.Exists(m.FilePath)) { result.Failed.Add(m.Label + " · " + m.Name); continue; }
-                            records.Add(new Removed { Kind = "file", Hive = m.FolderHive.ToString(), View = "", Key = "StartupFolder", Name = m.Name, Command = m.Command, Original = m.FilePath, Backup = copy });
+                            records.Add(new Removed { Time = DateTime.Now.Ticks, Kind = "file", Hive = m.FolderHive.ToString(), View = "", Key = "StartupFolder", Name = m.Name, Command = m.Command, Original = m.FilePath, Backup = copy });
                         }
                         DeleteApproved(m.FolderHive, "StartupFolder", m.Name);
                         result.Places.Add(m.Label + " · " + m.Name);
@@ -219,7 +223,7 @@ namespace CyberDisk
                     }
                     if (!gone) { result.Failed.Add(m.Label + " · " + m.Name); continue; }
                     DeleteApproved(src.Hive, src.Approved, m.Name);
-                    records.Add(new Removed { Kind = "reg", Hive = src.Hive.ToString(), View = src.View.ToString(), Key = src.Approved ?? "", Name = m.Name, Command = m.Command, Original = src.Path == RUN ? "" : src.Path, Backup = "" });
+                    records.Add(new Removed { Time = DateTime.Now.Ticks, Kind = "reg", Hive = src.Hive.ToString(), View = src.View.ToString(), Key = src.Approved ?? "", Name = m.Name, Command = m.Command, Original = src.Path == RUN ? "" : src.Path, Backup = "" });
                     result.Places.Add(m.Label + " · " + m.Name);
                 }
                 catch (Exception ex) { result.Failed.Add(m.Label + " · " + m.Name + " (" + ex.Message + ")"); }
@@ -234,12 +238,35 @@ namespace CyberDisk
             return result;
         }
 
-        /// <summary>Puts every removed entry back. Returns how many could not be restored.</summary>
-        public static int RestoreAll()
+        /// <summary>One saved (removed) startup entry, as shown in the "removed entries" list.</summary>
+        public sealed class RemovedItem { public int Index; public string Name, Command, Meta; }
+
+        static string WhereText(Removed r)
         {
-            int failed = 0; var keep = new List<Removed>();
+            if (r.Kind == "file") return "Startup folder · " + (r.Hive == "CurrentUser" ? "this user" : "all users");
+            string who = r.Hive == "CurrentUser" ? "this user" : r.View == "Registry32" ? "all users (32-bit)" : "all users";
+            return (string.IsNullOrEmpty(r.Original) ? "Run list" : "Policy list") + " · " + who;
+        }
+
+        public static List<RemovedItem> RemovedItems()
+        {
+            var res = new List<RemovedItem>(); int i = 0;
             foreach (var r in LoadRemoved())
             {
+                string when = r.Time > 0 ? "  ·  removed " + new DateTime(r.Time).ToString("yyyy-MM-dd HH:mm") : "";
+                res.Add(new RemovedItem { Index = i++, Name = r.Kind == "file" ? Path.GetFileNameWithoutExtension(r.Name) : r.Name, Command = r.Command, Meta = WhereText(r) + when });
+            }
+            return res;
+        }
+
+        /// <summary>Puts the chosen removed entries back (null = all of them). Returns how many could not be restored.</summary>
+        public static int Restore(ICollection<int> only)
+        {
+            int failed = 0, i = -1; var keep = new List<Removed>();
+            foreach (var r in LoadRemoved())
+            {
+                i++;
+                if (only != null && !only.Contains(i)) { keep.Add(r); continue; }
                 try
                 {
                     var hive = (RegistryHive)Enum.Parse(typeof(RegistryHive), r.Hive);
@@ -255,12 +282,27 @@ namespace CyberDisk
                         using (var bk = RegistryKey.OpenBaseKey(hive, view))
                         using (var rk = bk.CreateSubKey(string.IsNullOrEmpty(r.Original) ? RUN : r.Original)) rk.SetValue(r.Name, r.Command, RegistryValueKind.String);
                     }
-                    DeleteApproved(hive, r.Key, r.Name);                                                                           // back to "on"
+                    DeleteApproved(hive, r.Key, r.Name);                                      // back to "on"
                 }
                 catch { failed++; keep.Add(r); }
             }
             SaveRemoved(keep);
             return failed;
+        }
+
+        public static int RestoreAll() { return Restore(null); }
+
+        /// <summary>Deletes the saved copy of the chosen removed entries for good.</summary>
+        public static void Forget(ICollection<int> only)
+        {
+            int i = -1; var keep = new List<Removed>();
+            foreach (var r in LoadRemoved())
+            {
+                i++;
+                if (only.Contains(i)) { if (r.Kind == "file") { try { File.Delete(r.Backup); } catch { } } }
+                else keep.Add(r);
+            }
+            SaveRemoved(keep);
         }
 
         /// <summary>True when an icon has no visible pixels at all.</summary>

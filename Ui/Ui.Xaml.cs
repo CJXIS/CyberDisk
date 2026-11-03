@@ -678,23 +678,71 @@ namespace CyberDisk
       <Grid.ColumnDefinitions><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <Border Style="{StaticResource Panel}">
        <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <DockPanel Margin="16,12,12,8">
-         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <DockPanel Margin="16,12,12,4">
+         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
           <Button x:Name="bTrim" Content="TRIM" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Release idle memory of the selected process"/>
           <Button x:Name="bLower" Content="LOWER PRIORITY" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" ToolTip="Make the selected process yield CPU to other programs"/>
           <Button x:Name="bEnd" Content="END TASK" Style="{StaticResource Neon}" Padding="10,5" FontSize="11" Margin="0" Foreground="#FF6B8A" BorderBrush="#FF6B8A"/>
          </StackPanel>
-         <TextBlock Text="RUNNING PROCESSES" FontSize="12" FontWeight="Bold" Foreground="#8195B0" VerticalAlignment="Center"/>
+         <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="RUNNING PROCESSES" FontSize="12" FontWeight="Bold" Foreground="#8195B0"/>
+          <TextBlock x:Name="txtProcSummary" FontSize="11" Foreground="#6B7E99" Margin="0,3,0,0"/>
+         </StackPanel>
         </DockPanel>
-        <DataGrid x:Name="gp" Grid.Row="1">
-         <DataGrid.Columns>
-          <DataGridTextColumn Header="PROCESS" Binding="{Binding Name}" Width="*"/>
-          <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80"/>
-          <DataGridTextColumn Header="MEMORY" Binding="{Binding MemText}" SortMemberPath="MemBytes" Width="110"/>
-          <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" SortMemberPath="Cpu" Width="80"/>
-         </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="1" Margin="16,4,12,10" HorizontalAlignment="Left" Width="340">
+         <TextBox x:Name="txtProcSearch" Style="{StaticResource SearchBox}"/>
+         <Viewbox Width="15" Height="15" HorizontalAlignment="Left" Margin="13,0,0,0" IsHitTestVisible="False"><Canvas Width="24" Height="24"><Path Data="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.35-4.35" Stroke="#6B7E99" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox>
+         <TextBlock Text="Search by name, description, publisher or PID" Foreground="#6B7E99" FontSize="12.5" Margin="38,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+          <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/>
+           <Style.Triggers><DataTrigger Binding="{Binding Text.Length, ElementName=txtProcSearch}" Value="0"><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+         </TextBlock>
+        </Grid>
+        <Grid Grid.Row="2">
+         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+         <DataGrid x:Name="gp">
+          <DataGrid.Columns>
+           <DataGridTemplateColumn Header="PROCESS" Width="1.1*" MinWidth="130" SortMemberPath="Name"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+            <StackPanel Orientation="Horizontal"><Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,8,0" RenderOptions.BitmapScalingMode="HighQuality"/><TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/></StackPanel>
+           </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+           <DataGridTextColumn Header="DESCRIPTION" Binding="{Binding Description}" Width="1.3*" MinWidth="110"/>
+           <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="64"/>
+           <DataGridTextColumn Header="CPU" Binding="{Binding CpuText}" SortMemberPath="Cpu" Width="66"/>
+           <DataGridTextColumn Header="MEMORY" Binding="{Binding MemText}" SortMemberPath="MemBytes" Width="90"/>
+           <DataGridTextColumn Header="THREADS" Binding="{Binding Threads}" Width="78"/>
+          </DataGrid.Columns>
+         </DataGrid>
+         <Border Grid.Column="1" Width="316" Margin="12,0,12,12" CornerRadius="12" Background="#0C1626" BorderBrush="#1C2B44" BorderThickness="1" Padding="14,12">
+          <Grid>
+           <TextBlock x:Name="pdEmpty" Text="Select a process to see what it is, who started it and what it uses." TextWrapping="Wrap" Foreground="#6B7E99" FontSize="12.5" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="14"/>
+           <ScrollViewer x:Name="pdBody" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+            <StackPanel Margin="0,0,8,0">
+             <DockPanel>
+              <Image x:Name="pdIcon" DockPanel.Dock="Left" Width="40" Height="40" Margin="0,0,12,0" VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality"/>
+              <StackPanel>
+               <TextBlock x:Name="pdName" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
+               <TextBlock x:Name="pdDesc" FontSize="11.5" Foreground="#8195B0" TextWrapping="Wrap" Margin="0,2,0,0"/>
+              </StackPanel>
+             </DockPanel>
+             <UniformGrid Columns="2" Margin="0,12,-6,0">
+              <Border CornerRadius="9" Background="#111E31" Padding="10,7" Margin="0,0,6,6"><StackPanel><TextBlock Text="CPU" FontSize="9.5" FontWeight="Bold" Foreground="#6B7E99"/><TextBlock x:Name="pdCpu" FontSize="16" FontWeight="Bold" Foreground="#3DD6F5" Margin="0,2,0,0"/></StackPanel></Border><Border CornerRadius="9" Background="#111E31" Padding="10,7" Margin="0,0,6,6"><StackPanel><TextBlock Text="MEMORY" FontSize="9.5" FontWeight="Bold" Foreground="#6B7E99"/><TextBlock x:Name="pdMem" FontSize="16" FontWeight="Bold" Foreground="#3DD6F5" Margin="0,2,0,0"/></StackPanel></Border><Border CornerRadius="9" Background="#111E31" Padding="10,7" Margin="0,0,6,6"><StackPanel><TextBlock Text="THREADS" FontSize="9.5" FontWeight="Bold" Foreground="#6B7E99"/><TextBlock x:Name="pdThreads" FontSize="16" FontWeight="Bold" Foreground="#3DD6F5" Margin="0,2,0,0"/></StackPanel></Border><Border CornerRadius="9" Background="#111E31" Padding="10,7" Margin="0,0,6,6"><StackPanel><TextBlock Text="HANDLES" FontSize="9.5" FontWeight="Bold" Foreground="#6B7E99"/><TextBlock x:Name="pdHandles" FontSize="16" FontWeight="Bold" Foreground="#3DD6F5" Margin="0,2,0,0"/></StackPanel></Border>
+             </UniformGrid>
+             <ItemsControl x:Name="pdRows" Margin="0,6,0,0"><ItemsControl.ItemTemplate><DataTemplate>
+              <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="92"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+               <TextBlock Text="{Binding K}" Foreground="#6B7E99" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Top" Margin="0,2,0,0"/>
+               <TextBox Grid.Column="1" Style="{StaticResource Sel}" Text="{Binding V, Mode=OneWay}" Foreground="#E6EEFA" FontSize="12" VerticalAlignment="Top"/>
+              </Grid>
+             </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+             <TextBlock x:Name="pdNote" FontSize="11.5" Foreground="#FFB84D" TextWrapping="Wrap" Margin="0,10,0,0"/>
+             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+              <Button x:Name="bPdFolder" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="SHOW IN EXPLORER"/></StackPanel></Button>
+              <Button x:Name="bPdCopy" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Margin="0"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M9 9h11a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z M5 15H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="COPY PATH"/></StackPanel></Button>
+             </StackPanel>
+            </StackPanel>
+           </ScrollViewer>
+          </Grid>
+         </Border>
+        </Grid>
        </Grid>
       </Border>
      </Grid>
@@ -703,7 +751,7 @@ namespace CyberDisk
 
     <!-- ═════ STARTUP APPS ═════ -->
     <Grid x:Name="vStartup" Margin="28,22,28,0" Visibility="Collapsed">
-     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
      <DockPanel Margin="0,0,0,14">
       <Border DockPanel.Dock="Right" CornerRadius="10" Background="#12382B" Padding="14,6" VerticalAlignment="Center"><TextBlock x:Name="txtStartupCount" FontSize="12" FontWeight="Bold" Foreground="#3DDC97"/></Border>
       <StackPanel>
@@ -731,13 +779,43 @@ namespace CyberDisk
        </TextBlock>
       </Grid>
      </DockPanel>
-     <Border Grid.Row="2" Padding="13,0,18,6" Margin="0,0,0,2">
+     <Border x:Name="panelRemoved" Grid.Row="2" Visibility="Collapsed" CornerRadius="12" Background="#0E1A2D" BorderBrush="#2A3B5C" BorderThickness="1" Padding="14,12" Margin="0,0,8,12">
+      <StackPanel>
+       <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+         <Button x:Name="bRemRestoreAll" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Foreground="#3DDC97" BorderBrush="#3DDC97"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M1 4v6h6 M3.51 15a9 9 0 1 0 2.13-9.36L1 10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESTORE ALL"/></StackPanel></Button>
+         <Button x:Name="bRemClose" Content="CLOSE" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Margin="0" Foreground="#8195B0" BorderBrush="#2A3B5C"/>
+        </StackPanel>
+        <StackPanel>
+         <TextBlock Text="REMOVED ENTRIES" FontSize="11" FontWeight="Bold" Foreground="#2DD4BF"/>
+         <TextBlock Text="Choose what to put back into Windows startup. FORGET deletes the saved copy for good." Foreground="#8195B0" FontSize="11.5" TextWrapping="Wrap" Margin="0,3,0,0"/>
+        </StackPanel>
+       </DockPanel>
+       <ScrollViewer MaxHeight="230" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+        <ItemsControl x:Name="itemsRemoved"><ItemsControl.ItemTemplate><DataTemplate>
+         <Border CornerRadius="10" Background="#0B1322" BorderBrush="#1C2B44" BorderThickness="1" Padding="12,9" Margin="0,0,8,6">
+          <Grid>
+           <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+           <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis"/>
+            <TextBlock Text="{Binding Command}" FontFamily="Consolas" FontSize="11" Foreground="#8195B0" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" ToolTip="{Binding Command}"/>
+            <TextBlock Text="{Binding Meta}" FontSize="10.5" Foreground="#6B7E99" Margin="0,3,0,0"/>
+           </StackPanel>
+           <Button Grid.Column="1" Tag="restore" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="#3DDC97" BorderBrush="#3DDC97"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M1 4v6h6 M3.51 15a9 9 0 1 0 2.13-9.36L1 10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="RESTORE"/></StackPanel></Button>
+           <Button Grid.Column="2" Tag="forget" Style="{StaticResource Neon}" Padding="11,5" FontSize="10.5" Margin="0" VerticalAlignment="Center" Foreground="#FF6B8A" BorderBrush="#2A3B5C" ToolTip="Delete the saved copy for good"><StackPanel Orientation="Horizontal"><Viewbox Width="13" Height="13" Margin="0,0,6,0"><Canvas Width="24" Height="24"><Path Data="M3 6h18 M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2 M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6 M10 11v6 M14 11v6" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/></Canvas></Viewbox><TextBlock Text="FORGET"/></StackPanel></Button>
+          </Grid>
+         </Border>
+        </DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+       </ScrollViewer>
+      </StackPanel>
+     </Border>
+     <Border Grid.Row="3" Padding="13,0,18,6" Margin="0,0,0,2">
       <Grid>
        <Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="1.6*"/><ColumnDefinition Width="104"/><ColumnDefinition Width="178"/><ColumnDefinition Width="40"/><ColumnDefinition Width="40"/><ColumnDefinition Width="56"/></Grid.ColumnDefinitions>
        <TextBlock Grid.Column="1" Text="NAME" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="2" Text="COMMAND" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="3" Text="SCOPE" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/><TextBlock Grid.Column="4" Text="STATUS" FontSize="10" FontWeight="Bold" Foreground="#6B7E99" VerticalAlignment="Center"/>
       </Grid>
      </Border>
-     <ScrollViewer x:Name="svStartup" Grid.Row="3" VerticalScrollBarVisibility="Visible">
+     <ScrollViewer x:Name="svStartup" Grid.Row="4" VerticalScrollBarVisibility="Visible">
       <StackPanel>
        <ItemsControl x:Name="itemsStartup" VirtualizingPanel.IsVirtualizing="True"><ItemsControl.ItemTemplate><DataTemplate>
         <Border CornerRadius="12" Background="#0B1322" BorderBrush="#21304A" BorderThickness="1" Padding="12,10" Margin="0,0,8,8" Opacity="{Binding Dim}">
